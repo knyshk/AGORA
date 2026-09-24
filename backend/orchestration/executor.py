@@ -1,0 +1,18 @@
+import asyncio
+from agents.base_agent import run_agent
+
+async def run_node(node, state, query):
+    context = "\n".join(f"{d}: {state[d]}" for d in node["depends_on"])
+    prompt = f"Task: {query}\nContext from previous agents:\n{context}" if context else f"Task: {query}"
+    state[node["id"]] = run_agent(node["agent"], prompt)
+
+async def execute_plan(plan, query):
+    state = {}
+    remaining = plan.copy()
+    while remaining:
+        ready = [n for n in remaining if all(d in state for d in n["depends_on"])]
+        if not ready:
+            raise RuntimeError(f"Deadlock: remaining nodes have unmet dependencies: {remaining}")
+        await asyncio.gather(*(run_node(n, state, query) for n in ready))
+        remaining = [n for n in remaining if n["id"] not in state]
+    return state
