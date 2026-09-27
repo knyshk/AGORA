@@ -4,6 +4,8 @@ from agents.base_agent import run_agent
 AVAILABLE_AGENTS = {
     "research": "Gathers facts on a topic",
     "drafting": "Writes prose based on research",
+    "chart": "Describes a chart based on numeric data from research",
+    "fact_check": "Verifies drafted claims against the original research",
 }
 
 def plan_task(query: str) -> list:

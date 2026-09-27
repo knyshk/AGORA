@@ -1,10 +1,14 @@
-import asyncio
 from agents.base_agent import run_agent
+from mcp.registry import get_agents_for_skill
+import asyncio
 
 async def run_node(node, state, query):
+    candidates = get_agents_for_skill(node["agent"])
+    if not candidates:
+        raise RuntimeError(f"No registered agent for skill '{node['agent']}'")
     context = "\n".join(f"{d}: {state[d]}" for d in node["depends_on"])
     prompt = f"Task: {query}\nContext from previous agents:\n{context}" if context else f"Task: {query}"
-    state[node["id"]] = run_agent(node["agent"], prompt)
+    state[node["id"]] = run_agent(node["agent"], prompt)  # role passed through unchanged for now
 
 async def execute_plan(plan, query):
     state = {}
