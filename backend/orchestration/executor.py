@@ -8,6 +8,8 @@ async def run_node(node, state, query):
     if not candidates:
         raise RuntimeError(f"No registered agent for skill '{node['agent']}'")
     chosen = pick_best_agent(candidates)
+    skill = node["agent"]
+    print(f"[ROUTING] skill={skill} chose={chosen}")
     manifest = get_manifest(chosen)
     context = "\n".join(f"{d}: {state[d]}" for d in node["depends_on"])
     prompt = f"Task: {query}\nContext from previous agents:\n{context}" if context else f"Task: {query}"
