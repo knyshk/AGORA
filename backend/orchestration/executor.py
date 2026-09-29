@@ -1,6 +1,6 @@
 import asyncio
 from agents.base_agent import run_agent
-from mcp.registry import get_agents_for_skill
+from mcp.registry import get_agents_for_skill, get_manifest
 from reputation.scoring import pick_best_agent, update_score
 
 async def run_node(node, state, query):
@@ -8,10 +8,11 @@ async def run_node(node, state, query):
     if not candidates:
         raise RuntimeError(f"No registered agent for skill '{node['agent']}'")
     chosen = pick_best_agent(candidates)
+    manifest = get_manifest(chosen)
     context = "\n".join(f"{d}: {state[d]}" for d in node["depends_on"])
     prompt = f"Task: {query}\nContext from previous agents:\n{context}" if context else f"Task: {query}"
     try:
-        state[node["id"]] = run_agent(node["agent"], prompt)
+        state[node["id"]] = run_agent(node["agent"], prompt, provider=manifest.provider, model=manifest.model)
         update_score(chosen, success=True)
     except Exception as e:
         update_score(chosen, success=False)

@@ -1,12 +1,15 @@
+import os
 from langchain_openai import ChatOpenAI
-from config import get_provider_config
+from config import PROVIDER_ENDPOINTS
 
-def run_agent(role: str, prompt: str) -> str:
-    cfg = get_provider_config()
+def run_agent(role: str, prompt: str, provider: str = None, model: str = None) -> str:
+    provider = provider or os.getenv("LLM_PROVIDER", "groq")
+    model = model or os.getenv("LLM_MODEL")
+    api_key = os.getenv(f"{provider.upper()}_API_KEY")
     llm = ChatOpenAI(
-        base_url=cfg["base_url"],
-        api_key=cfg["api_key"],
-        model=cfg["model"],
+        base_url=PROVIDER_ENDPOINTS[provider],
+        api_key=api_key,
+        model=model,
         timeout=20,
         max_retries=1,
     )
