@@ -1,4 +1,5 @@
 import hashlib
+from reputation.scoring import seed_score
 
 class AgentManifest:
     def __init__(self, name: str, skill: str, owner_key: str = "agora-core"):
@@ -8,14 +9,14 @@ class AgentManifest:
 
 REGISTRY: dict[str, AgentManifest] = {}
 
-def register_agent(name: str, skill: str):
+def register_agent(name: str, skill: str, prior_score: float = 0.7):
     REGISTRY[name] = AgentManifest(name, skill)
+    seed_score(name, prior_score)
 
 def get_agents_for_skill(skill: str) -> list[str]:
     return [m.name for m in REGISTRY.values() if m.skill == skill]
 
-# Register your current agents at import time
-register_agent("research-v1", "research")
-register_agent("drafting-v1", "drafting")
-register_agent("chart-v1", "chart")
-register_agent("fact_check-v1", "fact_check")
+register_agent("research-v1", "research", 0.7)
+register_agent("drafting-v1", "drafting", 0.7)
+register_agent("chart-v1", "chart", 0.7)
+register_agent("fact_check-v1", "fact_check", 0.7)

@@ -1,14 +1,21 @@
+import asyncio
 from agents.base_agent import run_agent
 from mcp.registry import get_agents_for_skill
-import asyncio
+from reputation.scoring import pick_best_agent, update_score
 
 async def run_node(node, state, query):
     candidates = get_agents_for_skill(node["agent"])
     if not candidates:
         raise RuntimeError(f"No registered agent for skill '{node['agent']}'")
+    chosen = pick_best_agent(candidates)
     context = "\n".join(f"{d}: {state[d]}" for d in node["depends_on"])
     prompt = f"Task: {query}\nContext from previous agents:\n{context}" if context else f"Task: {query}"
-    state[node["id"]] = run_agent(node["agent"], prompt)  # role passed through unchanged for now
+    try:
+        state[node["id"]] = run_agent(node["agent"], prompt)
+        update_score(chosen, success=True)
+    except Exception as e:
+        update_score(chosen, success=False)
+        raise
 
 async def execute_plan(plan, query):
     state = {}
