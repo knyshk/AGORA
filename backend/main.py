@@ -17,10 +17,8 @@ def health():
 def research(req: TaskRequest):
     return {"output": run_agent("research", req.query)}
 
-
-
 @app.post("/tasks/run")
 async def run_task(req: TaskRequest):
     plan = plan_task(req.query)
     result = await execute_plan(plan, req.query)
-    return {"plan": plan, "result": result}
+    return {"plan": plan, "result": result["outputs"], "conflicts": result["conflicts"]}

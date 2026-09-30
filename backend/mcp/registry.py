@@ -22,7 +22,7 @@ def get_manifest(name: str) -> AgentManifest:
     return REGISTRY[name]
 
 register_agent("research-v1", "research", 0.7)
-register_agent("research-v2", "research", 0.6, provider="openrouter", model="nvidia/nemotron-3-ultra-550b-a55b:free")
+register_agent("research-v2", "research", 0.6, provider="openrouter", model="qwen/qwen3.8-27b:free")
 register_agent("drafting-v1", "drafting", 0.7)
 register_agent("chart-v1", "chart", 0.7)
 register_agent("fact_check-v1", "fact_check", 0.7)

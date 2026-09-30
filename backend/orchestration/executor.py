@@ -2,6 +2,7 @@ import asyncio
 from agents.base_agent import run_agent
 from mcp.registry import get_agents_for_skill, get_manifest
 from reputation.scoring import pick_best_agent, update_score
+from arbitration.engine import detect_conflict
 
 async def run_node(node, state, query):
     candidates = get_agents_for_skill(node["agent"])
@@ -22,6 +23,7 @@ async def run_node(node, state, query):
 
 async def execute_plan(plan, query):
     state = {}
+    conflicts = []
     remaining = plan.copy()
     while remaining:
         ready = [n for n in remaining if all(d in state for d in n["depends_on"])]
@@ -29,4 +31,16 @@ async def execute_plan(plan, query):
             raise RuntimeError(f"Deadlock: remaining nodes have unmet dependencies: {remaining}")
         await asyncio.gather(*(run_node(n, state, query) for n in ready))
         remaining = [n for n in remaining if n["id"] not in state]
-    return state
+
+    # After everything runs, check same-round sibling outputs for conflicts
+    node_by_id = {n["id"]: n for n in plan}
+    ids = list(state.keys())
+    for i in range(len(ids)):
+        for j in range(i + 1, len(ids)):
+            a, b = ids[i], ids[j]
+            conflict = detect_conflict(state[a], state[b], label_a=a, label_b=b)
+            if conflict:
+                conflicts.append({"between": [a, b], **conflict})
+                print(f"[CONFLICT] {a} vs {b}: {conflict['explanation']}")
+
+    return {"outputs": state, "conflicts": conflicts}
