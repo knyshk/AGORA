@@ -7,6 +7,15 @@ from orchestration.conflict_demo import conflict_demo_plan
 
 app = FastAPI()
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 class TaskRequest(BaseModel):
     query: str
 
@@ -20,7 +29,7 @@ async def research(req: TaskRequest):
 
 @app.post("/tasks/run")
 async def run_task(req: TaskRequest):
-    plan = plan_task(req.query)
+    plan = await plan_task(req.query)
     result = await execute_plan(plan, req.query)
     return {"plan": plan, "result": result["outputs"], "conflicts": result["conflicts"]}
 
