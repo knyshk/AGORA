@@ -2,7 +2,7 @@ import os
 from langchain_openai import ChatOpenAI
 from config import PROVIDER_ENDPOINTS
 
-def run_agent(role: str, prompt: str, provider: str = None, model: str = None) -> str:
+async def run_agent(role: str, prompt: str, provider: str = None, model: str = None) -> str:
     provider = provider or os.getenv("LLM_PROVIDER", "groq")
     model = model or os.getenv("LLM_MODEL")
     api_key = os.getenv(f"{provider.upper()}_API_KEY")
@@ -13,4 +13,4 @@ def run_agent(role: str, prompt: str, provider: str = None, model: str = None) -
         timeout=20,
         max_retries=1,
     )
-    return llm.invoke(f"You are a {role} agent. {prompt}").content
+    return (await llm.ainvoke(f"You are a {role} agent. {prompt}")).content
