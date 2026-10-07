@@ -1011,7 +1011,7 @@ body {
   background: var(--amber-primary);
 }
 
-.graph-canvas {
+ .graph-canvas{
   position: relative;
   min-height: 380px;
   padding: 3rem 2rem;
@@ -1757,6 +1757,7 @@ body {
 
 .spec-value {
   color: var(--text-secondary);
+}
 /* ==========================================================================
    Module Switcher Navigation
    ========================================================================== */
@@ -2390,7 +2391,7 @@ body {
   }
 }
 .node-hover-panel {
-  position: absolute;
+  position: fixed;
   z-index: 50;
   transform: translate(-50%, -100%);
   background: #1a1713;

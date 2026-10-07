@@ -1,4 +1,5 @@
 import { useState, useRef, useLayoutEffect, useMemo, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 const AGENT_META = {
@@ -101,7 +102,7 @@ export default function AgentGraph({ plan, result = {}, conflicts = [], selected
   const nodeRefs = useRef({});
   const [lines, setLines] = useState([]);
   const [hoveredNode, setHoveredNode] = useState(null);
-  const [hoverPos, setHoverPos] = useState(null);
+  const [hoverRect, setHoverRect] = useState(null);
 
   const levels = useMemo(() => buildLevels(plan), [plan]);
 
@@ -177,21 +178,15 @@ export default function AgentGraph({ plan, result = {}, conflicts = [], selected
   const handleNodeEnter = (nodeId) => {
     setHoveredNode(nodeId);
     const el = nodeRefs.current[nodeId];
-    const container = containerRef.current;
-    if (el && container) {
-      const elRect = el.getBoundingClientRect();
-      const containerRect = container.getBoundingClientRect();
-      setHoverPos({
-        top: elRect.top - containerRect.top,
-        left: elRect.left - containerRect.left + elRect.width / 2,
-        width: elRect.width,
-      });
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      setHoverRect(rect);
     }
   };
 
   const handleNodeLeave = () => {
     setHoveredNode(null);
-    setHoverPos(null);
+    setHoverRect(null);
   };
 
   const hoveredNodeData = hoveredNode ? plan.find((n) => n.id === hoveredNode) : null;
@@ -349,47 +344,55 @@ export default function AgentGraph({ plan, result = {}, conflicts = [], selected
             </div>
           );
         })}
-
-        {/* Hover detail panel */}
-        <AnimatePresence>
-          {hoveredNodeData && hoverPos && (
-            <motion.div
-              className="node-hover-panel"
-              style={{ top: hoverPos.top, left: hoverPos.left }}
-              initial={{ opacity: 0, y: -6, x: "-50%" }}
-              animate={{ opacity: 1, y: -10, x: "-50%" }}
-              exit={{ opacity: 0, y: -6, x: "-50%" }}
-              transition={{ duration: 0.15 }}
-            >
-              <div className="hover-panel-header">
-                <span className="hover-panel-id">[{hoveredNodeData.id}]</span>
-                <span className="hover-panel-agent" style={{ color: hoveredMeta.color }}>
-                  {hoveredMeta.label}
-                </span>
-              </div>
-              <div className="hover-panel-skill">{hoveredMeta.skill}</div>
-              <div className="hover-panel-row">
-                <span className="hover-panel-k">Dependencies:</span>
-                <span className="hover-panel-v">
-                  {(hoveredNodeData.depends_on || []).length === 0
-                    ? "None (root node)"
-                    : hoveredNodeData.depends_on.map((d) => `[${d}]`).join(", ")}
-                </span>
-              </div>
-              {hoveredConflicts.length > 0 && (
-                <div className="hover-panel-conflict-tag">⚡ {hoveredConflicts.length} disputed claim(s)</div>
-              )}
-              {hoveredOutput && (
-                <div className="hover-panel-preview">
-                  {hoveredOutput.slice(0, 140)}
-                  {hoveredOutput.length > 140 ? "…" : ""}
-                </div>
-              )}
-              <div className="hover-panel-hint">Click node to inspect full output</div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
+
+      {/* Hover panel rendered via portal so it's never clipped by parent overflow */}
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {hoveredNodeData && hoverRect && (
+              <motion.div
+                className="node-hover-panel"
+                style={{
+                  position: "fixed",
+                  top: hoverRect.top - 8,
+                  left: hoverRect.left + hoverRect.width / 2,
+                }}
+                initial={{ opacity: 0, x: "-50%", y: "-92%" }}
+                animate={{ opacity: 1, x: "-50%", y: "-100%" }}
+                exit={{ opacity: 0, x: "-50%", y: "-92%" }}
+                transition={{ duration: 0.15 }}
+              >
+                <div className="hover-panel-header">
+                  <span className="hover-panel-id">[{hoveredNodeData.id}]</span>
+                  <span className="hover-panel-agent" style={{ color: hoveredMeta.color }}>
+                    {hoveredMeta.label}
+                  </span>
+                </div>
+                <div className="hover-panel-skill">{hoveredMeta.skill}</div>
+                <div className="hover-panel-row">
+                  <span className="hover-panel-k">Dependencies:</span>
+                  <span className="hover-panel-v">
+                    {(hoveredNodeData.depends_on || []).length === 0
+                      ? "None (root node)"
+                      : hoveredNodeData.depends_on.map((d) => `[${d}]`).join(", ")}
+                  </span>
+                </div>
+                {hoveredConflicts.length > 0 && (
+                  <div className="hover-panel-conflict-tag">⚡ {hoveredConflicts.length} disputed claim(s)</div>
+                )}
+                {hoveredOutput && (
+                  <div className="hover-panel-preview">
+                    {hoveredOutput.slice(0, 140)}
+                    {hoveredOutput.length > 140 ? "…" : ""}
+                  </div>
+                )}
+                <div className="hover-panel-hint">Click node to inspect full output</div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
     </div>
   );
 }
