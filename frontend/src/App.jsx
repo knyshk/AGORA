@@ -296,10 +296,11 @@ export default function App() {
                     </div>
 
                     <AgentGraph
-                      plan={response.plan || []}
-                      conflicts={response.conflicts || []}
-                      selectedNode={selectedNode}
-                      onSelectNode={setSelectedNode}
+                        plan={response.plan || []}
+                        result={response.result || {}}
+                        conflicts={response.conflicts || []}
+                        selectedNode={selectedNode}
+                        onSelectNode={setSelectedNode}
                     />
 
                     {/* Node Output Inspector & Conflict Arbitration Chamber */}

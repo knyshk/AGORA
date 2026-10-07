@@ -1,5 +1,5 @@
 import { useState, useRef, useLayoutEffect, useMemo, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const AGENT_META = {
   research: {
@@ -79,13 +79,11 @@ function buildLevels(plan) {
 
   while (remaining.length > 0 && guard < 10) {
     guard++;
-    // Nodes whose dependencies are either empty or all placed
     const level = remaining.filter((node) =>
       (node.depends_on || []).every((dep) => placed.has(dep))
     );
 
     if (level.length === 0) {
-      // Break potential cyclic deadlock by placing remainder in final level
       levels.push(remaining);
       remaining.forEach((n) => placed.add(n.id));
       break;
@@ -98,20 +96,24 @@ function buildLevels(plan) {
   return levels;
 }
 
-export default function AgentGraph({ plan, conflicts = [], selectedNode, onSelectNode }) {
+export default function AgentGraph({ plan, result = {}, conflicts = [], selectedNode, onSelectNode }) {
   const containerRef = useRef(null);
   const nodeRefs = useRef({});
   const [lines, setLines] = useState([]);
   const [hoveredNode, setHoveredNode] = useState(null);
+  const [hoverPos, setHoverPos] = useState(null);
 
   const levels = useMemo(() => buildLevels(plan), [plan]);
 
-  // Set of node IDs involved in conflicts
   const conflictedIds = useMemo(() => {
     return new Set(conflicts.flatMap((c) => c.between || []));
   }, [conflicts]);
 
-  // Measure and compute SVG line curves
+  const nodeConflictsFor = useCallback(
+    (nodeId) => conflicts.filter((c) => (c.between || []).includes(nodeId)),
+    [conflicts]
+  );
+
   const updateLines = useCallback(() => {
     if (!containerRef.current) return;
     const containerRect = containerRef.current.getBoundingClientRect();
@@ -172,9 +174,33 @@ export default function AgentGraph({ plan, conflicts = [], selectedNode, onSelec
     };
   }, [updateLines]);
 
+  const handleNodeEnter = (nodeId) => {
+    setHoveredNode(nodeId);
+    const el = nodeRefs.current[nodeId];
+    const container = containerRef.current;
+    if (el && container) {
+      const elRect = el.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      setHoverPos({
+        top: elRect.top - containerRect.top,
+        left: elRect.left - containerRect.left + elRect.width / 2,
+        width: elRect.width,
+      });
+    }
+  };
+
+  const handleNodeLeave = () => {
+    setHoveredNode(null);
+    setHoverPos(null);
+  };
+
+  const hoveredNodeData = hoveredNode ? plan.find((n) => n.id === hoveredNode) : null;
+  const hoveredMeta = hoveredNodeData ? AGENT_META[hoveredNodeData.agent] || DEFAULT_META : null;
+  const hoveredOutput = hoveredNode ? result[hoveredNode] : "";
+  const hoveredConflicts = hoveredNode ? nodeConflictsFor(hoveredNode) : [];
+
   return (
     <div className="graph-wrapper">
-      {/* Graph Toolbar / Status */}
       <div className="graph-toolbar">
         <div className="graph-topology-info">
           <span className="topology-badge">DAG Topology</span>
@@ -199,31 +225,13 @@ export default function AgentGraph({ plan, conflicts = [], selectedNode, onSelec
         </div>
       </div>
 
-      {/* Main Canvas Floor */}
       <div className="graph-canvas" ref={containerRef}>
-        {/* SVG Bezier Connecting Edges */}
         <svg className="graph-svg-layer">
           <defs>
-            <marker
-              id="arrow-amber"
-              viewBox="0 0 10 10"
-              refX="8"
-              refY="5"
-              markerWidth="6"
-              markerHeight="6"
-              orient="auto-start-reverse"
-            >
+            <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
               <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#e59b2c" opacity="0.8" />
             </marker>
-            <marker
-              id="arrow-conflict"
-              viewBox="0 0 10 10"
-              refX="8"
-              refY="5"
-              markerWidth="6"
-              markerHeight="6"
-              orient="auto-start-reverse"
-            >
+            <marker id="arrow-conflict" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
               <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#d9534f" />
             </marker>
             <linearGradient id="edge-flow-grad" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -233,57 +241,28 @@ export default function AgentGraph({ plan, conflicts = [], selectedNode, onSelec
           </defs>
 
           {lines.map((l) => {
-            const isRelevant =
-              hoveredNode === l.from ||
-              hoveredNode === l.to ||
-              selectedNode === l.from ||
-              selectedNode === l.to;
-
-            const isFaded =
-              (hoveredNode || selectedNode) &&
-              !isRelevant;
+            const isRelevant = hoveredNode === l.from || hoveredNode === l.to || selectedNode === l.from || selectedNode === l.to;
+            const isFaded = (hoveredNode || selectedNode) && !isRelevant;
 
             return (
               <g key={l.id} className="edge-group">
-                {/* Background glow stroke when active */}
                 {isRelevant && (
-                  <path
-                    d={l.pathData}
-                    className="edge-glow"
-                    stroke={l.isConflictEdge ? "#d9534f" : "#e59b2c"}
-                    strokeWidth="6"
-                    fill="none"
-                    opacity="0.3"
-                  />
+                  <path d={l.pathData} className="edge-glow" stroke={l.isConflictEdge ? "#d9534f" : "#e59b2c"} strokeWidth="6" fill="none" opacity="0.3" />
                 )}
-
-                {/* Main animated connecting curve */}
                 <motion.path
                   d={l.pathData}
-                  className={`graph-edge ${l.isConflictEdge ? "edge-conflict" : "edge-normal"} ${
-                    isRelevant ? "edge-active" : isFaded ? "edge-dimmed" : ""
-                  }`}
+                  className={`graph-edge ${l.isConflictEdge ? "edge-conflict" : "edge-normal"} ${isRelevant ? "edge-active" : isFaded ? "edge-dimmed" : ""}`}
                   markerEnd={l.isConflictEdge ? "url(#arrow-conflict)" : "url(#arrow-amber)"}
                   initial={{ pathLength: 0, opacity: 0 }}
                   animate={{ pathLength: 1, opacity: isFaded ? 0.2 : 0.8 }}
                   transition={{ duration: 0.6, delay: 0.2 }}
                 />
-
-                {/* Animated data flow pulse */}
-                <path
-                  d={l.pathData}
-                  className="edge-flow-pulse"
-                  stroke={l.isConflictEdge ? "#ff6b6b" : "#ffc266"}
-                  strokeWidth="2"
-                  fill="none"
-                  strokeDasharray="6 14"
-                />
+                <path d={l.pathData} className="edge-flow-pulse" stroke={l.isConflictEdge ? "#ff6b6b" : "#ffc266"} strokeWidth="2" fill="none" strokeDasharray="6 14" />
               </g>
             );
           })}
         </svg>
 
-        {/* Levels / Tiers */}
         {levels.map((levelNodes, levelIndex) => {
           const tierLabel =
             levelIndex === 0
@@ -311,18 +290,15 @@ export default function AgentGraph({ plan, conflicts = [], selectedNode, onSelec
                     <motion.div
                       key={node.id}
                       ref={(el) => (nodeRefs.current[node.id] = el)}
-                      className={`agent-node-card ${isConflicted ? "node-disputed" : "node-harmonious"} ${
-                        isSelected ? "node-active-ring" : ""
-                      } ${isHovered ? "node-hovered" : ""}`}
+                      className={`agent-node-card ${isConflicted ? "node-disputed" : "node-harmonious"} ${isSelected ? "node-active-ring" : ""} ${isHovered ? "node-hovered" : ""}`}
                       onClick={() => onSelectNode(node.id)}
-                      onMouseEnter={() => setHoveredNode(node.id)}
-                      onMouseLeave={() => setHoveredNode(null)}
+                      onMouseEnter={() => handleNodeEnter(node.id)}
+                      onMouseLeave={handleNodeLeave}
                       initial={{ opacity: 0, y: 16, scale: 0.94 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       transition={{ duration: 0.4, delay: nodeDelay }}
                       whileHover={{ y: -4, transition: { duration: 0.15 } }}
                     >
-                      {/* Node Top Row: ID + Status Beacon */}
                       <div className="node-top-bar">
                         <span className="node-id-chip">[{node.id}]</span>
                         <div className="node-status-area">
@@ -340,7 +316,6 @@ export default function AgentGraph({ plan, conflicts = [], selectedNode, onSelec
                         </div>
                       </div>
 
-                      {/* Node Body: Icon + Agent Name + Skill */}
                       <div className="node-main-content">
                         <div
                           className="node-avatar"
@@ -358,18 +333,14 @@ export default function AgentGraph({ plan, conflicts = [], selectedNode, onSelec
                         </div>
                       </div>
 
-                      {/* Node Bottom: Dependencies indicator */}
                       <div className="node-footer">
                         {(node.depends_on || []).length === 0 ? (
                           <span className="dep-tag dep-root">✦ Root Node • Independent</span>
                         ) : (
-                          <span className="dep-tag dep-child">
-                            ↳ Inputs: {(node.depends_on || []).map((d) => `[${d}]`).join(", ")}
-                          </span>
+                          <span className="dep-tag dep-child">↳ Inputs: {(node.depends_on || []).map((d) => `[${d}]`).join(", ")}</span>
                         )}
                       </div>
 
-                      {/* Active Selection Glow Ring */}
                       {isSelected && <div className="selected-indicator-border" />}
                     </motion.div>
                   );
@@ -378,6 +349,46 @@ export default function AgentGraph({ plan, conflicts = [], selectedNode, onSelec
             </div>
           );
         })}
+
+        {/* Hover detail panel */}
+        <AnimatePresence>
+          {hoveredNodeData && hoverPos && (
+            <motion.div
+              className="node-hover-panel"
+              style={{ top: hoverPos.top, left: hoverPos.left }}
+              initial={{ opacity: 0, y: -6, x: "-50%" }}
+              animate={{ opacity: 1, y: -10, x: "-50%" }}
+              exit={{ opacity: 0, y: -6, x: "-50%" }}
+              transition={{ duration: 0.15 }}
+            >
+              <div className="hover-panel-header">
+                <span className="hover-panel-id">[{hoveredNodeData.id}]</span>
+                <span className="hover-panel-agent" style={{ color: hoveredMeta.color }}>
+                  {hoveredMeta.label}
+                </span>
+              </div>
+              <div className="hover-panel-skill">{hoveredMeta.skill}</div>
+              <div className="hover-panel-row">
+                <span className="hover-panel-k">Dependencies:</span>
+                <span className="hover-panel-v">
+                  {(hoveredNodeData.depends_on || []).length === 0
+                    ? "None (root node)"
+                    : hoveredNodeData.depends_on.map((d) => `[${d}]`).join(", ")}
+                </span>
+              </div>
+              {hoveredConflicts.length > 0 && (
+                <div className="hover-panel-conflict-tag">⚡ {hoveredConflicts.length} disputed claim(s)</div>
+              )}
+              {hoveredOutput && (
+                <div className="hover-panel-preview">
+                  {hoveredOutput.slice(0, 140)}
+                  {hoveredOutput.length > 140 ? "…" : ""}
+                </div>
+              )}
+              <div className="hover-panel-hint">Click node to inspect full output</div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
