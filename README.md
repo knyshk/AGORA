@@ -61,9 +61,9 @@ AGORA/
 │   └── src/                     # React UI — task input, DAG graph view,
 │                                 # conflict display, reputation registry
 ├── docs/
+│   ├── REQUIREMENTS.md
 │   └── ARCHITECTURE.md
-├── PROJECT_TIMELINE.md
-└── TEAM_UPDATE.md                # Internal handoff notes between teammates
+└── PROJECT_TIMELINE.md
 ```
 
 ## Setup & running locally
