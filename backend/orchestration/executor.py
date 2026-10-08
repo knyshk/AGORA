@@ -46,13 +46,18 @@ async def execute_plan(plan, query):
         await asyncio.gather(*(run_node(n, state, query) for n in ready))
         remaining = [n for n in remaining if n["id"] not in state]
 
-    ids = list(state.keys())
-    for i in range(len(ids)):
-        for j in range(i + 1, len(ids)):
-            a, b = ids[i], ids[j]
-            conflict = await detect_conflict(state[a], state[b], label_a=a, label_b=b)
-            if conflict:
-                conflicts.append({"between": [a, b], **conflict})
-                print(f"[CONFLICT] {a} vs {b}: {conflict['explanation']}")
+        ids = list(state.keys())
+    pairs = [(ids[i], ids[j]) for i in range(len(ids)) for j in range(i + 1, len(ids))]
+    results = await asyncio.gather(
+        *(detect_conflict(state[a], state[b], label_a=a, label_b=b) for a, b in pairs),
+        return_exceptions=True,
+    )
+    for (a, b), conflict in zip(pairs, results):
+        if isinstance(conflict, Exception):
+            print(f"[ARBITRATION ERROR] {a} vs {b}: {conflict}")
+            continue
+        if conflict:
+            conflicts.append({"between": [a, b], **conflict})
+            print(f"[CONFLICT] {a} vs {b}: {conflict['explanation']}")
 
     return {"outputs": state, "conflicts": conflicts}
