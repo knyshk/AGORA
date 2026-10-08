@@ -1,3 +1,5 @@
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -197,7 +199,7 @@ export default function InspectorAndConflicts({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <div className="output-prose">{activeOutput}</div>
+              <div className="output-prose"><ReactMarkdown remarkPlugins={[remarkGfm]}>{activeOutput}</ReactMarkdown></div>
             </motion.div>
           </AnimatePresence>
         </section>

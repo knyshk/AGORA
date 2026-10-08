@@ -115,7 +115,7 @@ export default function App() {
       const res = await axios.post(
         `${BACKEND_URL}/tasks/run`,
         { query: query.trim() },
-        { timeout: 120000 }
+        { timeout: 240000 }
       );
       setResponse(res.data);
       if (res.data.plan && res.data.plan.length > 0) {

@@ -2471,3 +2471,5 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
+.output-prose table { border-collapse: collapse; margin: 8px 0; }
+.output-prose th, .output-prose td { border: 1px solid #555; padding: 4px 8px; }
