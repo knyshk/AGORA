@@ -1,5 +1,42 @@
+
+# Environment files and secrets
 .env
+.env.*
+!.env.example
+
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Python
 __pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
 venv/
+ENV/
+
+# Node
 node_modules/
+dist/
+.vite/
+coverage/
+
+# Test and tooling cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Local project files
 TEAM_UPDATE.md

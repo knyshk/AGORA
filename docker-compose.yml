@@ -1,25 +1,143 @@
+
 services:
   postgres:
     image: postgres:16
+    restart: unless-stopped
+
     environment:
-      POSTGRES_USER: agora
-      POSTGRES_PASSWORD: agora
-      POSTGRES_DB: agora
+      POSTGRES_USER: ${POSTGRES_USER:-agora}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in the root .env file}
+      POSTGRES_DB: ${POSTGRES_DB:-agora}
+
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
+
+    volumes:
+      - agora_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 10s
 
   redis:
     image: redis:7
+    restart: unless-stopped
+
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
+
+    volumes:
+      - agora_redis_data:/data
+
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 5s
 
   backend:
-    build: ./backend
-    env_file: ./backend/.env
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+
+    restart: unless-stopped
+
+    env_file:
+      - ./backend/.env
+
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: ${POSTGRES_USER:-agora}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in the root .env file}
+      POSTGRES_DB: ${POSTGRES_DB:-agora}
+
     volumes:
       - ./backend:/app
+
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
+
+    command:
+      - uvicorn
+      - main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --reload
+
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  frontend:
+    image: node:22-alpine
+    restart: unless-stopped
+
+    working_dir: /app
+
+    environment:
+      AGORA_BACKEND_PROXY_TARGET: http://backend:8000
+      VITE_API_BASE_URL: /api
+      VITE_USE_POLLING: "true"
+
+    volumes:
+      - ./frontend:/app
+      - agora_frontend_node_modules:/app/node_modules
+
+    command:
+      - sh
+      - -c
+      - npm install && npm run dev -- --host 0.0.0.0
+
+    ports:
+      - "127.0.0.1:5173:5173"
+
+    depends_on:
+      backend:
+        condition: service_healthy
+
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:5173/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  agora_postgres_data:
+  agora_redis_data:
+  agora_frontend_node_modules:

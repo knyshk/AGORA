@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,13 +11,17 @@ import ReputationRegistry from "./components/ReputationRegistry";
 import LatencyBenchmark from "./components/LatencyBenchmark";
 import "./App.css";
 
-const BACKEND_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
-const apiUrl = (path) => `${BACKEND_URL}${path}`;
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || "/api"
+).replace(/\/$/, "");
+
+const apiUrl = (path) => `${API_BASE_URL}${path}`;
 
 export default function App() {
   const [query, setQuery] = useState(
     "Compare renewable energy adoption in Germany and France with current metrics, policy differences, and 2030 projections."
   );
+
   const [loading, setLoading] = useState(false);
   const [loadingMode, setLoadingMode] = useState(null);
   const [response, setResponse] = useState(null);
@@ -25,13 +30,18 @@ export default function App() {
   const [backendOnline, setBackendOnline] = useState(false);
   const [checkingBackend, setCheckingBackend] = useState(true);
   const [activeTab, setActiveTab] = useState("orchestrator");
+
   const resultsRef = useRef(null);
 
   useEffect(() => {
     let mounted = true;
+
     const checkHealth = async () => {
       try {
-        const res = await axios.get(apiUrl("/health"), { timeout: 3000 });
+        const res = await axios.get(apiUrl("/health"), {
+          timeout: 3000,
+        });
+
         if (mounted) {
           setBackendOnline(res.data?.status === "ok");
           setCheckingBackend(false);
@@ -45,7 +55,9 @@ export default function App() {
     };
 
     checkHealth();
+
     const interval = setInterval(checkHealth, 12000);
+
     return () => {
       mounted = false;
       clearInterval(interval);
@@ -53,18 +65,29 @@ export default function App() {
   }, []);
 
   const showExecution = (data) => {
-    if (!data || !Array.isArray(data.plan) || data.plan.length === 0) {
-      throw new Error("The backend returned an invalid execution response.");
+    if (
+      !data ||
+      !Array.isArray(data.plan) ||
+      data.plan.length === 0
+    ) {
+      throw new Error(
+        "The backend returned an invalid execution response."
+      );
     }
+
     setResponse(data);
     setSelectedNode(data.plan[0].id);
+
     setTimeout(() => {
-      resultsRef.current?.scrollIntoView({ behavior: "smooth" });
+      resultsRef.current?.scrollIntoView({
+        behavior: "smooth",
+      });
     }, 200);
   };
 
   const handleRunTask = async () => {
     if (!query.trim() || loading) return;
+
     setLoading(true);
     setLoadingMode("task");
     setError(null);
@@ -74,18 +97,28 @@ export default function App() {
     try {
       const res = await axios.post(
         apiUrl("/tasks/run"),
-        { query: query.trim() },
-        { timeout: 240000 }
+        {
+          query: query.trim(),
+        },
+        {
+          timeout: 240000,
+        }
       );
+
       showExecution(res.data);
     } catch (err) {
       console.error("Task execution failed:", err);
+
       const detail =
         err.response?.data?.detail ||
         err.response?.data?.message ||
         err.message ||
         "The backend request failed.";
-      setError(`Task execution failed. No sample result was substituted. Details: ${detail}`);
+
+      setError(
+        `Task execution failed. No sample result was substituted. Details: ${detail}`
+      );
+
       setResponse(null);
     } finally {
       setLoading(false);
@@ -95,6 +128,7 @@ export default function App() {
 
   const handleRunConflictDemo = async () => {
     if (loading) return;
+
     setLoading(true);
     setLoadingMode("conflict");
     setError(null);
@@ -102,16 +136,31 @@ export default function App() {
     setSelectedNode(null);
 
     try {
-      const res = await axios.post(apiUrl("/tasks/conflict-demo"), {}, { timeout: 60000 });
+      const res = await axios.post(
+        apiUrl("/tasks/conflict-demo"),
+        {},
+        {
+          timeout: 60000,
+        }
+      );
+
       showExecution(res.data);
     } catch (err) {
-      console.error("Conflict demonstration failed:", err);
+      console.error(
+        "Conflict demonstration failed:",
+        err
+      );
+
       const detail =
         err.response?.data?.detail ||
         err.response?.data?.message ||
         err.message ||
         "The backend request failed.";
-      setError(`Conflict demonstration failed. No sample result was substituted. Details: ${detail}`);
+
+      setError(
+        `Conflict demonstration failed. No sample result was substituted. Details: ${detail}`
+      );
+
       setResponse(null);
     } finally {
       setLoading(false);
@@ -128,84 +177,231 @@ export default function App() {
   return (
     <div className="agora-viewport">
       <NetworkBackground />
+
       <header className="agora-nav">
         <div className="nav-container">
           <div className="nav-brand">
             <div className="brand-emblem">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#e59b2c" strokeWidth="1.8">
-                <path d="M3 21h18M5 21V9l7-5 7 5v12M9 21V12h6v9" strokeLinejoin="round" />
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="#e59b2c"
+                strokeWidth="1.8"
+              >
+                <path
+                  d="M3 21h18M5 21V9l7-5 7 5v12M9 21V12h6v9"
+                  strokeLinejoin="round"
+                />
               </svg>
             </div>
+
             <div className="brand-text-block">
               <span className="brand-title">AGORA</span>
-              <span className="brand-tagline">Multi-Agent AI Orchestration</span>
+              <span className="brand-tagline">
+                Multi-Agent AI Orchestration
+              </span>
             </div>
           </div>
+
           <div className="nav-meta">
-            <div className="nav-stat-chip"><span className="chip-key">Concurrency:</span><span className="chip-val">Live benchmark pending</span></div>
-            <div className="nav-stat-chip"><span className="chip-key">Trust Scoring:</span><span className="chip-val">Redis-backed</span></div>
-            <div className="nav-stat-chip"><span className="chip-key">Arbitration:</span><span className="chip-val">Pairwise audit</span></div>
+            <div className="nav-stat-chip">
+              <span className="chip-key">Concurrency:</span>
+              <span className="chip-val">
+                Rebenchmark required
+              </span>
+            </div>
+
+            <div className="nav-stat-chip">
+              <span className="chip-key">Trust Scoring:</span>
+              <span className="chip-val">Redis-backed</span>
+            </div>
+
+            <div className="nav-stat-chip">
+              <span className="chip-key">Arbitration:</span>
+              <span className="chip-val">Pairwise audit</span>
+            </div>
           </div>
         </div>
       </header>
 
       <main className="agora-main-container">
-        <Hero backendOnline={backendOnline} checkingBackend={checkingBackend} />
+        <Hero
+          backendOnline={backendOnline}
+          checkingBackend={checkingBackend}
+        />
+
         <div className="agora-module-nav">
-          <button className={`module-tab ${activeTab === "orchestrator" ? "module-tab-active" : ""}`} onClick={() => setActiveTab("orchestrator")}>
-            <span className="tab-icon">🏛️</span><span className="tab-text">Task Orchestration & DAG Floor</span>
+          <button
+            className={`module-tab ${
+              activeTab === "orchestrator"
+                ? "module-tab-active"
+                : ""
+            }`}
+            onClick={() => setActiveTab("orchestrator")}
+          >
+            <span className="tab-icon">🏛️</span>
+            <span className="tab-text">
+              Task Orchestration & DAG Floor
+            </span>
           </button>
-          <button className={`module-tab ${activeTab === "latency" ? "module-tab-active" : ""}`} onClick={() => setActiveTab("latency")}>
-            <span className="tab-icon">⚡</span><span className="tab-text">DAG Concurrency Benchmark</span>
+
+          <button
+            className={`module-tab ${
+              activeTab === "latency"
+                ? "module-tab-active"
+                : ""
+            }`}
+            onClick={() => setActiveTab("latency")}
+          >
+            <span className="tab-icon">⚡</span>
+            <span className="tab-text">
+              DAG Concurrency Benchmark
+            </span>
           </button>
-          <button className={`module-tab ${activeTab === "reputation" ? "module-tab-active" : ""}`} onClick={() => setActiveTab("reputation")}>
-            <span className="tab-icon">🛡️</span><span className="tab-text">Redis Reputation Registry</span>
+
+          <button
+            className={`module-tab ${
+              activeTab === "reputation"
+                ? "module-tab-active"
+                : ""
+            }`}
+            onClick={() => setActiveTab("reputation")}
+          >
+            <span className="tab-icon">🛡️</span>
+            <span className="tab-text">
+              Redis Reputation Registry
+            </span>
           </button>
         </div>
 
         {activeTab === "orchestrator" && (
           <>
-            <TaskControl query={query} setQuery={setQuery} loading={loading} loadingMode={loadingMode}
-              onRunTask={handleRunTask} onRunConflictDemo={handleRunConflictDemo}
-              onReset={handleReset} hasResult={!!response} error={error} />
+            <TaskControl
+              query={query}
+              setQuery={setQuery}
+              loading={loading}
+              loadingMode={loadingMode}
+              onRunTask={handleRunTask}
+              onRunConflictDemo={handleRunConflictDemo}
+              onReset={handleReset}
+              hasResult={!!response}
+              error={error}
+            />
+
             <div ref={resultsRef}>
               <AnimatePresence mode="wait">
                 {response && !loading && (
-                  <motion.div key="execution-results" className="results-arena"
-                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }} transition={{ duration: 0.4 }}>
+                  <motion.div
+                    key="execution-results"
+                    className="results-arena"
+                    initial={{
+                      opacity: 0,
+                      y: 20,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: 20,
+                    }}
+                    transition={{
+                      duration: 0.4,
+                    }}
+                  >
                     <div className="arena-section-header">
                       <div className="arena-title-group">
-                        <span className="section-eyebrow">Visual Execution Topology</span>
-                        <h2 className="arena-title">Directed Acyclic Graph (DAG) Plan</h2>
+                        <span className="section-eyebrow">
+                          Visual Execution Topology
+                        </span>
+
+                        <h2 className="arena-title">
+                          Directed Acyclic Graph (DAG) Plan
+                        </h2>
                       </div>
-                      <div className="arena-hint"><span>Select an agent node to inspect its output.</span></div>
+
+                      <div className="arena-hint">
+                        <span>
+                          Select an agent node to inspect its output.
+                        </span>
+                      </div>
                     </div>
-                    <AgentGraph plan={response.plan || []} result={response.result || {}}
-                      conflicts={response.conflicts || []} selectedNode={selectedNode} onSelectNode={setSelectedNode} />
-                    <InspectorAndConflicts plan={response.plan || []} result={response.result || {}}
-                      conflicts={response.conflicts || []} selectedNode={selectedNode} onSelectNode={setSelectedNode} />
+
+                    <AgentGraph
+                      plan={response.plan || []}
+                      result={response.result || {}}
+                      conflicts={response.conflicts || []}
+                      selectedNode={selectedNode}
+                      onSelectNode={setSelectedNode}
+                    />
+
+                    <InspectorAndConflicts
+                      plan={response.plan || []}
+                      result={response.result || {}}
+                      conflicts={response.conflicts || []}
+                      selectedNode={selectedNode}
+                      onSelectNode={setSelectedNode}
+                    />
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
           </>
         )}
-        {activeTab === "latency" && <LatencyBenchmark />}
-        {activeTab === "reputation" && <ReputationRegistry />}
+
+        {activeTab === "latency" && (
+          <LatencyBenchmark />
+        )}
+
+        {activeTab === "reputation" && (
+          <ReputationRegistry />
+        )}
       </main>
 
       <footer className="agora-footer">
         <div className="footer-container">
           <div className="footer-left">
-            <div className="footer-brand">AGORA Platform</div>
-            <p className="footer-desc">BTech Major Project: Multi-Agent AI Orchestration, Reputation Routing, and Conflict Arbitration.</p>
+            <div className="footer-brand">
+              AGORA Platform
+            </div>
+
+            <p className="footer-desc">
+              BTech Major Project: Multi-Agent AI Orchestration,
+              Reputation Routing, and Conflict Arbitration.
+            </p>
           </div>
+
           <div className="footer-specs">
-            <div className="spec-row"><span className="spec-label">Orchestration:</span><span className="spec-value">FastAPI + Asyncio DAG Execution</span></div>
-            <div className="spec-row"><span className="spec-label">Reputation:</span><span className="spec-value">Redis-backed agent scoring</span></div>
-            <div className="spec-row"><span className="spec-label">Arbitration:</span><span className="spec-value">Pairwise factual consistency engine</span></div>
-            <div className="spec-row"><span className="spec-label">Frontend:</span><span className="spec-value">Vite + React dashboard</span></div>
+            <div className="spec-row">
+              <span className="spec-label">Orchestration:</span>
+              <span className="spec-value">
+                FastAPI + Asyncio DAG Execution
+              </span>
+            </div>
+
+            <div className="spec-row">
+              <span className="spec-label">Reputation:</span>
+              <span className="spec-value">
+                Redis-backed agent scoring
+              </span>
+            </div>
+
+            <div className="spec-row">
+              <span className="spec-label">Arbitration:</span>
+              <span className="spec-value">
+                Pairwise factual consistency engine
+              </span>
+            </div>
+
+            <div className="spec-row">
+              <span className="spec-label">Frontend:</span>
+              <span className="spec-value">
+                Vite + React dashboard
+              </span>
+            </div>
           </div>
         </div>
       </footer>
