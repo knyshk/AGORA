@@ -35,13 +35,15 @@ async def run_task(req: TaskRequest):
     except PlanError as e:
         raise HTTPException(status_code=422, detail=str(e))
     result = await execute_plan(plan, req.query)
-    return {"plan": plan, "result": result["outputs"], "conflicts": result["conflicts"]}
+    return {"plan": plan, "result": result["outputs"], "conflicts": result["conflicts"],
+        "node_status": result["node_status"], "status": result["status"]}
 
 @app.post("/tasks/conflict-demo")
 async def conflict_demo():
     plan = conflict_demo_plan()
     result = await execute_plan(plan, "Conflict injection demo")
-    return {"plan": plan, "result": result["outputs"], "conflicts": result["conflicts"]}
+    return {"plan": plan, "result": result["outputs"], "conflicts": result["conflicts"],
+        "node_status": result["node_status"], "status": result["status"]}
 
 @app.get("/reputation/scores")
 def get_reputation_scores():

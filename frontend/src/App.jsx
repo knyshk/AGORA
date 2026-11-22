@@ -13,53 +13,7 @@ import "./App.css";
 const BACKEND_URL = "http://127.0.0.1:8000";
 
 // Fallback verified benchmark samples for resilient demoing
-const VERIFIED_SAMPLES = {
-  conflict: {
-    plan: [
-      {
-        id: "a",
-        agent: "research",
-        depends_on: [],
-        forced_prompt: "State in one sentence that Q3 revenue was exactly $4.1 million. Say this clearly and directly.",
-      },
-      {
-        id: "b",
-        agent: "fact_check",
-        depends_on: [],
-        forced_prompt: "State in one sentence that Q3 revenue was exactly $4.6 million. Say this clearly and directly.",
-      },
-    ],
-    result: {
-      a: "Q3 revenue was recorded at exactly $4.1 million for the fiscal quarter.",
-      b: "Q3 revenue was recorded at exactly $4.6 million for the fiscal quarter.",
-    },
-    conflicts: [
-      {
-        between: ["a", "b"],
-        conflict: true,
-        explanation:
-          "Both statements refer to the exact same metric (Q3 fiscal revenue) but report conflicting values: $4.1 million versus $4.6 million. These divergent quantities are mutually incompatible in audited financial records.",
-        suggested_resolution:
-          "Cross-reference the audited SEC 10-Q filing or primary ledger. Update both statements to the verified value and apply a negative Bayesian reputation update in Redis to the conflicting node.",
-      },
-    ],
-  },
-  standard: {
-    plan: [
-      { id: "n1", agent: "research", depends_on: [] },
-      { id: "n2", agent: "chart", depends_on: ["n1"] },
-      { id: "n3", agent: "drafting", depends_on: ["n1"] },
-      { id: "n4", agent: "fact_check", depends_on: ["n3"] },
-    ],
-    result: {
-      n1: "Germany's renewable energy share reached 52.8% of gross electricity consumption in 2023, driven primarily by onshore wind (142 TWh) and solar PV (61 TWh). In contrast, France generated 26.4% of its electricity from renewables (predominantly hydro at 59 TWh, followed by wind at 48 TWh), relying on its nuclear fleet for 65% of base generation. Both nations have targeted 80% and 40% renewable shares respectively by 2030.",
-      n2: "Comparative Generation Chart:\n• Germany Total Renewables: 52.8% [Wind: 28.5%, Solar: 12.2%, Biomass: 8.8%, Hydro: 3.3%]\n• France Total Renewables: 26.4% [Hydro: 11.2%, Wind: 9.8%, Solar: 4.4%, Bio: 1.0%]\n• Primary Low-Carbon Baseline: France Nuclear 64.8% vs Germany 0.0% (post-shutdown phaseout).",
-      n3: "The European energy transition reflects divergent strategic pathways between its two largest economies. Germany has pursued aggressive renewable scaling under its Energiewende initiative, achieving over half of its electricity from wind and solar while shuttering its final nuclear assets. France maintains a fundamentally decarbonized baseline anchored by nuclear power, adopting renewables as a supplementary expansion rather than a total replacement. Both face distinct grid balancing and transmission infrastructure challenges heading into 2030.",
-      n4: "Verification Audit: All statements corroborated against European ENTSO-E transparency platform and Fraunhofer ISE 2023 figures. German 52.8% share and French 26.4% metrics match audited generation data. Nuclear baselines and 2030 policy mandates confirmed accurate.",
-    },
-    conflicts: [],
-  },
-};
+
 
 export default function App() {
   const [query, setQuery] = useState(
@@ -131,12 +85,7 @@ export default function App() {
         err.response?.data?.message ||
         err.message ||
         "Backend request timed out or was interrupted.";
-      setError(
-        `${detail} (Loaded verified reference pipeline below so you can inspect the full DAG visualization and arbitration engine).`
-      );
-      // Fallback to verified benchmark standard DAG
-      setResponse(VERIFIED_SAMPLES.standard);
-      setSelectedNode(VERIFIED_SAMPLES.standard.plan[0].id);
+      setError(detail);
       setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 200);
@@ -169,14 +118,7 @@ export default function App() {
         err.response?.data?.detail ||
         err.message ||
         "Backend request timed out.";
-      setError(
-        `${detail} (Loaded verified conflict arbitration reference below).`
-      );
-      setResponse(VERIFIED_SAMPLES.conflict);
-      setSelectedNode(VERIFIED_SAMPLES.conflict.plan[0].id);
-      setTimeout(() => {
-        resultsRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 200);
+      setError(detail);
     } finally {
       setLoading(false);
       setLoadingMode(null);
