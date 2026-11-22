@@ -44,7 +44,7 @@ def get_reputation_scores():
     import json, os, redis
     from registry.registry import REGISTRY
     from reputation.scoring import get_score
-    redis_url = os.getenv("REDIS_URL", "redis://localhost:6379").replace("redis://redis:6379", "redis://localhost:6379")
+    redis_url = os.getenv("REDIS_URL", "redis://redis:6379")
     r = redis.from_url(redis_url)
     data = {}
     for name, manifest in REGISTRY.items():
