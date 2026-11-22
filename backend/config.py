@@ -13,10 +13,10 @@ PROVIDER_ENDPOINTS = {
 
 PROVIDER_DEFAULT_MODELS = {
     "groq":       "openai/gpt-oss-120b",
-    "openrouter": "apodex/apodex-1.1-mini:free",
+    "openrouter": "google/gemma-4-31b-it:free",
     "nvidia":     "nvidia/llama-3.1-nemotron-70b-instruct",
     "cerebras":   "llama-3.3-70b",
-    "gemini":     "gemini-3.8-flash",
+    "gemini":     "gemini-3.5-flash-lite",
     "mistral":    "mistral-small-latest",
 }
 

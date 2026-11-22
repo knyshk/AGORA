@@ -29,19 +29,19 @@ def get_manifest(name: str) -> AgentManifest:
 register_agent("research-v1", "research", 0.75,
                provider="groq", model="openai/gpt-oss-120b")
 register_agent("research-v2", "research", 0.65,
-               provider="openrouter", model="qwen/qwen3.8-27b:free")
+               provider="gemini", model="gemini-3.5-flash-lite")
 
 register_agent("drafting-v1", "drafting", 0.75,
                provider="groq", model="openai/gpt-oss-120b")
 register_agent("drafting-v2", "drafting", 0.65,
-               provider="openrouter", model="qwen/qwen3.8-27b:free")
+               provider="groq", model="qwen/qwen3.8-27b")
 
 register_agent("chart-v1", "chart", 0.70,
                provider="groq", model="openai/gpt-oss-120b")
 register_agent("chart-v2", "chart", 0.60,
-               provider="openrouter", model="qwen/qwen3.8-27b:free")
+               provider="groq", model="openai/gpt-oss-20b")
 
 register_agent("fact_check-v1", "fact_check", 0.75,
                provider="groq", model="openai/gpt-oss-120b")
 register_agent("fact_check-v2", "fact_check", 0.65,
-               provider="groq", model="openai/gpt-oss-120b")
+               provider="gemini", model="gemini-3.1-flash-lite")

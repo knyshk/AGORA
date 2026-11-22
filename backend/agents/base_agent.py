@@ -10,7 +10,7 @@ SKILL_PREFERRED_PROVIDER = {
     "chart":      "groq",
     "fact_check": "groq",
     "planner":    "groq",
-    "arbitrator": "openrouter",
+    "arbitrator": "gemini",
 }
 
 def _make_llm(provider: str, model: str = None, timeout: int = 25):
