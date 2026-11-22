@@ -7,3 +7,5 @@ redis
 pytest
 pytest-asyncio
 httpx
+sqlalchemy
+psycopg2-binary

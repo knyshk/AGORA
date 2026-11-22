@@ -17,13 +17,26 @@ def is_infra_error(e: Exception) -> bool:
     return any(s in name or s in msg for s in infra_signals)
 
 
-async def run_node(node, state, query, meta):
+async def _emit(emit, event_type, payload):
+    if emit is None:
+        return
+    try:
+        await emit(event_type, payload)
+    except Exception as e:
+        print(f"[EMIT ERROR] {event_type}: {e}")
+
+
+async def run_node(node, state, query, meta, emit=None):
     node_id = node["id"]
+    skill = node["agent"]
     started = time.time()
-    candidates = get_agents_for_skill(node["agent"])
+    await _emit(emit, "node_started", {"node_id": node_id, "skill": skill, "depends_on": node["depends_on"]})
+
+    candidates = get_agents_for_skill(skill)
     if not candidates:
-        meta[node_id] = {"status": "failed", "agent": None, "attempts": 0,
-                         "duration_s": 0, "error": f"No registered agent for skill '{node['agent']}'"}
+        meta[node_id] = {"status": "failed", "agent": None, "attempts": 0, "duration_s": 0,
+                         "error": f"No registered agent for skill '{skill}'"}
+        await _emit(emit, "node_failed", {"node_id": node_id, "skill": skill, **meta[node_id]})
         return
 
     context = "\n".join(f"{d}: {state[d]}" for d in node["depends_on"])
@@ -36,14 +49,15 @@ async def run_node(node, state, query, meta):
     for attempt in range(1, MAX_ATTEMPTS + 1):
         pool = [c for c in candidates if c not in tried] or candidates
         chosen = pick_best_agent(pool)
-        print(f"[ROUTING] node={node_id} skill={node['agent']} chose={chosen} attempt={attempt}")
+        print(f"[ROUTING] node={node_id} skill={skill} chose={chosen} attempt={attempt}")
         manifest = get_manifest(chosen)
         try:
-            state[node_id] = await run_agent(node["agent"], prompt,
-                                             provider=manifest.provider, model=manifest.model)
+            state[node_id] = await run_agent(skill, prompt, provider=manifest.provider, model=manifest.model)
             update_score(chosen, success=True)
             meta[node_id] = {"status": "done", "agent": chosen, "attempts": attempt,
                              "duration_s": round(time.time() - started, 2), "error": None}
+            await _emit(emit, "node_finished", {"node_id": node_id, "skill": skill,
+                                                "output": state[node_id], **meta[node_id]})
             return
         except Exception as e:
             last_error = e
@@ -56,23 +70,24 @@ async def run_node(node, state, query, meta):
                 await asyncio.sleep(BACKOFF_SECONDS * attempt)
 
     meta[node_id] = {"status": "failed", "agent": tried[-1], "attempts": len(tried),
-                     "duration_s": round(time.time() - started, 2),
-                     "error": str(last_error)[:300]}
+                     "duration_s": round(time.time() - started, 2), "error": str(last_error)[:300]}
+    await _emit(emit, "node_failed", {"node_id": node_id, "skill": skill, **meta[node_id]})
 
 
-async def execute_plan(plan, query):
+async def execute_plan(plan, query, emit=None):
     state = {}
     meta = {}
     conflicts = []
     remaining = plan.copy()
 
     while remaining:
-        # Skip nodes whose upstream dependency failed or was skipped
         for n in list(remaining):
             bad = [d for d in n["depends_on"] if meta.get(d, {}).get("status") in ("failed", "skipped")]
             if bad:
                 meta[n["id"]] = {"status": "skipped", "agent": None, "attempts": 0, "duration_s": 0,
                                  "error": f"Skipped because upstream node(s) {bad} did not complete"}
+                await _emit(emit, "node_skipped", {"node_id": n["id"], "skill": n["agent"],
+                                                   "depends_on": n["depends_on"], **meta[n["id"]]})
                 remaining.remove(n)
 
         ready = [n for n in remaining if all(d in state for d in n["depends_on"])]
@@ -81,10 +96,9 @@ async def execute_plan(plan, query):
                 raise RuntimeError(f"Deadlock: {remaining}")
             break
 
-        await asyncio.gather(*(run_node(n, state, query, meta) for n in ready))
+        await asyncio.gather(*(run_node(n, state, query, meta, emit) for n in ready))
         remaining = [n for n in remaining if n["id"] not in meta]
 
-    # Conflict detection only between nodes that finished
     ids = list(state.keys())
     pairs = [(ids[i], ids[j]) for i in range(len(ids)) for j in range(i + 1, len(ids))]
     results = await asyncio.gather(
@@ -98,7 +112,9 @@ async def execute_plan(plan, query):
         if conflict:
             conflicts.append({"between": [a, b], **conflict})
             print(f"[CONFLICT] {a} vs {b}: {conflict['explanation']}")
+            await _emit(emit, "conflict_found", {"between": [a, b], **conflict})
 
     all_ok = all(m["status"] == "done" for m in meta.values())
     status = "complete" if all_ok else ("partial" if state else "failed")
+    await _emit(emit, "run_finished", {"status": status})
     return {"outputs": state, "conflicts": conflicts, "node_status": meta, "status": status}
