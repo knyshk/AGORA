@@ -12,6 +12,7 @@ from db.recorder import RunRecorder
 from db import crud
 from registry.registry import REGISTRY
 from orchestration.fork import reusable_outputs
+from agents.research_tools import grounded_research
 
 app = FastAPI()
 
@@ -40,6 +41,10 @@ def health():
 @app.post("/agents/research")
 async def research(req: TaskRequest):
     return {"output": await run_agent("research", req.query)}
+
+@app.post("/agents/research-grounded")
+async def research_grounded(req: TaskRequest):
+    return {"output": await grounded_research(f"Task: {req.query}")}
 
 
 async def _execute_and_record(run_id: str, plan: list, query: str, started: float):

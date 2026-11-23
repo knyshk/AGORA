@@ -3,11 +3,16 @@ from unittest.mock import patch
 from orchestration import executor
 
 
+async def _fake_grounded(prompt, provider=None, model=None):
+    return await executor.run_agent("research", prompt, provider=provider, model=model)
+
+
 @pytest.fixture(autouse=True)
 def no_redis_no_sleep():
     with patch.object(executor, "update_score"), \
          patch.object(executor, "pick_best_agent", side_effect=lambda c: c[0]), \
          patch.object(executor, "BACKOFF_SECONDS", 0), \
+         patch.object(executor, "grounded_research", new=_fake_grounded), \
          patch.object(executor, "detect_conflict", return_value=None):
         yield
 

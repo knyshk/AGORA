@@ -4,6 +4,7 @@ from agents.base_agent import run_agent
 from registry.registry import get_agents_for_skill, get_manifest
 from reputation.scoring import pick_best_agent, update_score
 from arbitration.engine import detect_conflict
+from agents.research_tools import grounded_research
 
 MAX_ATTEMPTS = 2
 BACKOFF_SECONDS = 2
@@ -16,6 +17,10 @@ def is_infra_error(e: Exception) -> bool:
     infra_signals = ["ratelimit", "timeout", "timed out", "connection", "429", "503", "502", "providers exhausted"]
     return any(s in name or s in msg for s in infra_signals)
 
+async def _call_agent(skill, prompt, manifest):
+    if skill == "research" and getattr(manifest, "strategy", "plain") == "grounded":
+        return await grounded_research(prompt, provider=manifest.provider, model=manifest.model)
+    return await run_agent(skill, prompt, provider=manifest.provider, model=manifest.model)
 
 async def _emit(emit, event_type, payload):
     if emit is None:
@@ -58,7 +63,7 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
         print(f"[ROUTING] node={node_id} skill={skill} chose={chosen} attempt={attempt}")
         manifest = get_manifest(chosen)
         try:
-            state[node_id] = await run_agent(skill, prompt, provider=manifest.provider, model=manifest.model)
+            state[node_id] = await _call_agent(skill, prompt, manifest)
             update_score(chosen, success=True)
             meta[node_id] = {"status": "done", "agent": chosen, "attempts": attempt,
                              "duration_s": round(time.time() - started, 2), "error": None}
