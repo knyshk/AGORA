@@ -52,3 +52,37 @@ def get_run(run_id: str):
             "events": [{"seq": e.seq, "type": e.type, "payload": e.payload,
                         "created_at": e.created_at.isoformat()} for e in events],
         }
+
+def get_checkpoints(run_id: str):
+    data = get_run(run_id)
+    if data is None:
+        return None
+    done, checkpoints = [], []
+    for e in data["events"]:
+        if e["type"] == "node_finished":
+            done.append(e["payload"]["node_id"])
+            checkpoints.append({"checkpoint": len(checkpoints) + 1, "seq": e["seq"],
+                                "after_node": e["payload"]["node_id"],
+                                "completed_nodes": list(done), "at": e["created_at"]})
+    return checkpoints
+
+
+def state_at(run_id: str, seq: int):
+    data = get_run(run_id)
+    if data is None:
+        return None
+    outputs, status = {}, {}
+    for e in data["events"]:
+        if e["seq"] > seq:
+            break
+        p = e["payload"]
+        if e["type"] == "node_started":
+            status[p["node_id"]] = "running"
+        elif e["type"] == "node_finished":
+            status[p["node_id"]] = "done"
+            outputs[p["node_id"]] = p.get("output")
+        elif e["type"] == "node_failed":
+            status[p["node_id"]] = "failed"
+        elif e["type"] == "node_skipped":
+            status[p["node_id"]] = "skipped"
+    return {"seq": seq, "plan": data["run"]["plan"], "node_status": status, "outputs": outputs}

@@ -10,6 +10,8 @@ from orchestration.validation import PlanError
 from db.database import init_db
 from db.recorder import RunRecorder
 from db import crud
+from registry.registry import REGISTRY
+from orchestration.fork import reusable_outputs
 
 app = FastAPI()
 
@@ -83,6 +85,63 @@ def get_run(run_id: str):
     if data is None:
         raise HTTPException(status_code=404, detail="Run not found")
     return data
+
+@app.get("/runs/{run_id}/checkpoints")
+def run_checkpoints(run_id: str):
+    cps = crud.get_checkpoints(run_id)
+    if cps is None:
+        raise HTTPException(status_code=404, detail="Run not found")
+    return cps
+
+
+@app.get("/runs/{run_id}/replay")
+def run_replay(run_id: str, upto: int = 10**9):
+    data = crud.state_at(run_id, upto)
+    if data is None:
+        raise HTTPException(status_code=404, detail="Run not found")
+    return data
+
+
+class ForkRequest(BaseModel):
+    rerun_node: str
+    agent: str | None = None
+    instruction: str | None = None
+
+
+@app.post("/runs/{run_id}/fork")
+async def fork_run(run_id: str, req: ForkRequest):
+    data = crud.get_run(run_id)
+    if data is None:
+        raise HTTPException(status_code=404, detail="Run not found")
+    run, plan = data["run"], data["run"]["plan"]
+    node = next((n for n in plan if n["id"] == req.rerun_node), None)
+    if node is None:
+        raise HTTPException(status_code=422, detail=f"Node '{req.rerun_node}' is not in this run")
+    if req.agent:
+        manifest = REGISTRY.get(req.agent)
+        if manifest is None or manifest.skill != node["agent"]:
+            raise HTTPException(status_code=422,
+                                detail=f"Agent '{req.agent}' is not registered for skill '{node['agent']}'")
+
+    outputs = {n["node_id"]: n["output"] for n in data["nodes"]
+               if n["status"] == "done" and n["output"] is not None}
+    keep = reusable_outputs(plan, outputs, req.rerun_node)
+
+    started = time.time()
+    new_id = crud.create_run(run["query"], parent_run_id=run_id)
+    recorder = RunRecorder(new_id)
+    await recorder("plan_created", {"plan": plan, "forked_from": run_id, "rerun_node": req.rerun_node})
+    result = await execute_plan(
+        plan, run["query"], emit=recorder, initial_state=keep,
+        forced_agents={req.rerun_node: req.agent} if req.agent else None,
+        instructions={req.rerun_node: req.instruction} if req.instruction else None,
+    )
+    crud.finish_run(new_id, plan, result["status"], result["conflicts"], started)
+    return {"run_id": new_id, "forked_from": run_id,
+            "reused_nodes": sorted(keep),
+            "rerun_nodes": sorted(n["id"] for n in plan if n["id"] not in keep),
+            "plan": plan, "result": result["outputs"], "conflicts": result["conflicts"],
+            "node_status": result["node_status"], "status": result["status"]}
 
 
 @app.get("/reputation/scores")

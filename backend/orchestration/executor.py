@@ -26,7 +26,7 @@ async def _emit(emit, event_type, payload):
         print(f"[EMIT ERROR] {event_type}: {e}")
 
 
-async def run_node(node, state, query, meta, emit=None):
+async def run_node(node, state, query, meta, emit=None, forced_agents=None, instructions=None):
     node_id = node["id"]
     skill = node["agent"]
     started = time.time()
@@ -43,11 +43,17 @@ async def run_node(node, state, query, meta, emit=None):
     prompt = node.get("forced_prompt") or (
         f"Task: {query}\nContext from previous agents:\n{context}" if context else f"Task: {query}"
     )
+    if instructions and node_id in instructions:
+        prompt += f"\n\nAdditional instruction from the user: {instructions[node_id]}"
 
     tried = []
     last_error = None
     for attempt in range(1, MAX_ATTEMPTS + 1):
-        pool = [c for c in candidates if c not in tried] or candidates
+        forced = (forced_agents or {}).get(node_id)
+        if forced and attempt == 1 and forced in candidates:
+            pool = [forced]
+        else:
+            pool = [c for c in candidates if c not in tried] or candidates
         chosen = pick_best_agent(pool)
         print(f"[ROUTING] node={node_id} skill={skill} chose={chosen} attempt={attempt}")
         manifest = get_manifest(chosen)
@@ -74,11 +80,20 @@ async def run_node(node, state, query, meta, emit=None):
     await _emit(emit, "node_failed", {"node_id": node_id, "skill": skill, **meta[node_id]})
 
 
-async def execute_plan(plan, query, emit=None):
-    state = {}
-    meta = {}
+async def execute_plan(plan, query, emit=None, initial_state=None, forced_agents=None, instructions=None):
+    state = dict(initial_state or {})
+    reused = set(state)
+    meta = {nid: {"status": "done", "agent": "reused", "attempts": 0, "duration_s": 0,
+                  "error": None, "reused": True} for nid in state}
     conflicts = []
-    remaining = plan.copy()
+    remaining = [n for n in plan if n["id"] not in state]
+
+    for n in plan:
+        if n["id"] in reused:
+            await _emit(emit, "node_finished", {
+                "node_id": n["id"], "skill": n["agent"], "depends_on": n["depends_on"],
+                "agent": "reused", "attempts": 0, "duration_s": 0, "error": None,
+                "output": state[n["id"]], "reused": True})
 
     while remaining:
         for n in list(remaining):
@@ -96,11 +111,12 @@ async def execute_plan(plan, query, emit=None):
                 raise RuntimeError(f"Deadlock: {remaining}")
             break
 
-        await asyncio.gather(*(run_node(n, state, query, meta, emit) for n in ready))
+        await asyncio.gather(*(run_node(n, state, query, meta, emit, forced_agents, instructions) for n in ready))
         remaining = [n for n in remaining if n["id"] not in meta]
 
     ids = list(state.keys())
-    pairs = [(ids[i], ids[j]) for i in range(len(ids)) for j in range(i + 1, len(ids))]
+    pairs = [(ids[i], ids[j]) for i in range(len(ids)) for j in range(i + 1, len(ids))
+        if not (ids[i] in reused and ids[j] in reused)]
     results = await asyncio.gather(
         *(detect_conflict(state[a], state[b], label_a=a, label_b=b) for a, b in pairs),
         return_exceptions=True,

@@ -60,3 +60,24 @@ async def test_retry_succeeds_on_second_attempt():
         result = await executor.execute_plan([PLAN[0]], "q")
     assert result["node_status"]["n1"]["attempts"] == 2
     assert result["status"] == "complete"
+
+async def test_initial_state_nodes_are_reused_not_rerun():
+    calls = []
+    async def fake(role, prompt, provider=None, model=None):
+        calls.append(role)
+        return f"{role} new"
+    with patch.object(executor, "run_agent", side_effect=fake):
+        result = await executor.execute_plan(PLAN, "q", initial_state={"n1": "old research"})
+    assert "research" not in calls
+    assert result["outputs"]["n1"] == "old research"
+    assert result["status"] == "complete"
+
+
+async def test_forced_agent_is_used():
+    used = []
+    async def fake(role, prompt, provider=None, model=None):
+        used.append(model)
+        return "ok"
+    with patch.object(executor, "run_agent", side_effect=fake):
+        await executor.execute_plan([PLAN[0]], "q", forced_agents={"n1": "research-v2"})
+    assert used == ["gemini-3.5-flash-lite"]
