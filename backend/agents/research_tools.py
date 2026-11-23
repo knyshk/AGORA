@@ -69,14 +69,14 @@ def format_sources(sources: list) -> str:
     )
 
 
-def dedupe_sources(batches: list) -> list:
+def dedupe_sources(batches: list, limit: int = MAX_SOURCES) -> list:
     seen, result = set(), []
     for batch in batches:
         for s in batch:
             if s["url"] and s["url"] not in seen:
                 seen.add(s["url"])
                 result.append(s)
-    return result[:MAX_SOURCES]
+    return result[:limit]
 
 
 async def _web_search(query: str) -> list:
@@ -146,30 +146,24 @@ async def enrich_sources(sources: list, terms: set) -> list:
     return sources
 
 
-async def grounded_research(task_prompt: str, provider: str = None, model: str = None) -> str:
-    raw = await run_agent(
-        "research query planner",
-        f"{task_prompt}\n\nWrite {MAX_QUERIES} short, specific web search queries that would find the facts "
-        f"needed for this task. Cover EVERY part of the task (each company, each year, each metric). "
-        f"Return ONLY a JSON list of strings, no other text.",
-        provider=provider, model=model,
-    )
-    queries = parse_queries(raw, task_prompt)
+def normalize_citations(text: str) -> str:
+    return text.replace("【", "[").replace("】", "]")
 
+
+async def _retrieve(queries: list, terms: set) -> list:
     batches = await asyncio.gather(
         *(_web_search(q) for q in queries),
         *(_wikipedia(q) for q in queries[:2]),
     )
     sources = dedupe_sources(batches)
+    if sources:
+        sources = await enrich_sources(sources, terms)
+        pages = sum(1 for s in sources if s.get("fetched"))
+        print(f"[RESEARCH] {len(sources)} sources, {pages} full pages read")
+    return sources
 
-    if not sources:
-        answer = await run_agent("research", task_prompt, provider=provider, model=model)
-        return ("NOTE: no live sources could be retrieved. The text below comes from model knowledge "
-                "and is UNVERIFIED.\n\n" + answer)
 
-    terms = keywords(task_prompt + " " + " ".join(queries))
-    sources = await enrich_sources(sources, terms)
-
+async def _answer(task_prompt: str, sources: list, provider: str, model: str) -> str:
     prompt = (
         f"{task_prompt}\n\n"
         f"Use ONLY the numbered sources below. Rules:\n"
@@ -181,6 +175,44 @@ async def grounded_research(task_prompt: str, provider: str = None, model: str =
         f"- Do not write a sources list; it is added automatically.\n\n"
         f"SOURCES:\n{format_sources(sources)}"
     )
-    answer = await run_agent("research", prompt, provider=provider, model=model)
+    return normalize_citations(await run_agent("research", prompt, provider=provider, model=model))
+
+
+async def grounded_research(task_prompt: str, provider: str = None, model: str = None) -> str:
+    raw = await run_agent(
+        "research query planner",
+        f"{task_prompt}\n\nWrite {MAX_QUERIES} short, specific web search queries that would find the facts "
+        f"needed for this task. Cover EVERY part of the task (each company, each year, each metric). "
+        f"Return ONLY a JSON list of strings, no other text.",
+        provider=provider, model=model,
+    )
+    queries = parse_queries(raw, task_prompt)
+    terms = keywords(task_prompt + " " + " ".join(queries))
+    sources = await _retrieve(queries, terms)
+
+    if not sources:
+        answer = await run_agent("research", task_prompt, provider=provider, model=model)
+        return ("NOTE: no live sources could be retrieved. The text below comes from model knowledge "
+                "and is UNVERIFIED.\n\n" + answer)
+
+    answer = await _answer(task_prompt, sources, provider, model)
+
+    # Corrective pass: search again only for what is missing
+    if "not found in sources" in answer.lower():
+        raw2 = await run_agent(
+            "research query planner",
+            f"{task_prompt}\n\nA first draft answer said some parts were missing:\n{answer[:1500]}\n\n"
+            f"Write 3 NEW targeted search queries (different wording, include the company name, year and "
+            f"metric, for example 'Tesla 2023 total revenues full year') for ONLY the missing parts. "
+            f"Return ONLY a JSON list of strings.",
+            provider=provider, model=model,
+        )
+        queries2 = [q for q in parse_queries(raw2, "") if q and q not in queries]
+        if queries2:
+            extra = await _retrieve(queries2, terms | keywords(" ".join(queries2)))
+            if extra:
+                sources = dedupe_sources([extra, sources], limit=12)
+                answer = await _answer(task_prompt, sources, provider, model)
+
     footer = "\n".join(f"[{i}] {s['title']} - {s['url']}" for i, s in enumerate(sources, 1))
     return f"{answer}\n\n---\nSources\n{footer}"

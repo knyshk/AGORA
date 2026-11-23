@@ -66,3 +66,29 @@ async def test_enrich_sources_replaces_snippet_with_page_passages():
         out = await rt.enrich_sources(src, rt.keywords("revenue 2022 billion"))
     assert "81.5" in out[0]["snippet"]
     assert out[0]["fetched"] is True
+
+async def test_corrective_second_pass_runs_when_answer_has_gaps():
+    answers = {"n": 0}
+
+    async def fake_agent(role, prompt, provider=None, model=None):
+        if "search queries" in prompt and "first draft" in prompt:
+            return '["tesla 2023 total revenues"]'
+        if "search queries" in prompt:
+            return '["tesla revenue"]'
+        answers["n"] += 1
+        return "2022 revenue 81.5 [1]. 2023 not found in sources." if answers["n"] == 1 else "2023 revenue was 96.8 [1]."
+
+    async def fake_search(q):
+        return [{"title": q, "url": "http://" + q.replace(" ", "-"), "snippet": "s", "type": "web"}]
+
+    with patch.object(rt, "run_agent", side_effect=fake_agent), \
+         patch.object(rt, "_web_search", side_effect=fake_search), \
+         patch.object(rt, "_wikipedia", new=AsyncMock(return_value=[])):
+        out = await rt.grounded_research("Task: tesla revenue 2022 2023")
+    assert answers["n"] == 2
+    assert "96.8" in out
+    assert "tesla-2023-total-revenues" in out
+
+
+def test_normalize_citations_converts_fullwidth_brackets():
+    assert rt.normalize_citations("fact【4】") == "fact[4]"
