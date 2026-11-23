@@ -1,6 +1,12 @@
 from unittest.mock import patch, AsyncMock
 from agents import research_tools as rt
+import pytest
 
+
+@pytest.fixture(autouse=True)
+def no_page_fetch():
+    with patch.object(rt, "_fetch_page_text", new=AsyncMock(return_value="")):
+        yield
 
 def test_parse_queries_valid_json():
     assert rt.parse_queries('["a", "b"]', "fallback") == ["a", "b"]
@@ -45,3 +51,18 @@ async def test_grounded_research_warns_when_no_sources():
          patch.object(rt, "_wikipedia", new=AsyncMock(return_value=[])):
         out = await rt.grounded_research("Task: tesla")
     assert out.startswith("NOTE: no live sources")
+
+def test_best_chunks_prefers_relevant_passage_with_numbers():
+    text = "Intro about the company history.\n\nTotal revenues were $96.8 billion in 2023, up 19 percent.\n\nContact us for press."
+    terms = rt.keywords("tesla total revenues 2023")
+    top = rt.best_chunks(text, terms, n=1)
+    assert "96.8" in top[0]
+
+
+async def test_enrich_sources_replaces_snippet_with_page_passages():
+    src = [{"title": "T", "url": "http://x", "snippet": "short", "type": "web"}]
+    page = "Filler text.\n\nRevenue for 2022 was $81.5 billion according to the filing."
+    with patch.object(rt, "_fetch_page_text", new=AsyncMock(return_value=page)):
+        out = await rt.enrich_sources(src, rt.keywords("revenue 2022 billion"))
+    assert "81.5" in out[0]["snippet"]
+    assert out[0]["fetched"] is True
