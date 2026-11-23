@@ -4,9 +4,50 @@ import pytest
 
 
 @pytest.fixture(autouse=True)
-def no_page_fetch():
-    with patch.object(rt, "_fetch_page_text", new=AsyncMock(return_value="")):
+def no_network():
+    with patch.object(rt, "_fetch_page_text", new=AsyncMock(return_value="")), \
+         patch.object(rt, "_sec_revenue", new=AsyncMock(return_value=None)):
         yield
+def test_parse_plan_accepts_object_with_tickers():
+    q, t = rt.parse_plan('{"queries": ["a b", "c"], "tickers": ["tsla", "F", "bad ticker!"]}', "fb")
+    assert q == ["a b", "c"]
+    assert t == ["TSLA", "F"]
+
+
+def test_parse_plan_accepts_plain_list_and_garbage():
+    assert rt.parse_plan('["x"]', "fb") == (["x"], [])
+    assert rt.parse_plan("nonsense", "fb") == (["fb"], [])
+
+
+def test_annual_values_keeps_only_full_year_10k_figures():
+    entries = [
+        {"form": "10-K", "start": "2023-01-01", "end": "2023-12-31", "val": 96_773_000_000, "filed": "2024-01-29"},
+        {"form": "10-K", "start": "2022-01-01", "end": "2022-12-31", "val": 81_462_000_000, "filed": "2023-01-30"},
+        {"form": "10-Q", "start": "2023-01-01", "end": "2023-03-31", "val": 23_329_000_000, "filed": "2023-04-24"},
+        {"form": "10-K", "start": "2023-10-01", "end": "2023-12-31", "val": 25_167_000_000, "filed": "2024-01-29"},
+    ]
+    assert rt.annual_values(entries) == [("2023-12-31", 96_773_000_000), ("2022-12-31", 81_462_000_000)]
+
+
+async def test_sec_source_is_listed_first_in_prompt():
+    prompts = []
+
+    async def fake_agent(role, prompt, provider=None, model=None):
+        prompts.append(prompt)
+        if "search queries" in prompt:
+            return '{"queries": ["tesla revenue"], "tickers": ["TSLA"]}'
+        return "Tesla revenue was 96.77 billion [1]."
+
+    sec = {"title": "SEC EDGAR 10-K data: Tesla", "url": "https://data.sec.gov/x", "type": "sec",
+           "snippet": "fiscal year ended 2023-12-31: $96.77 billion"}
+    web = [{"title": "Web", "url": "http://w", "snippet": "s", "type": "web"}]
+    with patch.object(rt, "run_agent", side_effect=fake_agent), \
+         patch.object(rt, "_sec_revenue", new=AsyncMock(return_value=sec)), \
+         patch.object(rt, "_web_search", new=AsyncMock(return_value=web)), \
+         patch.object(rt, "_wikipedia", new=AsyncMock(return_value=[])):
+        out = await rt.grounded_research("Task: tesla revenue")
+    assert "[1] SEC EDGAR 10-K data: Tesla" in prompts[-1]
+    assert "[1] SEC EDGAR 10-K data: Tesla - https://data.sec.gov/x" in out
 
 def test_parse_queries_valid_json():
     assert rt.parse_queries('["a", "b"]', "fallback") == ["a", "b"]

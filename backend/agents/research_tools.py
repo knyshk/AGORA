@@ -2,7 +2,10 @@ import asyncio
 import json
 import re
 import httpx
+import os
 from agents.base_agent import run_agent
+from datetime import date
+
 
 MAX_QUERIES = 4
 RESULTS_PER_QUERY = 4
@@ -145,6 +148,73 @@ async def enrich_sources(sources: list, terms: set) -> list:
                 source["fetched"] = True
     return sources
 
+SEC_CACHE = {}
+REVENUE_CONCEPTS = ["Revenues", "RevenueFromContractWithCustomerExcludingAssessedTax", "SalesRevenueNet"]
+
+
+def parse_plan(raw: str, fallback: str):
+    """Accepts a JSON list of queries or {"queries": [...], "tickers": [...]}."""
+    cleaned = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+    try:
+        data = json.loads(cleaned)
+    except json.JSONDecodeError:
+        return [fallback[:200]], []
+    if isinstance(data, list):
+        queries, tickers = data, []
+    elif isinstance(data, dict):
+        queries, tickers = data.get("queries", []), data.get("tickers", [])
+    else:
+        return [fallback[:200]], []
+    queries = [str(q).strip() for q in queries if str(q).strip()][:MAX_QUERIES] or [fallback[:200]]
+    tickers = [str(t).strip().upper() for t in tickers if re.fullmatch(r"[A-Za-z.\-]{1,6}", str(t).strip())][:4]
+    return queries, tickers
+
+
+def annual_values(entries: list) -> list:
+    """Keep only full-year figures from 10-K filings, newest first: [(end_date, value), ...]."""
+    by_end = {}
+    for e in entries:
+        if e.get("form") not in ("10-K", "10-K/A") or "start" not in e or "end" not in e:
+            continue
+        try:
+            days = (date.fromisoformat(e["end"]) - date.fromisoformat(e["start"])).days
+        except ValueError:
+            continue
+        if days < 340 or days > 380:
+            continue
+        prev = by_end.get(e["end"])
+        if prev is None or e.get("filed", "") >= prev.get("filed", ""):
+            by_end[e["end"]] = e
+    return sorted(((end, v["val"]) for end, v in by_end.items()), reverse=True)
+
+
+async def _sec_revenue(ticker: str):
+    headers = {"User-Agent": f"AGORA student project {os.getenv('SEC_CONTACT_EMAIL', 'student@example.com')}"}
+    try:
+        async with httpx.AsyncClient(timeout=20, headers=headers) as client:
+            if not SEC_CACHE:
+                resp = await client.get("https://www.sec.gov/files/company_tickers.json")
+                resp.raise_for_status()
+                for row in resp.json().values():
+                    SEC_CACHE[row["ticker"].upper()] = (row["cik_str"], row["title"])
+            found = SEC_CACHE.get(ticker.upper())
+            if not found:
+                return None
+            cik, title = found
+            for concept in REVENUE_CONCEPTS:
+                url = f"https://data.sec.gov/api/xbrl/companyconcept/CIK{int(cik):010d}/us-gaap/{concept}.json"
+                resp = await client.get(url)
+                if resp.status_code != 200:
+                    continue
+                rows = annual_values(resp.json().get("units", {}).get("USD", []))
+                if len(rows) >= 2:
+                    lines = "; ".join(f"fiscal year ended {end}: ${val / 1e9:.2f} billion" for end, val in rows[:5])
+                    return {"title": f"SEC EDGAR 10-K data: {title} ({ticker.upper()}) annual revenue",
+                            "url": url, "type": "sec",
+                            "snippet": f"Official annual revenue from 10-K filings (US GAAP, USD): {lines}."}
+    except Exception as e:
+        print(f"[SEC ERROR] {ticker}: {type(e).__name__}: {e}")
+    return None
 
 def normalize_citations(text: str) -> str:
     return text.replace("【", "[").replace("】", "]")
@@ -181,14 +251,24 @@ async def _answer(task_prompt: str, sources: list, provider: str, model: str) ->
 async def grounded_research(task_prompt: str, provider: str = None, model: str = None) -> str:
     raw = await run_agent(
         "research query planner",
-        f"{task_prompt}\n\nWrite {MAX_QUERIES} short, specific web search queries that would find the facts "
-        f"needed for this task. Cover EVERY part of the task (each company, each year, each metric). "
-        f"Return ONLY a JSON list of strings, no other text.",
+        f"{task_prompt}\n\nReturn ONLY a JSON object with two keys:\n"
+        f'"queries": {MAX_QUERIES} short web search queries (maximum 6 words each) covering EVERY part of '
+        f'the task (each company, year and metric);\n'
+        f'"tickers": US stock tickers of the companies named in the task (for example ["TSLA","F","GM"]), '
+        f'or [] if there are none.',
         provider=provider, model=model,
     )
-    queries = parse_queries(raw, task_prompt)
+    queries, tickers = parse_plan(raw, task_prompt)
     terms = keywords(task_prompt + " " + " ".join(queries))
-    sources = await _retrieve(queries, terms)
+
+    sec_results, web_sources = await asyncio.gather(
+        asyncio.gather(*(_sec_revenue(t) for t in tickers)),
+        _retrieve(queries, terms),
+    )
+    sec_sources = [s for s in sec_results if s]
+    if sec_sources:
+        print(f"[RESEARCH] SEC data for {len(sec_sources)} companies")
+    sources = dedupe_sources([sec_sources, web_sources], limit=12)
 
     if not sources:
         answer = await run_agent("research", task_prompt, provider=provider, model=model)
@@ -197,21 +277,19 @@ async def grounded_research(task_prompt: str, provider: str = None, model: str =
 
     answer = await _answer(task_prompt, sources, provider, model)
 
-    # Corrective pass: search again only for what is missing
     if "not found in sources" in answer.lower():
         raw2 = await run_agent(
             "research query planner",
             f"{task_prompt}\n\nA first draft answer said some parts were missing:\n{answer[:1500]}\n\n"
-            f"Write 3 NEW targeted search queries (different wording, include the company name, year and "
-            f"metric, for example 'Tesla 2023 total revenues full year') for ONLY the missing parts. "
-            f"Return ONLY a JSON list of strings.",
+            f"Write 3 NEW targeted search queries (maximum 6 words each, include the company name, year and "
+            f"metric) for ONLY the missing parts. Return ONLY a JSON list of strings.",
             provider=provider, model=model,
         )
-        queries2 = [q for q in parse_queries(raw2, "") if q and q not in queries]
+        queries2 = [q for q in parse_plan(raw2, "")[0] if q and q not in queries]
         if queries2:
             extra = await _retrieve(queries2, terms | keywords(" ".join(queries2)))
             if extra:
-                sources = dedupe_sources([extra, sources], limit=12)
+                sources = dedupe_sources([sec_sources, extra, web_sources], limit=12)
                 answer = await _answer(task_prompt, sources, provider, model)
 
     footer = "\n".join(f"[{i}] {s['title']} - {s['url']}" for i, s in enumerate(sources, 1))
