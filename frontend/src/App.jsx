@@ -9,6 +9,7 @@ import InspectorAndConflicts from "./components/InspectorAndConflicts";
 import ReputationRegistry from "./components/ReputationRegistry";
 import LatencyBenchmark from "./components/LatencyBenchmark";
 import "./App.css";
+import RunHistory from "./components/RunHistory";
 
 const BACKEND_URL = "http://127.0.0.1:8000";
 
@@ -197,6 +198,14 @@ export default function App() {
             <span className="tab-text">Redis Reputation Registry</span>
             <span className="tab-pill">Bayesian Routing</span>
           </button>
+          <button
+            className={`module-tab ${activeTab === "history" ? "module-tab-active" : ""}`}
+            onClick={() => setActiveTab("history")}
+          >
+            <span className="tab-icon">🕘</span>
+            <span className="tab-text">Run History & Replay</span>
+            <span className="tab-pill">Fork</span>
+          </button>
         </div>
 
         {/* Tab 1: Task Orchestrator & Live DAG Floor */}
@@ -265,6 +274,7 @@ export default function App() {
 
         {/* Tab 3: Redis Reputation Registry */}
         {activeTab === "reputation" && <ReputationRegistry />}
+        {activeTab === "history" && <RunHistory backendUrl={BACKEND_URL} />}
       </main>
 
       {/* Classical Agora Footer */}
