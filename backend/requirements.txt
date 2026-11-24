@@ -12,3 +12,6 @@ psycopg2-binary
 ddgs
 trafilatura
 jsonschema
+argon2-cffi
+PyJWT
+websockets

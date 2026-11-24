@@ -50,3 +50,43 @@ class RunEvent(Base):
     type: Mapped[str] = mapped_column(String(32))
     payload: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+# ---------------- live collaboration ----------------
+
+class User(Base):
+    __tablename__ = "users"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(80))
+    password_hash: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class CollabSession(Base):
+    """A workspace for runs. mode 'isolated' = owner only; 'collaborative' = members join and watch live.
+    Upgrading isolated -> collaborative keeps every run and event."""
+    __tablename__ = "collab_sessions"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    title: Mapped[str] = mapped_column(String(200))
+    owner_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    mode: Mapped[str] = mapped_column(String(20), default="isolated")
+    editor_token: Mapped[str] = mapped_column(String(32), default=_uuid, index=True)
+    viewer_token: Mapped[str] = mapped_column(String(32), default=_uuid, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class SessionMember(Base):
+    __tablename__ = "session_members"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    session_id: Mapped[str] = mapped_column(ForeignKey("collab_sessions.id"), index=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    role: Mapped[str] = mapped_column(String(10))          # owner | editor | viewer
+    last_seen_event_id: Mapped[int] = mapped_column(Integer, default=0)
+    joined_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class SessionRun(Base):
+    """Links runs to a session (a link table, so the existing runs table needs no migration)."""
+    __tablename__ = "session_runs"
+    run_id: Mapped[str] = mapped_column(ForeignKey("runs.id"), primary_key=True)
+    session_id: Mapped[str] = mapped_column(ForeignKey("collab_sessions.id"), index=True)

@@ -62,11 +62,34 @@ async def _feedback_to_drafts(node, fact_check_output, meta, emit):
                                                  "source": "fact_check_feedback", "after": stats})
 
 
-async def run_node(node, state, query, meta, emit=None, forced_agents=None, instructions=None):
+async def _human_node(node, state, meta, emit, takeover, started) -> bool:
+    """If a person has taken over this node, wait for their output. Returns True if they delivered it."""
+    holder = takeover.holder(node["id"]) if takeover else None
+    if not holder:
+        return False
+    node_id, skill = node["id"], node["agent"]
+    await _emit(emit, "node_takeover_waiting", {"node_id": node_id, "skill": skill, "user": holder})
+    output = await takeover.wait(node_id)
+    if output is None:
+        await _emit(emit, "node_takeover_released", {"node_id": node_id, "skill": skill, "user": holder})
+        return False
+    state[node_id] = output
+    meta[node_id] = {"status": "done", "agent": f"human:{holder['name']}", "attempts": 1,
+                     "duration_s": round(time.time() - started, 2), "error": None,
+                     "quality": None, "quality_reason": "written by a person (not graded)", "human": holder}
+    await _emit(emit, "node_finished", {"node_id": node_id, "skill": skill, "output": output, **meta[node_id]})
+    return True
+
+
+async def run_node(node, state, query, meta, emit=None, forced_agents=None, instructions=None, takeover=None):
     node_id = node["id"]
     skill = node["agent"]
     started = time.time()
     await _emit(emit, "node_started", {"node_id": node_id, "skill": skill, "depends_on": node["depends_on"]})
+    if await _human_node(node, state, meta, emit, takeover, started):
+        return
+    if takeover:
+        takeover.mark_started(node_id)
 
     candidates = get_agents_for_skill(skill)
     if not candidates:
@@ -131,7 +154,8 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
     await _emit(emit, "node_failed", {"node_id": node_id, "skill": skill, **meta[node_id]})
 
 
-async def execute_plan(plan, query, emit=None, initial_state=None, forced_agents=None, instructions=None):
+async def execute_plan(plan, query, emit=None, initial_state=None, forced_agents=None, instructions=None,
+                       takeover=None):
     state = dict(initial_state or {})
     reused = set(state)
     meta = {nid: {"status": "done", "agent": "reused", "attempts": 0, "duration_s": 0,
@@ -162,7 +186,7 @@ async def execute_plan(plan, query, emit=None, initial_state=None, forced_agents
                 raise RuntimeError(f"Deadlock: {remaining}")
             break
 
-        await asyncio.gather(*(run_node(n, state, query, meta, emit, forced_agents, instructions) for n in ready))
+        await asyncio.gather(*(run_node(n, state, query, meta, emit, forced_agents, instructions, takeover) for n in ready))
         remaining = [n for n in remaining if n["id"] not in meta]
 
     if any(n not in reused for n in state):

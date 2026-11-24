@@ -105,3 +105,11 @@ def update_review(run_id: str, conflicts: list, status: str):
         run.conflicts = conflicts
         run.status = status
         s.commit()
+
+
+def set_plan(run_id: str, plan: list, status: str):
+    with SessionLocal() as s:
+        run = s.get(Run, run_id)
+        run.plan = plan
+        run.status = status
+        s.commit()

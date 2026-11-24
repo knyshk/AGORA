@@ -15,6 +15,9 @@ from reputation.scoring import get_stats, route, update_score
 from arbitration import resolution
 from orchestration.fork import reusable_outputs
 from agents.research_tools import grounded_research
+from collab.routes import router as collab_router
+from collab import service as collab_service
+from collab.hub import hub
 
 app = FastAPI()
 
@@ -24,6 +27,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+app.include_router(collab_router)
 
 
 @app.on_event("startup")
@@ -176,7 +182,11 @@ async def resolve_conflict(run_id: str, conflict_id: str, req: ResolveRequest):
 
     status = resolution.run_status_after(conflicts, data["run"]["status"])
     crud.update_review(run_id, conflicts, status)
-    recorder = RunRecorder.resume(run_id)
+    session_id = collab_service.session_of_run(run_id)
+
+    async def live(event):
+        await hub.broadcast(session_id, {"type": "event", "event": event})
+    recorder = RunRecorder.resume(run_id, live if session_id else None)
     await recorder("conflict_resolved", {"conflict_id": conflict_id, **conflict["resolution"],
                                          "label": conflict["label"], "run_status": status})
     for agent, quality, reason in resolution.reputation_updates(winner, losers, data["run"]["plan"]):
