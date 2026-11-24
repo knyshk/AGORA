@@ -162,7 +162,7 @@ export default function App() {
             </div>
             <div className="nav-stat-chip">
               <span className="chip-key">Arbitration:</span>
-              <span className="chip-val">Pairwise Audit</span>
+              <span className="chip-val">Structured Claims</span>
             </div>
           </div>
         </div>
@@ -261,6 +261,8 @@ export default function App() {
                       conflicts={response.conflicts || []}
                       selectedNode={selectedNode}
                       onSelectNode={setSelectedNode}
+                      runId={response.run_id}
+                      onReviewed={(conflicts, status) => setResponse((r) => ({ ...r, conflicts, status }))}
                     />
                   </motion.div>
                 )}

@@ -4,7 +4,7 @@ from agents.base_agent import run_agent
 from registry.registry import get_agents_for_skill, get_manifest
 from reputation.scoring import route, update_score
 from reputation.quality import assess, draft_feedback
-from arbitration.engine import detect_conflict
+from arbitration.structured import arbitrate
 from agents.research_tools import grounded_research
 from agents.chart_tools import build_chart, strip_chart_blocks
 from agents.drafting_tools import write_draft
@@ -85,7 +85,7 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
     tried = []
     last_error = None
     for attempt in range(1, MAX_ATTEMPTS + 1):
-        forced = (forced_agents or {}).get(node_id)
+        forced = (forced_agents or {}).get(node_id) or node.get("forced_agent")
         if forced and attempt == 1 and forced in candidates:
             pool = [forced]
         else:
@@ -165,24 +165,22 @@ async def execute_plan(plan, query, emit=None, initial_state=None, forced_agents
         await asyncio.gather(*(run_node(n, state, query, meta, emit, forced_agents, instructions) for n in ready))
         remaining = [n for n in remaining if n["id"] not in meta]
 
-    ids = list(state.keys())
-    pairs = [(ids[i], ids[j]) for i in range(len(ids)) for j in range(i + 1, len(ids))
-        if not (ids[i] in reused and ids[j] in reused)]
-    results = await asyncio.gather(
-        *(detect_conflict(strip_chart_blocks(state[a]), strip_chart_blocks(state[b]), label_a=a, label_b=b)
-          for a, b in pairs),
-        return_exceptions=True,
-    )
-    for (a, b), conflict in zip(pairs, results):
-        if isinstance(conflict, Exception):
-            print(f"[ARBITRATION ERROR] {a} vs {b}: {conflict}")
-            continue
-        if conflict:
-            conflicts.append({"between": [a, b], **conflict})
-            print(f"[CONFLICT] {a} vs {b}: {conflict['explanation']}")
-            await _emit(emit, "conflict_found", {"between": [a, b], **conflict})
+    if any(n not in reused for n in state):
+        skills = {n["id"]: n["agent"] for n in plan}
+        agents = {nid: meta.get(nid, {}).get("agent") for nid in state}
+        try:
+            conflicts = await arbitrate(dict(state), skills, agents,
+                                        emit=lambda t, p: _emit(emit, t, p))
+        except Exception as e:
+            print(f"[ARBITRATION ERROR] {type(e).__name__}: {e}")
+            await _emit(emit, "arbitration_error", {"error": f"{type(e).__name__}: {str(e)[:200]}"})
+        for c in conflicts:
+            print(f"[CONFLICT] {c['explanation']}")
+            await _emit(emit, "conflict_found", c)
 
     all_ok = all(m["status"] == "done" for m in meta.values())
     status = "complete" if all_ok else ("partial" if state else "failed")
+    if status == "complete" and any(c["status"] == "open" for c in conflicts):
+        status = "needs_review"  # human approval gate: open conflicts must be decided
     await _emit(emit, "run_finished", {"status": status})
     return {"outputs": state, "conflicts": conflicts, "node_status": meta, "status": status}

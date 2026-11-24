@@ -154,7 +154,7 @@ export default function TaskControl({
           </div>
 
           <div className="action-hint">
-            <span>Independent nodes execute concurrently • Factual claims verified pairwise</span>
+            <span>Independent nodes execute concurrently • Numeric claims compared field by field</span>
           </div>
         </div>
 

@@ -1,6 +1,9 @@
 import NodeOutput from "./NodeOutput";
 import { useState, useRef } from "react";
+import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
+
+const BACKEND_URL = "http://127.0.0.1:8000";
 
 export default function InspectorAndConflicts({
   plan = [],
@@ -8,9 +11,14 @@ export default function InspectorAndConflicts({
   conflicts = [],
   selectedNode,
   onSelectNode,
+  runId = null,
+  onReviewed = null,
 }) {
   const [copied, setCopied] = useState(false);
-  const [ratifiedConflicts, setRatifiedConflicts] = useState({});
+  const [rerun, setRerun] = useState({});
+  const [busy, setBusy] = useState(null);
+  const [reviewError, setReviewError] = useState(null);
+  const [forks, setForks] = useState({});
   const conflictSectionRef = useRef(null);
 
   // Find the selected node object
@@ -62,11 +70,24 @@ export default function InspectorAndConflicts({
     URL.revokeObjectURL(url);
   };
 
-  const toggleRatify = (idx) => {
-    setRatifiedConflicts((prev) => ({
-      ...prev,
-      [idx]: !prev[idx],
-    }));
+  // Human approval gate: send the reviewer's decision to the backend
+  const resolveConflict = async (conflict, choice) => {
+    if (!runId) return;
+    setBusy(conflict.id);
+    setReviewError(null);
+    try {
+      const res = await axios.post(
+        `${BACKEND_URL}/runs/${runId}/conflicts/${conflict.id}/resolve`,
+        { choice, rerun: !!rerun[conflict.id] },
+        { timeout: 240000 }
+      );
+      if (res.data.fork) setForks((prev) => ({ ...prev, [conflict.id]: res.data.fork }));
+      if (onReviewed) onReviewed(res.data.conflicts, res.data.run_status);
+    } catch (e) {
+      setReviewError(e.response?.data?.detail || e.message);
+    } finally {
+      setBusy(null);
+    }
   };
 
   // Stepper handlers
@@ -224,111 +245,102 @@ export default function InspectorAndConflicts({
 
         {conflicts.length === 0 ? (
           <div className="consensus-card">
-            <div className="consensus-icon-box">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2l3 7h7l-5.5 4.5 2 7-6.5-4.5-6.5 4.5 2-7L2 9h7z" fill="rgba(82, 163, 115, 0.2)" />
-                <path d="M9 12l2 2 4-4" stroke="#52a373" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
             <div className="consensus-body">
-              <h4 className="consensus-title">Unanimous Consensus Reached Across All Agents</h4>
+              <h4 className="consensus-title">No conflicting figures found</h4>
               <p className="consensus-text">
-                The arbitration engine conducted pairwise cross-examination across all agent outputs. No contradictory
-                numeric claims, temporal divergences, or factual inconsistencies were found. Every assertion aligns
-                harmoniously across the dependency graph.
+                Every numeric claim was extracted as (entity, metric, period, value) and compared across nodes with
+                unit and rounding tolerance. No two nodes state different values for the same fact. Fact-check
+                verdicts are not treated as competing claims.
               </p>
-              <div className="consensus-stats">
-                <span>Pairwise Comparisons: Verified Clean</span>
-                <span>•</span>
-                <span>False Positive Rate: 0/3 Benchmark</span>
-              </div>
             </div>
           </div>
         ) : (
           <div className="conflicts-list">
+            {reviewError && <div style={{ color: "#ff9187", marginBottom: 12 }}>Review failed: {reviewError}</div>}
             {conflicts.map((conflict, idx) => {
-              const [nodeA, nodeB] = conflict.between || [];
-              const agentA = plan.find((n) => n.id === nodeA);
-              const agentB = plan.find((n) => n.id === nodeB);
-
-              const isRatified = !!ratifiedConflicts[idx];
-
+              const resolved = conflict.status === "resolved";
+              const sides = conflict.sides || [];
+              const fork = forks[conflict.id];
               return (
                 <motion.div
-                  key={idx}
-                  className={`conflict-card ${isRatified ? "conflict-ratified" : ""}`}
+                  key={conflict.id || idx}
+                  className={`conflict-card ${resolved ? "conflict-ratified" : ""}`}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: idx * 0.1 }}
                 >
                   <div className="conflict-header">
                     <div className="conflict-parties">
-                      <span className="party-chip">
-                        Node [{nodeA}] ({agentA?.agent || "agent"})
-                      </span>
-                      <span className="party-vs">disagrees with</span>
-                      <span className="party-chip">
-                        Node [{nodeB}] ({agentB?.agent || "agent"})
-                      </span>
+                      <span className="party-chip">{conflict.label || "Disputed fact"}</span>
+                      <span className="party-vs">nodes {(conflict.between || []).map((n) => `[${n}]`).join(" ")}</span>
                     </div>
-
                     <div className="arbitration-status-tag">
-                      {isRatified ? (
-                        <span className="tag-ratified">✓ Council Ratified</span>
+                      {resolved ? (
+                        <span className="tag-ratified">✓ Resolved by reviewer: {conflict.resolution?.value}</span>
                       ) : (
-                        <span>Arbitrated by Agora Engine</span>
+                        <span>Awaiting human review · policy: {conflict.policy}</span>
                       )}
                     </div>
                   </div>
 
-                  {/* Side-by-side statement comparisons */}
                   <div className="disputed-claims-grid">
-                    <div className="claim-box">
-                      <div className="claim-header">
-                        <span className="claim-author">Claim from Node [{nodeA}]:</span>
+                    {sides.map((side, i) => (
+                      <div className="claim-box" key={i}
+                           style={i === conflict.recommended ? { borderColor: "rgba(121,212,139,0.6)" } : undefined}>
+                        <div className="claim-header">
+                          <span className="claim-author">
+                            {side.value} {i === conflict.recommended && <span style={{ color: "#79d48b" }}>· recommended</span>}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 12, opacity: 0.85, margin: "4px 0 8px" }}>
+                          Nodes {side.nodes.map((n) => `[${n}]`).join(" ")} · {side.agents.join(", ")}
+                          <br />
+                          Source: {side.authority_reason} (authority {side.authority}) · agent trust {side.trust}
+                        </div>
+                        {side.claims.slice(0, 3).map((c, j) => (
+                          <div className="claim-text" key={j} style={{ marginBottom: 6 }}>
+                            [{c.node_id}] "{c.quote}"
+                            {c.sources.map((s) => (
+                              <a key={s.url} href={s.url} target="_blank" rel="noreferrer"
+                                 style={{ marginLeft: 6, fontStyle: "normal", color: "#f5ab3d" }}>[{s.id}]</a>
+                            ))}
+                          </div>
+                        ))}
+                        {!resolved && (
+                          <button className="btn-ratify" disabled={!runId || busy === conflict.id}
+                                  onClick={() => resolveConflict(conflict, i)}>
+                            {busy === conflict.id ? "Saving decision…" : `Accept ${side.value}`}
+                          </button>
+                        )}
                       </div>
-                      <div className="claim-text">"{result[nodeA] || "Output statement"}"</div>
-                    </div>
-
-                    <div className="claim-box">
-                      <div className="claim-header">
-                        <span className="claim-author">Claim from Node [{nodeB}]:</span>
-                      </div>
-                      <div className="claim-text">"{result[nodeB] || "Output statement"}"</div>
-                    </div>
+                    ))}
                   </div>
 
-                  {/* Plain Language Explanation */}
                   <div className="discrepancy-box">
-                    <div className="box-label">
-                      <span className="label-icon">🔍</span>
-                      <span>Factual Divergence Explanation:</span>
-                    </div>
+                    <div className="box-label"><span className="label-icon">🔍</span><span>What disagrees:</span></div>
                     <p className="explanation-text">{conflict.explanation}</p>
                   </div>
 
-                  {/* Suggested Resolution */}
                   <div className="resolution-box">
-                    <div className="box-label">
-                      <span className="label-icon">⚖️</span>
-                      <span>Suggested Arbitration Resolution:</span>
-                    </div>
+                    <div className="box-label"><span className="label-icon">⚖️</span><span>Recommendation:</span></div>
                     <p className="resolution-text">{conflict.suggested_resolution}</p>
                   </div>
 
-                  {/* Ratification Action Bar */}
                   <div className="conflict-ratify-bar">
-                    <button
-                      className={`btn-ratify ${isRatified ? "btn-ratified-active" : ""}`}
-                      onClick={() => toggleRatify(idx)}
-                    >
-                      {isRatified ? "✓ Arbitration Finding Ratified" : "⚖️ Ratify Arbitration Resolution"}
-                    </button>
-                    <span className="ratify-caption">
-                      {isRatified
-                        ? "Finding accepted into council ledger. Negative Bayesian penalty applied to conflicting node."
-                        : "Click to enforce suggested resolution and record verified truth into council ledger."}
-                    </span>
+                    {!resolved ? (
+                      <label className="ratify-caption" style={{ cursor: "pointer" }}>
+                        <input type="checkbox" checked={!!rerun[conflict.id]}
+                               onChange={(e) => setRerun((p) => ({ ...p, [conflict.id]: e.target.checked }))} />{" "}
+                        Also re-run the losing node with the approved figure (fork from checkpoint; downstream nodes
+                        re-run too). Your decision is stored and updates both agents' reputation.
+                      </label>
+                    ) : (
+                      <span className="ratify-caption">
+                        Decision stored in the run's event log; winning agent +1 graded outcome, losing agent(s) 0
+                        (counted twice).
+                        {fork && ` Corrected fork run ${fork.run_id.slice(0, 8)}: re-ran ${fork.rerun_nodes.join(", ")}, status ${fork.status}.`}
+                      </span>
+                    )}
                   </div>
                 </motion.div>
               );

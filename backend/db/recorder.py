@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import func, select
 from db.database import SessionLocal
 from db.models import NodeRun, RunEvent
 
@@ -11,6 +11,14 @@ class RunRecorder:
     def __init__(self, run_id: str):
         self.run_id = run_id
         self.seq = 0
+
+    @classmethod
+    def resume(cls, run_id: str) -> "RunRecorder":
+        """Continue an existing run's event log (e.g. a reviewer resolving a conflict later)."""
+        rec = cls(run_id)
+        with SessionLocal() as s:
+            rec.seq = s.scalar(select(func.max(RunEvent.seq)).where(RunEvent.run_id == run_id)) or 0
+        return rec
 
     async def __call__(self, event_type: str, payload: dict):
         self.seq += 1

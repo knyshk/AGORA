@@ -97,3 +97,11 @@ def events_of_type(event_type: str, run_id: str = None, agent: str = None, limit
         out = [{"run_id": e.run_id, "seq": e.seq, "created_at": e.created_at.isoformat(), **e.payload}
                for e in rows if not agent or e.payload.get("agent") == agent]
         return out[:limit]
+
+
+def update_review(run_id: str, conflicts: list, status: str):
+    with SessionLocal() as s:
+        run = s.get(Run, run_id)
+        run.conflicts = conflicts
+        run.status = status
+        s.commit()

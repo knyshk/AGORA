@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 from orchestration import executor
 
 
@@ -28,7 +28,7 @@ def no_redis_no_sleep():
          patch.object(executor, "build_chart", new=_fake_chart), \
          patch.object(executor, "write_draft", new=_fake_draft), \
          patch.object(executor, "fact_check", new=_fake_fact_check), \
-         patch.object(executor, "detect_conflict", return_value=None):
+         patch.object(executor, "arbitrate", new=AsyncMock(return_value=[])):
         yield
 
 
