@@ -4,7 +4,7 @@ from orchestration.validation import validate_plan, PlanError
 
 AVAILABLE_AGENTS = {
     "research": "Gathers facts on a topic",
-    "drafting": "Writes prose based on research",
+    "drafting": "Writes a report from the research with verified inline citations",
     "chart": "Builds a validated, data-grounded chart (Vega-Lite) from numbers in the research",
     "fact_check": "Verifies drafted claims against the original research",
 }

@@ -6,6 +6,7 @@ from reputation.scoring import pick_best_agent, update_score
 from arbitration.engine import detect_conflict
 from agents.research_tools import grounded_research
 from agents.chart_tools import build_chart, strip_chart_blocks
+from agents.drafting_tools import write_draft
 
 MAX_ATTEMPTS = 2
 BACKOFF_SECONDS = 2
@@ -21,6 +22,8 @@ def is_infra_error(e: Exception) -> bool:
 async def _call_agent(skill, prompt, manifest):
     if skill == "research" and getattr(manifest, "strategy", "plain") == "grounded":
         return await grounded_research(prompt, provider=manifest.provider, model=manifest.model)
+    if skill == "drafting" and getattr(manifest, "strategy", "plain") == "cited":
+        return await write_draft(prompt, provider=manifest.provider, model=manifest.model)
     if skill == "chart" and getattr(manifest, "strategy", "plain") == "spec":
         return await build_chart(prompt, provider=manifest.provider, model=manifest.model)
     return await run_agent(skill, prompt, provider=manifest.provider, model=manifest.model)

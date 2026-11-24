@@ -33,9 +33,9 @@ register_agent("research-v2", "research", 0.65,
                provider="gemini", model="gemini-3.5-flash-lite")
 
 register_agent("drafting-v1", "drafting", 0.75,
-               provider="groq", model="openai/gpt-oss-120b")
+               provider="groq", model="openai/gpt-oss-120b", strategy="cited")
 register_agent("drafting-v2", "drafting", 0.65,
-               provider="groq", model="qwen/qwen3.8-27b")
+               provider="groq", model="qwen/qwen3.8-27b", strategy="cited")
 
 register_agent("chart-v1", "chart", 0.70,
                provider="groq", model="openai/gpt-oss-120b", strategy="spec")

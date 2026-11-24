@@ -11,6 +11,10 @@ async def _fake_chart(prompt, provider=None, model=None):
     return await executor.run_agent("chart", prompt, provider=provider, model=model)
 
 
+async def _fake_draft(prompt, provider=None, model=None):
+    return await executor.run_agent("drafting", prompt, provider=provider, model=model)
+
+
 @pytest.fixture(autouse=True)
 def no_redis_no_sleep():
     with patch.object(executor, "update_score"), \
@@ -18,6 +22,7 @@ def no_redis_no_sleep():
          patch.object(executor, "BACKOFF_SECONDS", 0), \
          patch.object(executor, "grounded_research", new=_fake_grounded), \
          patch.object(executor, "build_chart", new=_fake_chart), \
+         patch.object(executor, "write_draft", new=_fake_draft), \
          patch.object(executor, "detect_conflict", return_value=None):
         yield
 
