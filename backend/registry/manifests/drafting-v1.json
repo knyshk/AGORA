@@ -1,0 +1,13 @@
+{
+ "manifest": {
+  "name": "drafting-v1",
+  "skill": "drafting",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "strategy": "cited",
+  "publisher": "agora-core",
+  "version": 1
+ },
+ "key_id": "agora-core",
+ "signature": "b9VzKdUQpt2nZ4Zd5PsOJIGYP0YmXLgsnZvenPvCb1lQ6bIdFi5H1RPla/9f49Ta1x7TCPP4rtKKBMJD0FcLAA=="
+}

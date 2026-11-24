@@ -1,0 +1,13 @@
+{
+ "manifest": {
+  "name": "chart-v1",
+  "skill": "chart",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "strategy": "spec",
+  "publisher": "agora-core",
+  "version": 1
+ },
+ "key_id": "agora-core",
+ "signature": "NPsaEiGGls7oC1vEuHoeuRsKp/8VDVKnPHKqwqToTYoMz7Fh9j+M4uvPWD+H6v3ug0YXGvRd5tm/wIBMQdSFBg=="
+}

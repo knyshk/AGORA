@@ -15,3 +15,5 @@ jsonschema
 argon2-cffi
 PyJWT
 websockets
+cryptography
+mcp

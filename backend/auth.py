@@ -20,7 +20,7 @@ from db.models import User
 JWT_ALGORITHM = "HS256"
 TOKEN_TTL_S = 12 * 3600
 MIN_PASSWORD = 8
-_DEV_SECRET = "agora-dev-only-secret-change-me"
+_DEV_SECRET = "agora-development-only-secret-change-me-in-env"  # 32+ bytes
 _hasher = PasswordHasher()
 _bearer = HTTPBearer(auto_error=False)
 

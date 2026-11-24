@@ -3,3 +3,4 @@ __pycache__/
 venv/
 node_modules/
 TEAM_UPDATE.md
+backend/keys/

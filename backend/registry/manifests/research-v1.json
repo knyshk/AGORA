@@ -1,0 +1,13 @@
+{
+ "manifest": {
+  "name": "research-v1",
+  "skill": "research",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "strategy": "grounded",
+  "publisher": "agora-core",
+  "version": 1
+ },
+ "key_id": "agora-core",
+ "signature": "/ufmEL/grLg/HUHQxnlwZWo/aoIBPoD8WiNqp1Z90mzOhhY2skA//YPXLKlkB7jLJfW03Vi2sgF1hdge86gGBw=="
+}

@@ -1,55 +1,74 @@
-import hashlib
+"""Agent registry: only agents with a valid Ed25519-signed manifest are registered.
+
+Manifests live in registry/manifests/*.json (signed by `python -m security.sign_manifests`);
+trusted publisher keys in registry/trusted_keys.json. Rejected manifests are kept in REJECTED
+with the reason, and recorded in the audit log at startup.
+"""
 import json
 from pathlib import Path
+
+from registry.specs import AGENT_SPECS
 from reputation.scoring import seed_score
+from security.manifests import load_manifests, load_trusted_keys, verify
 
 # Priors measured by AGORA-Bench (bench/run_bench.py --apply-priors) replace the hand-typed ones.
 _PRIORS_FILE = Path(__file__).resolve().parent.parent / "bench" / "priors.json"
 BENCH_PRIORS = json.loads(_PRIORS_FILE.read_text()) if _PRIORS_FILE.exists() else {}
+_DEFAULT_PRIORS = {s["name"]: s["default_prior"] for s in AGENT_SPECS}
+
 
 class AgentManifest:
-    def __init__(self, name: str, skill: str,
-                 provider: str = None, model: str = None,
-                 owner_key: str = "agora-core", strategy: str = "plain"):
-        self.name     = name
-        self.skill    = skill
+    def __init__(self, name: str, skill: str, provider: str = None, model: str = None,
+                 strategy: str = "plain", publisher: str = None, version: int = None,
+                 key_id: str = None, signature: str = None):
+        self.name = name
+        self.skill = skill
         self.provider = provider
-        self.model    = model
+        self.model = model
         self.strategy = strategy
-        self.signature = hashlib.sha256(
-            f"{name}{skill}{owner_key}".encode()
-        ).hexdigest()
+        self.publisher = publisher
+        self.version = version
+        self.key_id = key_id
+        self.signature = signature
+        self.verified = signature is not None
+        self.prior_source = "AGORA-Bench" if name in BENCH_PRIORS else "hand-set"
+
 
 REGISTRY: dict[str, AgentManifest] = {}
+REJECTED: dict[str, str] = {}   # manifest file -> reason
 
-def register_agent(name: str, skill: str, prior_score: float = 0.7,
-                   provider: str = None, model: str = None, strategy: str = "plain"):
-    REGISTRY[name] = AgentManifest(name, skill, provider, model, strategy=strategy)
-    REGISTRY[name].prior_source = "AGORA-Bench" if name in BENCH_PRIORS else "hand-set"
-    seed_score(name, BENCH_PRIORS.get(name, {}).get("prior", prior_score))
+
+def register_signed(signed: dict, trusted: dict) -> tuple:
+    ok, reason = verify(signed, trusted)
+    if not ok:
+        return False, reason
+    m = signed["manifest"]
+    REGISTRY[m["name"]] = AgentManifest(m["name"], m["skill"], m["provider"], m["model"], m["strategy"],
+                                        m["publisher"], m["version"], signed["key_id"], signed["signature"])
+    seed_score(m["name"], BENCH_PRIORS.get(m["name"], {}).get("prior", _DEFAULT_PRIORS.get(m["name"], 0.6)))
+    return True, reason
+
+
+def load_registry():
+    REGISTRY.clear()
+    REJECTED.clear()
+    trusted = load_trusted_keys()
+    for fname, signed, error in load_manifests():
+        if error:
+            REJECTED[fname] = error
+            continue
+        ok, reason = register_signed(signed, trusted)
+        if not ok:
+            REJECTED[fname] = reason
+            print(f"[REGISTRY] REJECTED {fname}: {reason}")
+
 
 def get_agents_for_skill(skill: str) -> list[str]:
     return [m.name for m in REGISTRY.values() if m.skill == skill]
 
+
 def get_manifest(name: str) -> AgentManifest:
     return REGISTRY[name]
 
-register_agent("research-v1", "research", 0.75,
-               provider="groq", model="openai/gpt-oss-120b", strategy="grounded")
-register_agent("research-v2", "research", 0.65,
-               provider="gemini", model="gemini-3.5-flash-lite")
 
-register_agent("drafting-v1", "drafting", 0.75,
-               provider="groq", model="openai/gpt-oss-120b", strategy="cited")
-register_agent("drafting-v2", "drafting", 0.65,
-               provider="groq", model="qwen/qwen3.8-27b", strategy="cited")
-
-register_agent("chart-v1", "chart", 0.70,
-               provider="groq", model="openai/gpt-oss-120b", strategy="spec")
-register_agent("chart-v2", "chart", 0.60,
-               provider="groq", model="openai/gpt-oss-20b", strategy="spec")
-
-register_agent("fact_check-v1", "fact_check", 0.75,
-               provider="groq", model="openai/gpt-oss-120b", strategy="verify")
-register_agent("fact_check-v2", "fact_check", 0.65,
-               provider="gemini", model="gemini-3.1-flash-lite", strategy="verify")
+load_registry()

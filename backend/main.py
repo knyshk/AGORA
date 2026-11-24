@@ -1,4 +1,5 @@
 import time
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -18,8 +19,27 @@ from agents.research_tools import grounded_research
 from collab.routes import router as collab_router
 from collab import service as collab_service
 from collab.hub import hub
+from registry.registry import REJECTED
+from security import audit
+from security.manifests import load_trusted_keys, verify as verify_manifest
+from mcp_server import server as mcp_server
 
-app = FastAPI()
+_mcp_app = mcp_server.streamable_http_app(streamable_http_path="/mcp")
+
+
+@asynccontextmanager
+async def lifespan(app):
+    init_db()
+    for name, m in REGISTRY.items():
+        audit.record("registry", "manifest_verified", name, {"key_id": m.key_id, "model": m.model})
+    for fname, reason in REJECTED.items():
+        audit.record("registry", "manifest_rejected", fname, {"reason": reason})
+    async with mcp_server.session_manager.run():
+        yield
+
+
+app = FastAPI(lifespan=lifespan)
+app.mount("/agents", _mcp_app)   # real MCP endpoint: /agents/mcp
 
 app.add_middleware(
     CORSMiddleware,
@@ -30,11 +50,6 @@ app.add_middleware(
 
 
 app.include_router(collab_router)
-
-
-@app.on_event("startup")
-def startup():
-    init_db()
 
 
 class TaskRequest(BaseModel):
@@ -181,6 +196,8 @@ async def resolve_conflict(run_id: str, conflict_id: str, req: ResolveRequest):
         raise HTTPException(status_code=422, detail=str(e))
 
     status = resolution.run_status_after(conflicts, data["run"]["status"])
+    audit.record("reviewer", "conflict_resolved", f"{run_id}/{conflict_id}",
+                 {"label": conflict["label"], "value": conflict["resolution"]["value"]})
     crud.update_review(run_id, conflicts, status)
     session_id = collab_service.session_of_run(run_id)
 
@@ -240,3 +257,32 @@ def run_routing(run_id: str):
         raise HTTPException(status_code=404, detail="Run not found")
     return {"routing": crud.events_of_type("agent_routed", run_id=run_id),
             "grades": crud.events_of_type("reputation_updated", run_id=run_id)}
+
+
+# ---------------- signed manifests and audit log ----------------
+
+@app.get("/registry/manifests")
+def registry_manifests():
+    return {"verified": [{"name": m.name, "skill": m.skill, "provider": m.provider, "model": m.model,
+                          "strategy": m.strategy, "publisher": m.publisher, "key_id": m.key_id,
+                          "signature": m.signature[:16] + "..."} for m in REGISTRY.values()],
+            "rejected": REJECTED}
+
+
+@app.post("/registry/verify-manifest")
+def check_manifest(signed: dict):
+    """Verify any signed manifest (e.g. a tampered copy). The result is written to the audit log."""
+    ok, reason = verify_manifest(signed, load_trusted_keys())
+    name = (signed.get("manifest") or {}).get("name", "?") if isinstance(signed, dict) else "?"
+    audit.record("api", "manifest_verified" if ok else "manifest_rejected", name, {"reason": reason})
+    return {"valid": ok, "reason": reason}
+
+
+@app.get("/audit")
+def audit_log(limit: int = 100, action: str | None = None):
+    return audit.entries(limit=limit, action=action)
+
+
+@app.get("/audit/verify")
+def audit_verify():
+    return audit.verify_chain()

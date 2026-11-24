@@ -1,0 +1,13 @@
+{
+ "manifest": {
+  "name": "research-v2",
+  "skill": "research",
+  "provider": "gemini",
+  "model": "gemini-3.5-flash-lite",
+  "strategy": "plain",
+  "publisher": "agora-core",
+  "version": 1
+ },
+ "key_id": "agora-core",
+ "signature": "8DZihVWUd6xEyKhixbzA+ayHJSufRRCDOm1nvo3dvZX5uiZ2M4kJJhrYTqcZkyZfwBddrjGIrUIMMFlkdba/Dg=="
+}

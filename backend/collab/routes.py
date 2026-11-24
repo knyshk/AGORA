@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisco
 from pydantic import BaseModel
 
 import auth
+from security import audit
 from collab import service
 from collab.digest import build_digest
 from collab.hub import TakeoverError, hub
@@ -35,12 +36,14 @@ class LoginRequest(BaseModel):
 @router.post("/auth/register")
 def register(req: RegisterRequest):
     user = auth.register(req.email, req.password, req.name)
+    audit.record(f"user:{user.id}", "user_registered", user.email)
     return {"token": auth.create_token(user.id), "user": auth.public_user(user)}
 
 
 @router.post("/auth/login")
 def login(req: LoginRequest):
     user = auth.login(req.email, req.password)
+    audit.record(f"user:{user.id}", "user_login", user.email)
     return {"token": auth.create_token(user.id), "user": auth.public_user(user)}
 
 
@@ -105,6 +108,7 @@ def get_session(session_id: str, user: User = Depends(auth.current_user)):
 async def set_mode(session_id: str, req: ModeRequest, user: User = Depends(auth.current_user)):
     service.require_role(session_id, user, "owner")
     sess = service.set_mode(session_id, req.mode)
+    audit.record(f"user:{user.id}", "session_mode_changed", session_id, {"mode": req.mode})
     await hub.broadcast(session_id, {"type": "mode", "mode": sess.mode})
     return _session_view(sess, "owner")
 
@@ -112,6 +116,7 @@ async def set_mode(session_id: str, req: ModeRequest, user: User = Depends(auth.
 @router.post("/sessions/join")
 async def join(req: JoinRequest, user: User = Depends(auth.current_user)):
     sess, role = service.join_with_token(user, req.token)
+    audit.record(f"user:{user.id}", "session_joined", sess.id, {"role": role})
     await hub.broadcast(sess.id, {"type": "members", "members": service.members(sess.id)})
     return _session_view(sess, role)
 
@@ -120,6 +125,7 @@ async def join(req: JoinRequest, user: User = Depends(auth.current_user)):
 async def set_role(session_id: str, user_id: str, req: RoleRequest, user: User = Depends(auth.current_user)):
     service.require_role(session_id, user, "owner")
     service.set_member_role(session_id, user_id, req.role)
+    audit.record(f"user:{user.id}", "member_role_changed", session_id, {"member": user_id, "role": req.role})
     await hub.broadcast(session_id, {"type": "members", "members": service.members(session_id)})
     return {"members": service.members(session_id)}
 
@@ -200,6 +206,7 @@ async def _takeover_action(session_id, run_id, node_id, user, action, output=Non
     except TakeoverError as e:
         raise HTTPException(status_code=409, detail=str(e))
     event = {"claim": "node_claimed", "release": "node_released", "submit": "node_submitted"}[action]
+    audit.record(f"user:{user.id}", event, f"{run_id}/{node_id}")
     await RunRecorder.resume(run_id, _live(session_id))(event, {"node_id": node_id, "user": who})
     return {"takeovers": to.snapshot()}
 

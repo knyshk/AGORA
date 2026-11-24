@@ -1,7 +1,10 @@
 import asyncio
+import os
 import time
 from agents.base_agent import run_agent
-from registry.registry import get_agents_for_skill, get_manifest
+from registry.registry import REGISTRY, get_agents_for_skill, get_manifest
+from security import audit, task_tokens
+from security.task_tokens import TaskTokenError
 from reputation.scoring import route, update_score
 from reputation.quality import assess, draft_feedback
 from arbitration.structured import arbitrate
@@ -21,7 +24,8 @@ def is_infra_error(e: Exception) -> bool:
     infra_signals = ["ratelimit", "timeout", "timed out", "connection", "429", "503", "502", "providers exhausted"]
     return any(s in name or s in msg for s in infra_signals)
 
-async def _call_agent(skill, prompt, manifest):
+async def _dispatch(skill, prompt, manifest):
+    """Run the agent's strategy. Only reached through invoke_agent (token-checked)."""
     if skill == "research" and getattr(manifest, "strategy", "plain") == "grounded":
         return await grounded_research(prompt, provider=manifest.provider, model=manifest.model)
     if skill == "drafting" and getattr(manifest, "strategy", "plain") == "cited":
@@ -31,6 +35,30 @@ async def _call_agent(skill, prompt, manifest):
     if skill == "chart" and getattr(manifest, "strategy", "plain") == "spec":
         return await build_chart(prompt, provider=manifest.provider, model=manifest.model)
     return await run_agent(skill, prompt, provider=manifest.provider, model=manifest.model)
+
+
+async def invoke_agent(agent_name: str, prompt: str, task_token: str) -> str:
+    """The agent gateway, used by direct calls and by the MCP server: the agent must have a verified
+    signed manifest, and the task token must be valid for exactly this agent and skill."""
+    manifest = REGISTRY.get(agent_name)
+    if manifest is None or not manifest.verified:
+        raise TaskTokenError(f"agent '{agent_name}' has no verified signed manifest")
+    try:
+        claims = task_tokens.check(task_token, agent_name, manifest.skill)
+    except TaskTokenError as e:
+        audit.record("gateway", "agent_call_refused", agent_name, {"reason": str(e)})
+        raise
+    audit.record(f"agent:{agent_name}", "agent_invoked", f"{claims['run']}/{claims['node']}",
+                 {"skill": manifest.skill, "model": manifest.model, "token_id": claims["jti"]})
+    return await _dispatch(manifest.skill, prompt, manifest)
+
+
+async def _call_agent(skill, prompt, manifest, run_id="adhoc", node_id="-"):
+    token = task_tokens.issue(run_id, node_id, manifest.name, skill)
+    if os.getenv("AGENT_TRANSPORT", "direct") == "mcp":
+        from agents.mcp_client import call_agent_over_mcp
+        return await call_agent_over_mcp(manifest.name, prompt, token)
+    return await invoke_agent(manifest.name, prompt, token)
 
 async def _emit(emit, event_type, payload):
     if emit is None:
@@ -121,7 +149,7 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
         manifest = get_manifest(chosen)
         call_started = time.time()
         try:
-            state[node_id] = await _call_agent(skill, prompt, manifest)
+            state[node_id] = await _call_agent(skill, prompt, manifest, getattr(emit, "run_id", "adhoc"), node_id)
             latency = round(time.time() - call_started, 2)
             quality, reason = assess(skill, state[node_id])
             stats = update_score(chosen, quality=quality, latency_s=latency)

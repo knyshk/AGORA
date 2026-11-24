@@ -90,3 +90,16 @@ class SessionRun(Base):
     __tablename__ = "session_runs"
     run_id: Mapped[str] = mapped_column(ForeignKey("runs.id"), primary_key=True)
     session_id: Mapped[str] = mapped_column(ForeignKey("collab_sessions.id"), index=True)
+
+
+class AuditEntry(Base):
+    """Append-only, hash-chained audit log (UPDATE/DELETE are blocked by database triggers)."""
+    __tablename__ = "audit_log"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    actor: Mapped[str] = mapped_column(String(120))
+    action: Mapped[str] = mapped_column(String(60), index=True)
+    target: Mapped[str] = mapped_column(String(200), default="")
+    detail: Mapped[dict] = mapped_column(JSON, default=dict)
+    prev_hash: Mapped[str] = mapped_column(String(64))
+    hash: Mapped[str] = mapped_column(String(64))

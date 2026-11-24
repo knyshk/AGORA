@@ -1,0 +1,13 @@
+{
+ "manifest": {
+  "name": "drafting-v2",
+  "skill": "drafting",
+  "provider": "groq",
+  "model": "qwen/qwen3.8-27b",
+  "strategy": "cited",
+  "publisher": "agora-core",
+  "version": 1
+ },
+ "key_id": "agora-core",
+ "signature": "vJb8aZ74a5WGoOpWNY/bYdVY2FMppzY/+zG8i0ERMLRLRvnEJFPHtig2NnMaabXknt6SXK9gzgW4XMIr3TA0Dg=="
+}
