@@ -38,9 +38,9 @@ register_agent("drafting-v2", "drafting", 0.65,
                provider="groq", model="qwen/qwen3.8-27b")
 
 register_agent("chart-v1", "chart", 0.70,
-               provider="groq", model="openai/gpt-oss-120b")
+               provider="groq", model="openai/gpt-oss-120b", strategy="spec")
 register_agent("chart-v2", "chart", 0.60,
-               provider="groq", model="openai/gpt-oss-20b")
+               provider="groq", model="openai/gpt-oss-20b", strategy="spec")
 
 register_agent("fact_check-v1", "fact_check", 0.75,
                provider="groq", model="openai/gpt-oss-120b")

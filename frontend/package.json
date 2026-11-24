@@ -15,7 +15,10 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "vega": "^6.4.0",
+    "vega-embed": "^7.4.0",
+    "vega-lite": "^6.5.0"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",

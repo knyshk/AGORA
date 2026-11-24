@@ -5,6 +5,7 @@ from registry.registry import get_agents_for_skill, get_manifest
 from reputation.scoring import pick_best_agent, update_score
 from arbitration.engine import detect_conflict
 from agents.research_tools import grounded_research
+from agents.chart_tools import build_chart, strip_chart_blocks
 
 MAX_ATTEMPTS = 2
 BACKOFF_SECONDS = 2
@@ -20,6 +21,8 @@ def is_infra_error(e: Exception) -> bool:
 async def _call_agent(skill, prompt, manifest):
     if skill == "research" and getattr(manifest, "strategy", "plain") == "grounded":
         return await grounded_research(prompt, provider=manifest.provider, model=manifest.model)
+    if skill == "chart" and getattr(manifest, "strategy", "plain") == "spec":
+        return await build_chart(prompt, provider=manifest.provider, model=manifest.model)
     return await run_agent(skill, prompt, provider=manifest.provider, model=manifest.model)
 
 async def _emit(emit, event_type, payload):
@@ -44,7 +47,7 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
         await _emit(emit, "node_failed", {"node_id": node_id, "skill": skill, **meta[node_id]})
         return
 
-    context = "\n".join(f"{d}: {state[d]}" for d in node["depends_on"])
+    context = "\n".join(f"{d}: {strip_chart_blocks(state[d])}" for d in node["depends_on"])
     prompt = node.get("forced_prompt") or (
         f"Task: {query}\nContext from previous agents:\n{context}" if context else f"Task: {query}"
     )
@@ -123,7 +126,8 @@ async def execute_plan(plan, query, emit=None, initial_state=None, forced_agents
     pairs = [(ids[i], ids[j]) for i in range(len(ids)) for j in range(i + 1, len(ids))
         if not (ids[i] in reused and ids[j] in reused)]
     results = await asyncio.gather(
-        *(detect_conflict(state[a], state[b], label_a=a, label_b=b) for a, b in pairs),
+        *(detect_conflict(strip_chart_blocks(state[a]), strip_chart_blocks(state[b]), label_a=a, label_b=b)
+          for a, b in pairs),
         return_exceptions=True,
     )
     for (a, b), conflict in zip(pairs, results):

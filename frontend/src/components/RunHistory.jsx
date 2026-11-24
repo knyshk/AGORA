@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import NodeOutput from "./NodeOutput";
 
 const GOLD = "#f5ab3d";
 const PANEL = "#241c14";
@@ -146,7 +147,7 @@ export default function RunHistory({ backendUrl }) {
                     {out && (
                       <details style={{ marginTop: 6 }}>
                         <summary style={{ cursor: "pointer", color: GOLD }}>Show output ({out.length} chars)</summary>
-                        <pre style={{ whiteSpace: "pre-wrap", maxHeight: 280, overflowY: "auto", fontSize: 12 }}>{out}</pre>
+                        <div style={{ maxHeight: 520, overflowY: "auto", fontSize: 13 }}><NodeOutput text={out} /></div>
                       </details>
                     )}
                   </div>
