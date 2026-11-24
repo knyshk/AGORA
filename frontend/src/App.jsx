@@ -10,6 +10,7 @@ import ReputationRegistry from "./components/ReputationRegistry";
 import LatencyBenchmark from "./components/LatencyBenchmark";
 import "./App.css";
 import RunHistory from "./components/RunHistory";
+import LiveSessions from "./components/LiveSessions";
 
 const BACKEND_URL = "http://127.0.0.1:8000";
 
@@ -27,7 +28,9 @@ export default function App() {
   const [selectedNode, setSelectedNode] = useState(null);
   const [backendOnline, setBackendOnline] = useState(false);
   const [checkingBackend, setCheckingBackend] = useState(true);
-  const [activeTab, setActiveTab] = useState("orchestrator"); // 'orchestrator' | 'latency' | 'reputation'
+  const [activeTab, setActiveTab] = useState(
+    () => (new URLSearchParams(window.location.search).get("join") ? "live" : "orchestrator")
+  ); // 'orchestrator' | 'latency' | 'reputation' | 'history' | 'live'
 
   const resultsRef = useRef(null);
 
@@ -206,6 +209,14 @@ export default function App() {
             <span className="tab-text">Run History & Replay</span>
             <span className="tab-pill">Fork</span>
           </button>
+          <button
+            className={`module-tab ${activeTab === "live" ? "module-tab-active" : ""}`}
+            onClick={() => setActiveTab("live")}
+          >
+            <span className="tab-icon">👥</span>
+            <span className="tab-text">Live Sessions</span>
+            <span className="tab-pill">Collaborate</span>
+          </button>
         </div>
 
         {/* Tab 1: Task Orchestrator & Live DAG Floor */}
@@ -277,6 +288,7 @@ export default function App() {
         {/* Tab 3: Redis Reputation Registry */}
         {activeTab === "reputation" && <ReputationRegistry />}
         {activeTab === "history" && <RunHistory backendUrl={BACKEND_URL} />}
+        {activeTab === "live" && <LiveSessions backendUrl={BACKEND_URL} />}
       </main>
 
       {/* Classical Agora Footer */}
@@ -300,7 +312,7 @@ export default function App() {
             </div>
             <div className="spec-row">
               <span className="spec-label">Arbitration:</span>
-              <span className="spec-value">Pairwise LLM Factual Consistency Engine</span>
+              <span className="spec-value">Structured Claim Arbitration + Human Review</span>
             </div>
             <div className="spec-row">
               <span className="spec-label">Frontend:</span>
