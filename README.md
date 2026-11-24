@@ -1,132 +1,96 @@
-# AGORA — A Collaborative Multi-Agent Orchestration Platform
+# AGORA — Collaborative Multi-Agent Orchestration with Measured Trust
 
-**BTech Major Project (PR1107)** — Institute of Engineering and Technology (IET), JK Lakshmipat University
-**Team:** Vedika Agrawal (2023Btech096), Kanishk Jain (2023Btech040)
-**Faculty Guide:** Dr. Deepika Prakash
+**BTech Major Project (PR1107)** — Institute of Engineering and Technology, JK Lakshmipat University
+**Team:** Vedika Agrawal (2023Btech096), Kanishk Jain (2023Btech040) · **Guide:** Dr. Deepika Prakash
 
-## What is AGORA?
+![CI](https://github.com/knyshk/AGORA/actions/workflows/ci.yml/badge.svg)
 
-AGORA is a platform where multiple specialized AI agents (research, drafting, chart, fact-check) work together on a task, coordinated by data dependency rather than a fixed schedule. A Planner agent decomposes a user's request into a dependency graph (DAG) at runtime; independent steps run in parallel. Every agent carries a Redis-backed reputation score, seeded from a benchmark and updated from real outcomes, used to route each step to the best-performing registered agent. A conflict-arbitration engine catches factual disagreements between agent outputs and explains them in plain language.
+AGORA turns a request into a **task graph (DAG)** that specialised, tool-using agents execute in parallel.
+Each node goes to the agent with the best **measured** reputation, every factual claim is checked,
+disagreements between agents are resolved through **source-aware arbitration with a human approval gate**,
+and several people can **watch a run live and take over single nodes**. Every state change is an event in an
+append-only log, so any run can be replayed, forked from a checkpoint and audited.
 
-### The four core mechanisms
+## What it does
 
-1. **Dependency-driven orchestration** — agents activate the moment their inputs are ready, not on a timer; independent nodes run concurrently.
-2. **Reputation-weighted routing** — a trust score per agent, blended from a benchmark-seeded prior and live success rate, decides who handles each step.
-3. **Conflict detection & arbitration** — disagreements between agent outputs on the same fact are caught, explained, and flagged for resolution.
-4. **Dual-mode playground** *(planned)* — Isolated Mode for solo work, Collaborative Mode for a shared live session.
-
-## Why this project
-
-Existing multi-agent frameworks (CrewAI, AutoGen, LangGraph) chain agents together but have no way to know which agent is actually reliable, and no mechanism to catch it when two agents produce conflicting outputs. Existing multiplayer AI products (ChatGPT Group Chats, Dust, GitHub Ace) let people work near an AI only as a shared chat thread, never as a shared live view over an evolving multi-agent task. AGORA is designed to close this gap.
-
-## Verified results (Phase 10 evaluation)
-
-| Metric | Result |
+| Capability | How |
 |---|---|
-| Routing accuracy | 3/3 correct routing decisions |
-| Conflict recall | 3/3 real conflicts caught |
-| False positive rate | 0/3 |
-| Parallel vs sequential latency | 2.76x speedup |
+| **Planning** | An LLM planner builds the DAG; the plan is validated (unknown agents, cycles, bad dependencies) with one corrective retry. |
+| **Real agents** | *Research*: web + Wikipedia + page reading + official SEC EDGAR XBRL data, answers only from numbered sources, corrective second retrieval pass, source list added by code. *Drafting*: report with inline citations; code rejects unknown citations, uncited figures and figures absent from the research. *Chart*: the LLM only extracts data points; code validates them (JSON Schema, every value grounded in the research, one unit per chart) and builds a Vega-Lite spec. *Fact-check*: re-reads each cited source and labels every claim supported / unsupported / contradicted / unverifiable with a quote. |
+| **Measured trust** | One Beta distribution per agent: prior from **AGORA-Bench** (40 tasks, two tiers), updated from graded output quality (each agent's own checks, fact-check feedback, reviewed conflicts); older evidence decays; rate limits never count. Routing by Thompson sampling × a speed term, with a stored explanation for every choice, plus baseline modes (random, fixed, success-rate) for evaluation. |
+| **Structured arbitration** | Claims are extracted as (entity, metric, period, value); numbers are compared in code with unit and rounding tolerance; text facts get an LLM entailment check only inside their group. The recommendation ranks sources (SEC > official > Wikipedia > web > uncited) and agent trust. A run with open conflicts ends as `needs_review`; the reviewer's decision updates reputation (only the origin of a wrong figure is penalised) and can re-run the losing node with the approved figure. |
+| **Persistence, replay, fork** | Postgres event log (Alembic migrations); replay to any event; fork from a checkpoint re-runs one node and its descendants and reuses the rest. |
+| **Live collaboration** | Accounts (argon2 + JWT), sessions (isolated → collaborative without losing state), owner/editor/viewer roles, invite links, WebSocket broadcast of the event log, presence, node takeover with locks (a person writes the node instead of an agent), catch-up digest. |
+| **Security** | Agents served as a real **MCP** server (official SDK); Ed25519-**signed agent manifests** verified at startup (a tampered manifest is rejected); short-lived **task-scoped tokens** for every agent call; **append-only, hash-chained audit log** (UPDATE/DELETE blocked by the database). |
+| **Cost and reliability** | Per-node ledger of every LLM call (tokens, latency, notional cost); budget governor (economy mode at 80 %, skip at 100 %); per-node timeout with reassignment. |
+| **Observability** | Dashboard computed only from stored events: runs per day, per-agent success/latency/quality/cost, trust over time, conflicts, human decisions, audit-log integrity. |
 
-See `backend/evaluate.py` for the measurement script.
+## Measured results so far
 
-## Tech stack
+Every number comes from a script in this repository and a saved results file in `backend/bench/results/`.
+Sample sizes are given next to each number. The full evaluation (RQ1–RQ5 with baselines) is in progress.
 
-| Layer | Technology |
+| Question | Result | Sample | Source |
+|---|---|---|---|
+| Tool use vs plain LLM (research) | grounded agent 1.00 vs plain model 0.50 mean score | 10 tasks each | AGORA-Bench, `bench/run_bench.py` |
+| Agent quality (all skills) | 0.98–1.00 for every tool-using agent | 10 tasks per agent | AGORA-Bench |
+| Conflict detection (RQ2) | structured F1 0.955 (precision 0.91, recall 1.00) vs pairwise-LLM baseline F1 0.941 (precision 0.89) | 64 labelled pairs | `bench/eval_conflicts.py` — a rounding bug behind all 3 false positives has been fixed since; a confirming run is pending (free-tier quota) |
+| Fork vs full re-run (RQ5) | 21 s vs 51 s | 1 run | early measurement, to be repeated |
+
+The benchmark also found real bugs (mixed units in charts, stale SEC data for Apple); both were fixed and
+re-measured, and the before/after result files are kept.
+
+## Architecture
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the component diagram, the event model and the design decisions.
+
+```
+React + Vite UI ──HTTP/WebSocket──► FastAPI ──► planner ─► DAG executor ─► agent gateway (token-checked)
+                                       │                         │                 ├─ direct call
+                                       │                         │                 └─ MCP server (/agents/mcp)
+                                       │                         ├─► structured arbitration
+                                       │                         └─► reputation (Redis, Beta)
+                                       └─► Postgres: runs · node_runs · run_events · sessions · audit_log
+```
+
+## Run it
+
+Needs Docker Desktop (running) and Node 22+. All tools and LLM tiers are free.
+
+```bash
+cp backend/.env.example backend/.env      # then fill in your own free API keys (never commit .env)
+docker compose up -d --build              # Postgres, Redis, backend on :8000 (migrations run on start)
+cd frontend && npm install && npm run dev # UI on http://localhost:5173
+```
+
+| Command | What it does |
 |---|---|
-| Backend API | FastAPI (Python, async) |
-| Orchestration | Custom async DAG executor |
-| LLM access | langchain-openai, multi-provider (Groq, OpenRouter, Gemini) with automatic fallback |
-| Reputation store | Redis |
-| Frontend | React + Vite, Framer Motion |
-| Agent registry | Custom MCP-inspired skill-scoped registry (not full MCP protocol) |
+| `make test` | backend tests inside Docker (no network, LLMs mocked) |
+| `cd frontend && npm run test:e2e` | Playwright browser tests (backend mocked) |
+| `make bench` / `make priors` | run AGORA-Bench; set reputation priors from it |
+| `docker compose exec backend python -m bench.eval_conflicts` | conflict-detection evaluation (RQ2) |
+| `docker compose exec backend python -m security.sign_manifests` | re-sign agent manifests after editing `registry/specs.py` (needs the private key in `backend/keys/`, which is never committed) |
+| `docker compose exec backend alembic revision --autogenerate -m "..."` | new database migration after changing `db/models.py` |
 
-## Project structure
+CI (GitHub Actions) runs the backend tests with real Postgres and Redis, the migrations on a fresh database,
+the manifest signature check, the frontend lint and build, and the Playwright tests on every push.
 
-```
-AGORA/
-├── backend/
-│   ├── main.py                  # FastAPI app & routes
-│   ├── config.py                # Provider endpoints, model defaults, fallback chain
-│   ├── agents/base_agent.py     # LLM call wrapper with provider fallback
-│   ├── orchestration/
-│   │   ├── planner.py           # Builds the task DAG at runtime
-│   │   ├── executor.py          # Async, dependency-driven execution
-│   │   └── conflict_demo.py     # Forced-conflict demo harness
-│   ├── registry/registry.py     # Agent registration, skill-scoped lookup
-│   ├── reputation/scoring.py    # Redis-backed trust scoring
-│   ├── arbitration/engine.py    # Conflict detection between agent outputs
-│   └── evaluate.py              # Phase 10 evaluation script
-├── frontend/
-│   └── src/                     # React UI — task input, DAG graph view,
-│                                 # conflict display, reputation registry
-├── docs/
-│   ├── REQUIREMENTS.md
-│   └── ARCHITECTURE.md
-└── PROJECT_TIMELINE.md
-```
+## Honest limitations
 
-## Setup & running locally
+- The free LLM tiers rate-limit hard; long evaluations must be paced, and some runs fail with HTTP 429.
+- Costs are **notional**: the free tiers charge nothing; prices come from an editable assumption table.
+- Within chart, drafting and fact-check, the two candidate agents score the same on AGORA-Bench, so the
+  bench alone cannot rank them; live quality and speed separate them over time.
+- The live hub runs in one backend process; several processes would need Redis pub/sub.
+- Text-fact conflict checks depend on one LLM entailment call; numeric checks are deterministic.
+- The LLM judge in AGORA-Bench was lenient in one observed case; a hand-labelled agreement check (Cohen's kappa) is prepared (`bench/kappa.py`) but not yet run.
 
-### Prerequisites
-- Python 3.11
-- Node.js (LTS)
-- Redis (native install or Docker)
-
-### Backend
-
-```bash
-cd backend
-python -m venv venv
-venv\Scripts\activate          # Windows; source venv/bin/activate on Mac/Linux
-pip install -r requirements.txt
-pip install langchain-community
-pip install "redis==4.6.0"
-```
-
-Create `backend/.env`:
+## Repository layout
 
 ```
-LLM_PROVIDER=groq
-LLM_MODEL=openai/gpt-oss-120b
-GROQ_API_KEY=your_key
-OPENROUTER_API_KEY=your_key
-GEMINI_API_KEY=your_key
-FALLBACK_CHAIN=groq,openrouter,gemini
-REDIS_URL=redis://localhost:6379
+backend/   agents/ (research, drafting, chart, fact-check, usage, MCP client)  orchestration/ (planner, executor, budget, fork)
+           arbitration/ (claims, structured, resolution)  reputation/ (Beta scoring, quality grading)  collab/ (sessions, hub, digest)
+           security/ (manifests, task tokens, audit)  registry/ (specs, signed manifests, trusted keys)  metrics/  bench/  migrations/  tests/
+frontend/  src/components/ (DAG, inspector + conflict review, reputation, run history, live sessions, observability)  e2e/
+docs/      ARCHITECTURE.md (current) · REQUIREMENTS.md, PROJECT_TIMELINE.md (mid-term documents, kept for reference)
 ```
-
-Run:
-
-```bash
-uvicorn main:app --reload
-```
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Opens at `http://localhost:5173`.
-
-### Verify
-
-- `http://127.0.0.1:8000/health` → `{"status":"ok"}`
-- `http://127.0.0.1:8000/reputation/scores` → live agent trust scores
-- `http://localhost:5173` → the AGORA UI
-
-## Evaluation
-
-```bash
-cd backend
-python evaluate.py
-```
-
-Measures routing accuracy, conflict detection precision/recall, and parallel vs sequential latency against real LLM calls.
-
-## References
-
-See `docs/ARCHITECTURE.md` for the full reference list and design rationale.

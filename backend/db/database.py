@@ -14,11 +14,15 @@ class Base(DeclarativeBase):
 
 
 def init_db(retries: int = 15):
+    """Postgres: Alembic migrations (the schema's source of truth). SQLite (tests): create_all."""
     from db import models  # noqa: F401  (registers the tables)
     for attempt in range(retries):
         try:
-            Base.metadata.create_all(engine)
-            _protect_audit_log()
+            if engine.dialect.name == "sqlite":
+                Base.metadata.create_all(engine)
+                _protect_audit_log()
+            else:
+                run_migrations()
             return
         except Exception as e:
             print(f"[DB] not ready ({attempt + 1}/{retries}): {type(e).__name__}")
@@ -40,3 +44,24 @@ def _protect_audit_log():
             for op in ("UPDATE", "DELETE"):
                 conn.execute(text(f"CREATE TRIGGER IF NOT EXISTS audit_log_no_{op.lower()} BEFORE {op} ON audit_log "
                                   "BEGIN SELECT RAISE(ABORT, 'audit_log is append-only'); END"))
+
+
+BASELINE = "0001"
+
+
+def run_migrations():
+    """Upgrade to the latest migration. A database created before Alembic was added (same tables,
+    no alembic_version) is stamped at the baseline first, so nothing is recreated and no data is lost."""
+    from pathlib import Path
+    from alembic import command
+    from alembic.config import Config
+    from sqlalchemy import inspect
+
+    cfg = Config(str(Path(__file__).resolve().parent.parent / "alembic.ini"))
+    with engine.begin() as conn:
+        cfg.attributes["connection"] = conn
+        tables = set(inspect(conn).get_table_names())
+        if "runs" in tables and "alembic_version" not in tables:
+            print("[DB] existing pre-Alembic database: stamping baseline", BASELINE)
+            command.stamp(cfg, BASELINE)
+        command.upgrade(cfg, "head")

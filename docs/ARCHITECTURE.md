@@ -1,119 +1,84 @@
-# AGORA — System Design & Architecture
+# AGORA architecture (final phase)
 
-**BTech Major Project (PR1107)**
-**Team:** Vedika Agrawal (2023Btech096), Kanishk Jain (2023Btech040)
-**Faculty Guide:** Dr. Deepika Prakash
+This describes the system as built. The mid-term version of this document is in the git history.
 
-## 1. High-Level Architecture
+## Components
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                     CLIENT INTERFACE                     │
-│         React + Vite frontend (localhost:5173)           │
-│   Task input · Live DAG graph · Node inspector ·          │
-│   Conflict display · Reputation registry                  │
-└───────────────────────┬─────────────────────────────────┘
-                         │ HTTP (CORS-enabled)
-┌───────────────────────▼─────────────────────────────────┐
-│                      API GATEWAY                          │
-│              FastAPI backend (localhost:8000)             │
-└───────────────────────┬─────────────────────────────────┘
-                         │
-┌───────────────────────▼─────────────────────────────────┐
-│                  PLANNER / SUPERVISOR                      │
-│   Decomposes the user's query into a dependency graph      │
-│   (DAG) at runtime via an LLM call                         │
-└───────────────────────┬─────────────────────────────────┘
-                         │
-          ┌──────────────┼──────────────┬──────────────┐
-          ▼              ▼              ▼              ▼
-┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
-│ORCHESTRATION│ │ REPUTATION  │ │ ARBITRATION │ │  REGISTRY   │
-│  Async DAG  │ │   Redis-    │ │  Conflict   │ │ Skill-scoped│
-│  executor   │ │   backed    │ │  detection  │ │   agent     │
-│             │ │   scoring   │ │             │ │   lookup    │
-└──────┬──────┘ └─────────────┘ └─────────────┘ └─────────────┘
-       │
-┌──────▼──────────────────────────────────────────────────┐
-│                   SPECIALIZED AGENTS                       │
-│  Research · Drafting · Chart · Fact-Check                  │
-│  Each with multiple provider-backed variants (v1, v2)      │
-└──────┬──────────────────────────────────────────────────┘
-       │
-┌──────▼──────────────────────────────────────────────────┐
-│               LLM PROVIDER FALLBACK CHAIN                  │
-│        Groq → OpenRouter → Gemini (auto-retry on           │
-│        rate limit / error, skips providers with no key)    │
-└─────────────────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+  UI[React UI\nDAG · review · history · live sessions · dashboard] -- HTTP --> API[FastAPI]
+  UI <-- WebSocket /ws/session --> HUB[Live hub\npresence · broadcast · node locks]
+  API --> PLAN[Planner\nLLM + plan validation]
+  API --> EXEC[DAG executor\nparallel tiers · retry · reassignment\nbudget governor · timeouts]
+  EXEC --> ROUTE[Router\nThompson sampling over Beta trust]
+  ROUTE --> REP[(Redis\nBeta posteriors)]
+  EXEC --> GW[Agent gateway\nsigned manifest + task token check]
+  GW --> AG[Agents\nresearch · drafting · chart · fact-check]
+  MCP[MCP server /agents/mcp] --> GW
+  EXEC -. AGENT_TRANSPORT=mcp .-> MCP
+  AG --> TOOLS[Tools\nDuckDuckGo · Wikipedia · page reader · SEC EDGAR XBRL]
+  AG --> LLM[Free LLM tiers\nGroq · Gemini · OpenRouter fallback]
+  EXEC --> ARB[Structured arbitration\nclaims · grouping · policies]
+  EXEC -- emit(event) --> REC[RunRecorder]
+  REC --> PG[(Postgres\nruns · node_runs · run_events\nsessions · users · audit_log)]
+  REC --> HUB
+  API --> AUD[Audit log\nappend-only, hash-chained] --> PG
 ```
 
-## 2. Orchestration Flow — Dependency-Driven, Asynchronous Activation
+## The event log is the backbone
 
-Each agent declares the inputs it needs and the output it produces. The orchestrator builds a directed acyclic graph (DAG) of the task at runtime: an edge from Agent A to Agent B means B needs A's output. B activates only once A's output is marked ready — this is event-driven activation, not a fixed sequence.
+Every state change in a run goes through one callback, `emit(event_type, payload)`, implemented by
+`db/recorder.py`. It writes the event to `run_events`, keeps `node_runs` current and (in a collaborative
+session) broadcasts the same event over WebSocket. Because there is only one stream:
 
-**Example** — "Build a competitor analysis report with a chart":
-- **Research** starts immediately (no dependency)
-- **Drafting** and **Chart** both depend only on Research, so they run *in parallel* the moment Research finishes
-- **Fact-Check** depends on both Drafting and Chart, so it waits for whichever finishes last
+- **Replay** rebuilds the state after any event number.
+- **Fork** reuses the stored outputs of the nodes that do not depend on the changed node.
+- **Live view** shows exactly what is stored; a late joiner's **digest** is computed from it.
+- **Observability** metrics are aggregated from it, so the dashboard never shows unbacked numbers.
 
-Implementation: `backend/orchestration/executor.py`. The executor repeatedly scans the remaining nodes for any whose dependencies are now satisfied, and dispatches all of them concurrently via `asyncio.gather`.
+Event types: `plan_created`, `node_started`, `agent_routed`, `node_attempt_failed`, `node_finished`,
+`node_failed`, `node_skipped`, `reputation_updated`, `claims_extracted`, `conflict_found`,
+`conflict_resolved`, `node_claimed` / `node_released` / `node_submitted`, `node_takeover_waiting` /
+`node_takeover_released`, `budget_economy` / `budget_exhausted` / `budget_downgrade`, `arbitration_error`,
+`run_finished` (with the run's token and cost totals).
 
-A real bug was found and fixed here during development: the underlying LLM call originally used a *synchronous* `invoke()` inside an `async def`, which silently serialized all "parallel" execution despite `asyncio.gather`. This was caught by the Phase 10 latency benchmark (which initially showed parallel execution running *slower* than sequential) and fixed by switching to `ainvoke()` throughout. Measured result after the fix: 2.76x speedup.
+## A node's life
 
-## 3. Reputation & Trust Layer
+1. Ready when all its dependencies are done; nodes of one tier run concurrently (`asyncio.gather`).
+2. If a person has taken the node over, the executor waits for their text instead (or falls back to an agent).
+3. Otherwise the router picks among the skill's agents (budget economy mode may restrict to the cheapest).
+4. The executor issues a task-scoped token; the gateway checks the agent's signed manifest and the token.
+5. The agent runs its strategy under a timeout; every LLM call lands in the node's usage ledger.
+6. The output is graded by the agent's own checks; the grade updates the agent's Beta posterior.
+7. Failures retry on the next-best agent; infrastructure errors (rate limits, timeouts) never lower reputation.
 
-Each agent is registered with a prior trust score (`backend/registry/registry.py`). Live task outcomes update this score in Redis (`backend/reputation/scoring.py`) using a blend of the seeded prior and the live success rate, weighted by how many real outcomes have accumulated:
+After all nodes: structured arbitration; open conflicts make the run `needs_review` until a person decides.
 
-```
-score = (1 - weight) × prior + weight × (successes / total)
-weight = min(total / 20, 1.0)
-```
+## Trust model
 
-When a skill is needed, `pick_best_agent()` selects the highest-scoring registered agent for that skill. This was verified empirically: deliberately tanking one agent's score causes the system to correctly route to its better-performing sibling, 3/3 trials.
+`Beta(p·10 + Σq, (1−p)·10 + Σ(1−q))` per agent, where `p` is the AGORA-Bench prior and `q ∈ [0,1]` the graded
+quality of each outcome; evidence decays by 0.97 per update. Updates are a single Redis Lua script (atomic).
+Evidence sources: output checks, fact-check verdicts on a drafter's claims, reviewed conflicts (the origin of a
+wrong figure gets two zero-quality observations; nodes that merely repeated it are not penalised).
 
-**Reputation accuracy fix:** reputation scoring originally penalized *any* exception, including transient infrastructure errors (rate limits, timeouts). This meant a rate-limited agent could look unreliable even though its actual output quality was fine. Fixed by classifying exceptions — only genuine model-output failures now affect the score; infrastructure errors are logged separately and skipped.
+## Security model
 
-## 4. Conflict Detection & Arbitration
+| Threat | Control |
+|---|---|
+| An agent's configuration is swapped (e.g. a cheaper or malicious model) | Ed25519-signed manifests; the registry loads only verified ones; result in the audit log |
+| A leaked call credential is reused | Task tokens are valid for 120 s, one run/node, one agent and skill |
+| History is rewritten | `audit_log` rejects UPDATE/DELETE (database trigger); the hash chain exposes edits made around the trigger |
+| Someone joins a private session | Isolated sessions are owner-only; invite tokens grant editor or viewer; every action checks the role |
 
-After a task graph finishes executing, the arbitration engine (`backend/arbitration/engine.py`) compares pairs of sibling outputs for factual contradictions (conflicting numbers, dates, or claims) using an LLM-based comparison, and returns a plain-language explanation plus a suggested resolution when a conflict is found.
+The private signing key lives only in `backend/keys/` (gitignored); the public key is committed in
+`registry/trusted_keys.json`.
 
-Because real conflicts are rare and timing-dependent in practice, a **conflict-injection harness** (`backend/orchestration/conflict_demo.py`) forces two agents to state deliberately contradicting figures, giving a reliable, repeatable demonstration via the `/tasks/conflict-demo` endpoint — rather than relying on one occurring naturally during a live demo.
+## Key decisions
 
-## 5. Multi-Provider Fallback
-
-Free-tier LLM APIs have tight rate limits (e.g. Groq: ~8000 tokens/minute). To keep the system usable under load, `backend/agents/base_agent.py` tries providers in a configured order (`FALLBACK_CHAIN` in `.env`) — if the primary provider rate-limits or errors, it automatically retries on the next provider before giving up. This was verified live: a Groq rate limit during testing correctly triggered a fallback to OpenRouter, which completed the request successfully.
-
-Each skill also has a preferred provider/model assignment (`SKILL_PREFERRED_PROVIDER` in `base_agent.py`, and per-agent provider/model in `registry.py`), so, for example, research and drafting default to a larger model while chart and fact-check can use faster ones.
-
-## 6. Frontend
-
-React + Vite application (`frontend/src/`). Key pieces:
-- **Task input** — submits a query to `/tasks/run`
-- **AgentGraph** — renders the returned plan as a true node-link graph, computing node positions by dependency depth and drawing connecting SVG edges between dependent nodes; nodes are colored by conflict status; hovering a node shows a floating panel (rendered via a React portal to avoid clipping) with the agent's role, dependencies, and an output preview
-- **InspectorAndConflicts** — shows the full output for a selected node and all detected conflicts with their explanations and suggested resolutions
-- **ReputationRegistry** — pulls live trust scores from `/reputation/scores` and displays them per agent
-
-## 7. Security Notes (Current State — Honest Disclosure)
-
-- The agent registry is **MCP-inspired**, not MCP-protocol-compliant: it mimics skill-scoped registration with a manifest, but has no real MCP server/client and no signature verification path. This is a known, intentional scope limitation for the current build, named honestly here rather than overstated.
-- `.env` (API keys) is excluded from version control via `.gitignore` and was never committed.
-
-## 8. Known Limitations / Future Work
-
-- No checkpointing/replay — a failed task cannot currently be resumed from a partial state
-- No cost/latency ledger surfaced to the end user
-- No collaborative/multi-user mode yet (Isolated Mode only)
-- Agent manifest signatures are computed but not cryptographically verified anywhere in the call path
-
-## 9. References
-
-1. Qingyun Wu et al., "AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation," arXiv:2308.08155, 2023.
-2. Sirui Hong et al., "MetaGPT: Meta Programming for a Multi-Agent Collaborative Framework," arXiv:2308.00352, 2023.
-3. Guohao Li et al., "CAMEL: Communicative Agents for 'Mind' Exploration of Large Language Model Society," arXiv:2303.17760, 2023.
-4. Marc Shapiro et al., "Conflict-Free Replicated Data Types," INRIA Research Report RR-7687, 2011.
-5. Sepandar D. Kamvar, Mario T. Schlosser, Hector Garcia-Molina, "The EigenTrust Algorithm for Reputation Management in P2P Networks," Proceedings of WWW 2003.
-6. Anthropic, "Model Context Protocol Specification," 2024–2026. https://modelcontextprotocol.io
-7. LangChain, "LangGraph Documentation," 2026. https://langchain-ai.github.io/langgraph/
-8. OpenAI, "Introducing Group Chats in ChatGPT," November 2025.
-9. Dust, "Multiplayer Agents for the Enterprise," Dust Product Documentation, 2026. https://dust.tt
-10. Liveblocks, "Real-Time Infrastructure for Human and AI Collaboration," 2026. https://liveblocks.io
+- **Custom executor, not LangGraph**: full control over events, retries, takeover and budgets.
+- **Code decides, LLMs propose**: sources lists, chart specs, citation checks, numeric comparisons and
+  final verdict overrides are deterministic; LLMs extract and judge only where language understanding is needed.
+- **Server-authoritative collaboration with node locks** instead of a CRDT: simpler, matches the DAG model.
+- **Official data beats scraping** for financial figures (SEC EDGAR XBRL).
+- **Honest evaluation**: baselines, sample sizes and failures are reported; infrastructure failures are
+  excluded and counted, never silently scored.

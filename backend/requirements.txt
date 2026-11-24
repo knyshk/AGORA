@@ -17,3 +17,4 @@ PyJWT
 websockets
 cryptography
 mcp
+alembic

@@ -1,3 +1,4 @@
+import os
 import random
 from concurrent.futures import ThreadPoolExecutor
 
@@ -6,7 +7,7 @@ import redis
 
 from reputation import scoring as sc
 
-TEST_DB = "redis://redis:6379/15"  # separate database, never the real scores (db 0)
+TEST_DB = os.getenv("TEST_REDIS_URL", "redis://redis:6379/15")  # separate DB, never the real scores (db 0)
 
 
 @pytest.fixture(autouse=True)

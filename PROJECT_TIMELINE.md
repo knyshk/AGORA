@@ -1,3 +1,5 @@
+> **Mid-term document (October 2026), kept for reference.** The current system is described in README.md and docs/ARCHITECTURE.md.
+
 # AGORA — Project Timeline & Milestones
 
 **Team:** Vedika Agrawal (2023Btech096), Kanishk Jain (2023Btech040)
