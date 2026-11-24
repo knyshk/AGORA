@@ -1,5 +1,11 @@
 import hashlib
+import json
+from pathlib import Path
 from reputation.scoring import seed_score
+
+# Priors measured by AGORA-Bench (bench/run_bench.py --apply-priors) replace the hand-typed ones.
+_PRIORS_FILE = Path(__file__).resolve().parent.parent / "bench" / "priors.json"
+BENCH_PRIORS = json.loads(_PRIORS_FILE.read_text()) if _PRIORS_FILE.exists() else {}
 
 class AgentManifest:
     def __init__(self, name: str, skill: str,
@@ -19,7 +25,8 @@ REGISTRY: dict[str, AgentManifest] = {}
 def register_agent(name: str, skill: str, prior_score: float = 0.7,
                    provider: str = None, model: str = None, strategy: str = "plain"):
     REGISTRY[name] = AgentManifest(name, skill, provider, model, strategy=strategy)
-    seed_score(name, prior_score)
+    REGISTRY[name].prior_source = "AGORA-Bench" if name in BENCH_PRIORS else "hand-set"
+    seed_score(name, BENCH_PRIORS.get(name, {}).get("prior", prior_score))
 
 def get_agents_for_skill(skill: str) -> list[str]:
     return [m.name for m in REGISTRY.values() if m.skill == skill]

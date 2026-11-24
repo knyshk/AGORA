@@ -1,0 +1,307 @@
+{
+ "name": "AGORA-Bench",
+ "version": 1,
+ "description": "20 tasks, 5 per skill. Research tasks are live (web + SEC); drafting, chart and fact-check tasks use frozen inputs so every agent is graded on identical data.",
+ "tasks": [
+  {
+   "id": "R1",
+   "skill": "research",
+   "task": "Tesla total revenue in fiscal year 2023",
+   "checks": {
+    "contains_numbers": [
+     96.77
+    ],
+    "min_citations": 1,
+    "has_sources": true
+   },
+   "rubric": "Does the answer state Tesla's 2023 total revenue and cite a source for it?"
+  },
+  {
+   "id": "R2",
+   "skill": "research",
+   "task": "Apple total net sales in fiscal year 2023",
+   "checks": {
+    "contains_numbers": [
+     383.29
+    ],
+    "min_citations": 1,
+    "has_sources": true
+   },
+   "rubric": "Does the answer state Apple's fiscal 2023 net sales and cite a source?"
+  },
+  {
+   "id": "R3",
+   "skill": "research",
+   "task": "Microsoft total revenue for fiscal year 2023",
+   "checks": {
+    "contains_numbers": [
+     211.92
+    ],
+    "min_citations": 1,
+    "has_sources": true
+   },
+   "rubric": "Does the answer state Microsoft's fiscal 2023 revenue and cite a source?"
+  },
+  {
+   "id": "R4",
+   "skill": "research",
+   "task": "Ford and General Motors total revenue in 2023",
+   "checks": {
+    "contains_numbers": [
+     176.19,
+     171.84
+    ],
+    "min_citations": 2,
+    "has_sources": true
+   },
+   "rubric": "Does the answer give both Ford's and GM's 2023 revenue, each with a source?"
+  },
+  {
+   "id": "R5",
+   "skill": "research",
+   "task": "Tesla annual revenue in 2022 and 2023",
+   "checks": {
+    "contains_numbers": [
+     81.46,
+     96.77
+    ],
+    "min_citations": 1,
+    "has_sources": true
+   },
+   "rubric": "Does the answer give Tesla's revenue for both 2022 and 2023 with sources?"
+  },
+  {
+   "id": "D1",
+   "skill": "drafting",
+   "task": "Write a short report comparing Tesla, Ford and GM revenue in 2022 and 2023",
+   "context": "Tesla reported total revenue of $81.46 billion in 2022 and $96.77 billion in 2023 [1]. Ford reported total revenue of $158.06 billion in 2022 and $176.19 billion in 2023 [2]. General Motors reported total revenue of $156.74 billion in 2022 and $171.84 billion in 2023 [3].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n[3] SEC EDGAR 10-K data: General Motors Co (GM) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001467858/us-gaap/Revenues.json",
+   "checks": {
+    "citation_check_passed": true,
+    "contains_numbers": [
+     96.77,
+     176.19,
+     171.84
+    ],
+    "min_citations": 3,
+    "max_words": 450
+   },
+   "rubric": "Is this a clear, accurate comparison of the three companies' revenue that only uses the given research?"
+  },
+  {
+   "id": "D2",
+   "skill": "drafting",
+   "task": "Write a short report comparing Apple and Microsoft revenue in fiscal 2022 and 2023",
+   "context": "Apple reported net sales of $383,285 million in fiscal 2023 and $394,328 million in fiscal 2022 [1]. Microsoft reported revenue of $211,915 million in fiscal 2023 and $198,270 million in fiscal 2022 [2].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Apple Inc. (AAPL) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000320193/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json\n[2] SEC EDGAR 10-K data: MICROSOFT CORP (MSFT) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000789019/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json",
+   "checks": {
+    "citation_check_passed": true,
+    "contains_numbers": [
+     383.29,
+     211.92
+    ],
+    "min_citations": 2,
+    "max_words": 450
+   },
+   "rubric": "Is this a clear, accurate comparison of Apple and Microsoft revenue that only uses the given research?"
+  },
+  {
+   "id": "D3",
+   "skill": "drafting",
+   "task": "Write a short history of the Python programming language",
+   "context": "Python was created by Guido van Rossum and first released in 1991 [1]. Python 3.0 was released in 2008 [1]. Python 2 reached end of life on 1 January 2020 [1].\n\n---\nSources\n[1] Python (programming language) (Wikipedia) - https://en.wikipedia.org/wiki/Python_(programming_language)",
+   "checks": {
+    "citation_check_passed": true,
+    "min_citations": 1,
+    "max_words": 450,
+    "mentions": [
+     "1991",
+     "2008"
+    ]
+   },
+   "rubric": "Is this a clear, accurate short history that only uses the given research and invents nothing?"
+  },
+  {
+   "id": "D4",
+   "skill": "drafting",
+   "task": "Write a short description of the Eiffel Tower",
+   "context": "The Eiffel Tower in Paris was completed in 1889 [1]. It is 330 metres tall including antennas [1]. The tower was built by Gustave Eiffel's engineering company for the 1889 World's Fair [1].\n\n---\nSources\n[1] Eiffel Tower (Wikipedia) - https://en.wikipedia.org/wiki/Eiffel_Tower",
+   "checks": {
+    "citation_check_passed": true,
+    "contains_numbers": [
+     330
+    ],
+    "min_citations": 1,
+    "max_words": 450,
+    "mentions": [
+     "1889"
+    ]
+   },
+   "rubric": "Is this a clear, accurate description that only uses the given research and invents nothing?"
+  },
+  {
+   "id": "D5",
+   "skill": "drafting",
+   "task": "Write a short comparison of Mount Everest and K2",
+   "context": "Mount Everest is 8,848.86 metres high according to the 2020 survey by China and Nepal [1]. It was first summited in 1953 by Edmund Hillary and Tenzing Norgay [1]. K2 is 8,611 metres high, the second-highest mountain on Earth [2].\n\n---\nSources\n[1] Mount Everest (Wikipedia) - https://en.wikipedia.org/wiki/Mount_Everest\n[2] K2 (Wikipedia) - https://en.wikipedia.org/wiki/K2",
+   "checks": {
+    "citation_check_passed": true,
+    "contains_numbers": [
+     8848.86,
+     8611
+    ],
+    "min_citations": 2,
+    "max_words": 450
+   },
+   "rubric": "Is this a clear, accurate comparison that only uses the given research and invents nothing?"
+  },
+  {
+   "id": "C1",
+   "skill": "chart",
+   "task": "Chart Tesla revenue in 2022 and 2023",
+   "context": "Tesla reported total revenue of $81.46 billion in 2022 and $96.77 billion in 2023 [1]. Ford reported total revenue of $158.06 billion in 2022 and $176.19 billion in 2023 [2]. General Motors reported total revenue of $156.74 billion in 2022 and $171.84 billion in 2023 [3].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n[3] SEC EDGAR 10-K data: General Motors Co (GM) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001467858/us-gaap/Revenues.json",
+   "checks": {
+    "chart_points": [
+     81.46,
+     96.77
+    ],
+    "chart_max_points": 2
+   }
+  },
+  {
+   "id": "C2",
+   "skill": "chart",
+   "task": "Chart 2023 revenue of Tesla, Ford and GM",
+   "context": "Tesla reported total revenue of $81.46 billion in 2022 and $96.77 billion in 2023 [1]. Ford reported total revenue of $158.06 billion in 2022 and $176.19 billion in 2023 [2]. General Motors reported total revenue of $156.74 billion in 2022 and $171.84 billion in 2023 [3].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n[3] SEC EDGAR 10-K data: General Motors Co (GM) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001467858/us-gaap/Revenues.json",
+   "checks": {
+    "chart_points": [
+     96.77,
+     176.19,
+     171.84
+    ],
+    "chart_max_points": 3
+   }
+  },
+  {
+   "id": "C3",
+   "skill": "chart",
+   "task": "Chart Apple and Microsoft revenue for fiscal 2022 and 2023",
+   "context": "Apple reported net sales of $383,285 million in fiscal 2023 and $394,328 million in fiscal 2022 [1]. Microsoft reported revenue of $211,915 million in fiscal 2023 and $198,270 million in fiscal 2022 [2].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Apple Inc. (AAPL) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000320193/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json\n[2] SEC EDGAR 10-K data: MICROSOFT CORP (MSFT) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000789019/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json",
+   "checks": {
+    "chart_points": [
+     383285,
+     394328,
+     211915,
+     198270
+    ],
+    "chart_max_points": 4
+   }
+  },
+  {
+   "id": "C4",
+   "skill": "chart",
+   "task": "Chart the heights of Mount Everest and K2",
+   "context": "Mount Everest is 8,848.86 metres high according to the 2020 survey by China and Nepal [1]. It was first summited in 1953 by Edmund Hillary and Tenzing Norgay [1]. K2 is 8,611 metres high, the second-highest mountain on Earth [2].\n\n---\nSources\n[1] Mount Everest (Wikipedia) - https://en.wikipedia.org/wiki/Mount_Everest\n[2] K2 (Wikipedia) - https://en.wikipedia.org/wiki/K2",
+   "checks": {
+    "chart_points": [
+     8848.86,
+     8611
+    ],
+    "chart_max_points": 2
+   }
+  },
+  {
+   "id": "C5",
+   "skill": "chart",
+   "task": "Chart 2023 revenue of Tesla, Ford, GM and Stellantis",
+   "context": "Tesla reported total revenue of $81.46 billion in 2022 and $96.77 billion in 2023 [1]. Ford reported total revenue of $158.06 billion in 2022 and $176.19 billion in 2023 [2]. General Motors reported total revenue of $156.74 billion in 2022 and $171.84 billion in 2023 [3].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n[3] SEC EDGAR 10-K data: General Motors Co (GM) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001467858/us-gaap/Revenues.json",
+   "checks": {
+    "chart_points": [
+     96.77,
+     176.19,
+     171.84
+    ],
+    "chart_max_points": 3
+   },
+   "note": "Stellantis is not in the research: the agent must not invent it"
+  },
+  {
+   "id": "F1",
+   "skill": "fact_check",
+   "task": "Fact-check the revenue report",
+   "context": "Tesla's revenue was $96.77 billion in 2023 [1]. Ford's revenue was $200.5 billion in 2023 [2].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n\nCitation check: passed.",
+   "source_texts": {
+    "https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json": "Official annual revenue from 10-K filings: fiscal year ended 2023-12-31: $96.77 billion; fiscal year ended 2022-12-31: $81.46 billion",
+    "https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json": "Official annual revenue from 10-K filings: fiscal year ended 2023-12-31: $176.19 billion; fiscal year ended 2022-12-31: $158.06 billion"
+   },
+   "checks": {
+    "verdicts": [
+     "supported",
+     "contradicted"
+    ]
+   }
+  },
+  {
+   "id": "F2",
+   "skill": "fact_check",
+   "task": "Fact-check the Python history",
+   "context": "Python was first released in 1991 [1]. Python 3.0 was released in 2010 [1].\n\n---\nSources\n[1] Python (programming language) (Wikipedia) - https://en.wikipedia.org/wiki/Python_(programming_language)\n\nCitation check: passed.",
+   "source_texts": {
+    "https://en.wikipedia.org/wiki/Python_(programming_language)": "Python is a high-level programming language. Guido van Rossum began working on Python in the late 1980s and first released it in 1991. Python 3.0 was released in 2008. Python 2.7's end-of-life was 1 January 2020."
+   },
+   "checks": {
+    "verdicts": [
+     "supported",
+     "contradicted"
+    ]
+   }
+  },
+  {
+   "id": "F3",
+   "skill": "fact_check",
+   "task": "Fact-check the Eiffel Tower description",
+   "context": "The Eiffel Tower is 330 metres tall [1]. It receives 50 million visitors every year [1].\n\n---\nSources\n[1] Eiffel Tower (Wikipedia) - https://en.wikipedia.org/wiki/Eiffel_Tower\n\nCitation check: passed.",
+   "source_texts": {
+    "https://en.wikipedia.org/wiki/Eiffel_Tower": "The Eiffel Tower is a wrought-iron lattice tower in Paris, France. It was constructed from 1887 to 1889 as the centrepiece of the 1889 World's Fair. The tower is 330 metres tall including antennas."
+   },
+   "checks": {
+    "verdicts": [
+     "supported",
+     "unsupported"
+    ]
+   }
+  },
+  {
+   "id": "F4",
+   "skill": "fact_check",
+   "task": "Fact-check the big tech revenue report",
+   "context": "Apple's fiscal 2023 net sales were $383.29 billion [1]. Microsoft's fiscal 2023 revenue was $211.92 billion [2]. Microsoft has 500,000 employees [2].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Apple Inc. (AAPL) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000320193/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json\n[2] SEC EDGAR 10-K data: MICROSOFT CORP (MSFT) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000789019/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json\n\nCitation check: passed.",
+   "source_texts": {
+    "https://data.sec.gov/api/xbrl/companyconcept/CIK0000320193/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json": "Official annual revenue from 10-K filings: fiscal year ended 2023-09-30: $383.29 billion; fiscal year ended 2022-09-24: $394.33 billion",
+    "https://data.sec.gov/api/xbrl/companyconcept/CIK0000789019/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json": "Official annual revenue from 10-K filings: fiscal year ended 2023-06-30: $211.92 billion; fiscal year ended 2022-06-30: $198.27 billion"
+   },
+   "checks": {
+    "verdicts": [
+     "supported",
+     "supported",
+     "unsupported"
+    ]
+   }
+  },
+  {
+   "id": "F5",
+   "skill": "fact_check",
+   "task": "Fact-check the mountains comparison",
+   "context": "Mount Everest is 8,848.86 metres high [1]. Everest was first summited in 1963 [1]. K2 is 8,611 metres high [2].\n\n---\nSources\n[1] Mount Everest (Wikipedia) - https://en.wikipedia.org/wiki/Mount_Everest\n[2] K2 (Wikipedia) - https://en.wikipedia.org/wiki/K2\n\nCitation check: passed.",
+   "source_texts": {
+    "https://en.wikipedia.org/wiki/Mount_Everest": "Mount Everest is Earth's highest mountain above sea level. In 2020 China and Nepal announced a height of 8,848.86 m. The first ascent was made in 1953 by Tenzing Norgay and Edmund Hillary.",
+    "https://en.wikipedia.org/wiki/K2": "K2, at 8,611 metres above sea level, is the second-highest mountain on Earth, after Mount Everest."
+   },
+   "checks": {
+    "verdicts": [
+     "supported",
+     "contradicted",
+     "supported"
+    ]
+   }
+  }
+ ]
+}

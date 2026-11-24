@@ -1,0 +1,14 @@
+# AGORA-Bench results (20261124T091935Z-regraded)
+
+Tasks: 20 · judge: on · scores in [0, 1]; n = graded runs; infra errors are excluded from scores.
+
+| Agent | Skill | Strategy | Model | n | Mean | 95% CI | Infra errors | Mean latency (s) |
+|---|---|---|---|---|---|---|---|---|
+| chart-v1 | chart | spec | openai/gpt-oss-120b | 5 | 1.0 | 1.0–1 | 0 | 1.22 |
+| chart-v2 | chart | spec | openai/gpt-oss-20b | 5 | 1.0 | 1.0–1 | 0 | 0.73 |
+| drafting-v1 | drafting | cited | openai/gpt-oss-120b | 5 | 0.965 | 0.896–1 | 0 | 2.86 |
+| drafting-v2 | drafting | cited | qwen/qwen3.8-27b | 5 | 1.0 | 1.0–1 | 0 | 2.58 |
+| fact_check-v1 | fact_check | verify | openai/gpt-oss-120b | 5 | 1.0 | 1.0–1 | 0 | 0.99 |
+| fact_check-v2 | fact_check | verify | gemini-3.1-flash-lite | 5 | 1.0 | 1.0–1 | 0 | 7.99 |
+| research-v1 | research | grounded | openai/gpt-oss-120b | 5 | 1.0 | 1.0–1 | 0 | 7.9 |
+| research-v2 | research | plain | gemini-3.5-flash-lite | 5 | 0.533 | 0.533–0.533 | 0 | 1.69 |

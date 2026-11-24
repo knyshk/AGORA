@@ -157,6 +157,7 @@ def get_reputation_scores():
     for name, manifest in REGISTRY.items():
         st = get_stats(name)
         data[name] = {"name": name, "skill": manifest.skill, "strategy": manifest.strategy,
+                      "prior_source": getattr(manifest, "prior_source", "hand-set"),
                       "provider": manifest.provider or "default", "model": manifest.model or "default",
                       "score": st["mean"], **st}
     return data
