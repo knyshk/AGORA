@@ -1,6 +1,8 @@
 import os
+import time
 from langchain_openai import ChatOpenAI
 from config import PROVIDER_ENDPOINTS, PROVIDER_DEFAULT_MODELS, FALLBACK_CHAIN
+from agents.usage import record_call
 
 FAST_SKILLS = {"chart", "fact_check"}
 
@@ -47,7 +49,11 @@ async def run_agent(role: str, prompt: str,
         )
         try:
             llm = _make_llm(attempt_provider, use_model)
-            result = await llm.ainvoke(f"You are a {role} agent. {prompt}")
+            full_prompt = f"You are a {role} agent. {prompt}"
+            started = time.time()
+            result = await llm.ainvoke(full_prompt)
+            record_call(attempt_provider, use_model or PROVIDER_DEFAULT_MODELS.get(attempt_provider), full_prompt,
+                        result, started)
             if attempt_provider != chain[0]:
                 print(f"[FALLBACK] Used {attempt_provider} for {role} "
                       f"(primary was {chain[0]})")

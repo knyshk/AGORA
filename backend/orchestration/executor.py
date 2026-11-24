@@ -12,9 +12,12 @@ from agents.research_tools import grounded_research
 from agents.chart_tools import build_chart, strip_chart_blocks
 from agents.drafting_tools import write_draft
 from agents.factcheck_tools import fact_check
+from agents.usage import start_ledger, summarise
+from orchestration.budget import Budget, default_budget
 
 MAX_ATTEMPTS = 2
 BACKOFF_SECONDS = 2
+NODE_TIMEOUT_S = float(os.getenv("NODE_TIMEOUT_S", "90"))  # per agent call; a timeout reassigns the node
 
 
 def is_infra_error(e: Exception) -> bool:
@@ -69,6 +72,12 @@ async def _emit(emit, event_type, payload):
         print(f"[EMIT ERROR] {event_type}: {e}")
 
 
+async def _spend(budget, cost, emit):
+    changed = budget.add(cost)
+    if changed:
+        await _emit(emit, f"budget_{changed}", budget.snapshot())
+
+
 async def _feedback_to_drafts(node, fact_check_output, meta, emit):
     """Fact-check verdicts are graded evidence about the drafting agent that wrote the claims."""
     feedback = draft_feedback(fact_check_output)
@@ -109,10 +118,18 @@ async def _human_node(node, state, meta, emit, takeover, started) -> bool:
     return True
 
 
-async def run_node(node, state, query, meta, emit=None, forced_agents=None, instructions=None, takeover=None):
+async def run_node(node, state, query, meta, emit=None, forced_agents=None, instructions=None, takeover=None,
+                   budget=None):
     node_id = node["id"]
     skill = node["agent"]
     started = time.time()
+    budget = budget or Budget()
+    if budget.exhausted:
+        meta[node_id] = {"status": "skipped", "agent": None, "attempts": 0, "duration_s": 0,
+                         "error": f"Skipped: run budget of ${budget.limit} (notional) is used up"}
+        await _emit(emit, "node_skipped", {"node_id": node_id, "skill": skill, "depends_on": node["depends_on"],
+                                           **meta[node_id]})
+        return
     await _emit(emit, "node_started", {"node_id": node_id, "skill": skill, "depends_on": node["depends_on"]})
     if await _human_node(node, state, meta, emit, takeover, started):
         return
@@ -133,6 +150,7 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
     if instructions and node_id in instructions:
         prompt += f"\n\nAdditional instruction from the user: {instructions[node_id]}"
 
+    ledger = start_ledger()  # every LLM call this node makes, including retries and fallbacks
     tried = []
     last_error = None
     for attempt in range(1, MAX_ATTEMPTS + 1):
@@ -141,6 +159,11 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
             pool = [forced]
         else:
             pool = [c for c in candidates if c not in tried] or candidates
+            economy = budget.filter_pool(pool, REGISTRY)
+            if economy != pool:
+                await _emit(emit, "budget_downgrade", {"node_id": node_id, "skill": skill, "from": pool,
+                                                       "to": economy, **budget.snapshot()})
+                pool = economy
         chosen, why = route(pool)
         if forced and attempt == 1 and pool == [forced]:
             why = {**why, "reason": f"{forced} was chosen by the user (fork override)"}
@@ -149,7 +172,8 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
         manifest = get_manifest(chosen)
         call_started = time.time()
         try:
-            state[node_id] = await _call_agent(skill, prompt, manifest, getattr(emit, "run_id", "adhoc"), node_id)
+            state[node_id] = await asyncio.wait_for(
+                _call_agent(skill, prompt, manifest, getattr(emit, "run_id", "adhoc"), node_id), NODE_TIMEOUT_S)
             latency = round(time.time() - call_started, 2)
             quality, reason = assess(skill, state[node_id])
             stats = update_score(chosen, quality=quality, latency_s=latency)
@@ -158,15 +182,20 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
                                                      "source": "output_check", "after": stats})
             meta[node_id] = {"status": "done", "agent": chosen, "attempts": attempt,
                              "duration_s": round(time.time() - started, 2), "error": None,
-                             "quality": quality, "quality_reason": reason}
+                             "quality": quality, "quality_reason": reason, "usage": summarise(ledger)}
+            await _spend(budget, meta[node_id]["usage"]["cost_usd"], emit)
             await _emit(emit, "node_finished", {"node_id": node_id, "skill": skill,
                                                 "output": state[node_id], **meta[node_id]})
             if skill == "fact_check":
                 await _feedback_to_drafts(node, state[node_id], meta, emit)
             return
         except Exception as e:
+            if isinstance(e, asyncio.TimeoutError):
+                e = TimeoutError(f"agent call timed out after {NODE_TIMEOUT_S:.0f}s")
             last_error = e
             tried.append(chosen)
+            await _emit(emit, "node_attempt_failed", {"node_id": node_id, "agent": chosen, "attempt": attempt,
+                                                      "error": str(e)[:200], "infra": is_infra_error(e)})
             if is_infra_error(e):
                 print(f"[INFRA ERROR] {chosen}: {e} (not counted against reputation)")
             else:
@@ -178,12 +207,15 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
                 await asyncio.sleep(BACKOFF_SECONDS * attempt)
 
     meta[node_id] = {"status": "failed", "agent": tried[-1], "attempts": len(tried),
-                     "duration_s": round(time.time() - started, 2), "error": str(last_error)[:300]}
+                     "duration_s": round(time.time() - started, 2), "error": str(last_error)[:300],
+                     "usage": summarise(ledger)}
+    await _spend(budget, meta[node_id]["usage"]["cost_usd"], emit)
     await _emit(emit, "node_failed", {"node_id": node_id, "skill": skill, **meta[node_id]})
 
 
 async def execute_plan(plan, query, emit=None, initial_state=None, forced_agents=None, instructions=None,
-                       takeover=None):
+                       takeover=None, budget_usd=None):
+    budget = Budget(budget_usd if budget_usd is not None else default_budget())
     state = dict(initial_state or {})
     reused = set(state)
     meta = {nid: {"status": "done", "agent": "reused", "attempts": 0, "duration_s": 0,
@@ -214,9 +246,10 @@ async def execute_plan(plan, query, emit=None, initial_state=None, forced_agents
                 raise RuntimeError(f"Deadlock: {remaining}")
             break
 
-        await asyncio.gather(*(run_node(n, state, query, meta, emit, forced_agents, instructions, takeover) for n in ready))
+        await asyncio.gather(*(run_node(n, state, query, meta, emit, forced_agents, instructions, takeover, budget) for n in ready))
         remaining = [n for n in remaining if n["id"] not in meta]
 
+    arbitration_ledger = start_ledger()
     if any(n not in reused for n in state):
         skills = {n["id"]: n["agent"] for n in plan}
         agents = {nid: meta.get(nid, {}).get("agent") for nid in state}
@@ -234,5 +267,18 @@ async def execute_plan(plan, query, emit=None, initial_state=None, forced_agents
     status = "complete" if all_ok else ("partial" if state else "failed")
     if status == "complete" and any(c["status"] == "open" for c in conflicts):
         status = "needs_review"  # human approval gate: open conflicts must be decided
-    await _emit(emit, "run_finished", {"status": status})
-    return {"outputs": state, "conflicts": conflicts, "node_status": meta, "status": status}
+    usage = run_usage(meta, summarise(arbitration_ledger), budget)
+    await _emit(emit, "run_finished", {"status": status, "usage": usage})
+    return {"outputs": state, "conflicts": conflicts, "node_status": meta, "status": status, "usage": usage}
+
+
+def run_usage(meta: dict, arbitration: dict, budget) -> dict:
+    nodes = {nid: m["usage"] for nid, m in meta.items() if m.get("usage")}
+    parts = list(nodes.values()) + [arbitration]
+    return {"nodes": nodes, "arbitration": arbitration,
+            "total": {"llm_calls": sum(p["llm_calls"] for p in parts),
+                      "tokens_in": sum(p["tokens_in"] for p in parts),
+                      "tokens_out": sum(p["tokens_out"] for p in parts),
+                      "cost_usd": round(sum(p["cost_usd"] for p in parts), 6),
+                      "tokens_estimated": any(p["tokens_estimated"] for p in parts)},
+            "budget": budget.snapshot(), "pricing": "notional (free tiers are actually $0)"}

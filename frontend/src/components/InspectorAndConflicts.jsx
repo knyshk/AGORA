@@ -13,6 +13,8 @@ export default function InspectorAndConflicts({
   onSelectNode,
   runId = null,
   onReviewed = null,
+  nodeStatus = {},
+  usage = null,
 }) {
   const [copied, setCopied] = useState(false);
   const [rerun, setRerun] = useState({});
@@ -198,9 +200,23 @@ export default function InspectorAndConflicts({
               </span>
             </div>
             <div className="meta-item">
-              <span className="meta-k">Routing Engine:</span>
-              <span className="meta-v">Redis Bayesian Prior Score</span>
+              <span className="meta-k">Agent:</span>
+              <span className="meta-v">
+                {nodeStatus[activeNode.id]?.agent || "—"}
+                {nodeStatus[activeNode.id]?.quality != null && ` · quality ${nodeStatus[activeNode.id].quality}`}
+              </span>
             </div>
+            {nodeStatus[activeNode.id]?.usage && (
+              <div className="meta-item">
+                <span className="meta-k">Cost:</span>
+                <span className="meta-v">
+                  {nodeStatus[activeNode.id].usage.llm_calls} LLM calls ·{" "}
+                  {(nodeStatus[activeNode.id].usage.tokens_in + nodeStatus[activeNode.id].usage.tokens_out).toLocaleString()}{" "}
+                  tokens · ${nodeStatus[activeNode.id].usage.cost_usd.toFixed(4)} notional
+                  {usage && ` (run total $${usage.total.cost_usd.toFixed(4)})`}
+                </span>
+              </div>
+            )}
             <div className="meta-item">
               <span className="meta-k">Output Volume:</span>
               <span className="meta-v">

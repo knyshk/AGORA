@@ -15,6 +15,8 @@ function replayState(events, upto) {
   const status = {};
   const outputs = {};
   const reused = {};
+  const usage = {};
+  let runUsage = null;
   for (const e of events) {
     if (e.seq > upto) break;
     const p = e.payload;
@@ -23,11 +25,16 @@ function replayState(events, upto) {
       status[p.node_id] = "done";
       outputs[p.node_id] = p.output;
       reused[p.node_id] = !!p.reused;
+      if (p.usage) usage[p.node_id] = p.usage;
     }
-    if (e.type === "node_failed") status[p.node_id] = "failed";
+    if (e.type === "node_failed") {
+      status[p.node_id] = "failed";
+      if (p.usage) usage[p.node_id] = p.usage;
+    }
     if (e.type === "node_skipped") status[p.node_id] = "skipped";
+    if (e.type === "run_finished" && p.usage) runUsage = p.usage;
   }
-  return { status, outputs, reused };
+  return { status, outputs, reused, usage, runUsage };
 }
 
 export default function RunHistory({ backendUrl }) {
@@ -144,6 +151,13 @@ export default function RunHistory({ backendUrl }) {
                     <span style={{ color: COLORS[st], marginLeft: 8 }}>{st}</span>
                     {state.reused[n.id] && <span style={{ color: GOLD, marginLeft: 8 }}>reused from parent</span>}
                     <span style={{ opacity: 0.6, marginLeft: 8 }}>depends on: {n.depends_on.join(", ") || "none"}</span>
+                    {state.usage[n.id] && (
+                      <span style={{ opacity: 0.75, marginLeft: 8, fontSize: 12 }}>
+                        · {state.usage[n.id].llm_calls} LLM calls ·{" "}
+                        {(state.usage[n.id].tokens_in + state.usage[n.id].tokens_out).toLocaleString()} tokens
+                        {state.usage[n.id].tokens_estimated ? " (est.)" : ""} · ${state.usage[n.id].cost_usd.toFixed(4)}
+                      </span>
+                    )}
                     {out && (
                       <details style={{ marginTop: 6 }}>
                         <summary style={{ cursor: "pointer", color: GOLD }}>Show output ({out.length} chars)</summary>
@@ -154,6 +168,15 @@ export default function RunHistory({ backendUrl }) {
                 );
               })}
             </div>
+            {state.runUsage && (
+              <div style={{ fontSize: 13, opacity: 0.85, margin: "6px 0" }}>
+                Run total: {state.runUsage.total.llm_calls} LLM calls ·{" "}
+                {(state.runUsage.total.tokens_in + state.runUsage.total.tokens_out).toLocaleString()} tokens · $
+                {state.runUsage.total.cost_usd.toFixed(4)} notional cost (free tiers actually charge $0)
+                {state.runUsage.budget?.limit_usd != null &&
+                  ` · budget $${state.runUsage.budget.limit_usd}, mode ${state.runUsage.budget.mode}`}
+              </div>
+            )}
             {detail.run.conflicts?.length > 0 && (
               <div style={{ color: "#ff9187" }}>Conflicts in this run: {detail.run.conflicts.length}</div>
             )}

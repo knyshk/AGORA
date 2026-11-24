@@ -273,6 +273,8 @@ export default function App() {
                       selectedNode={selectedNode}
                       onSelectNode={setSelectedNode}
                       runId={response.run_id}
+                      nodeStatus={response.node_status || {}}
+                      usage={response.usage || null}
                       onReviewed={(conflicts, status) => setResponse((r) => ({ ...r, conflicts, status }))}
                     />
                   </motion.div>

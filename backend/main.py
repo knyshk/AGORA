@@ -54,6 +54,7 @@ app.include_router(collab_router)
 
 class TaskRequest(BaseModel):
     query: str
+    budget_usd: float | None = None   # notional per-run budget; None = RUN_BUDGET_USD env or no limit
 
 
 @app.get("/health")
@@ -70,14 +71,14 @@ async def research_grounded(req: TaskRequest):
     return {"output": await grounded_research(f"Task: {req.query}")}
 
 
-async def _execute_and_record(run_id: str, plan: list, query: str, started: float):
+async def _execute_and_record(run_id: str, plan: list, query: str, started: float, budget_usd=None):
     recorder = RunRecorder(run_id)
     await recorder("plan_created", {"plan": plan})
-    result = await execute_plan(plan, query, emit=recorder)
+    result = await execute_plan(plan, query, emit=recorder, budget_usd=budget_usd)
     crud.finish_run(run_id, plan, result["status"], result["conflicts"], started)
     return {"run_id": run_id, "plan": plan, "result": result["outputs"],
             "conflicts": result["conflicts"], "node_status": result["node_status"],
-            "status": result["status"]}
+            "status": result["status"], "usage": result["usage"]}
 
 
 @app.post("/tasks/run")
@@ -92,7 +93,7 @@ async def run_task(req: TaskRequest):
     except Exception:
         crud.finish_run(run_id, [], "failed", [], started)
         raise
-    return await _execute_and_record(run_id, plan, req.query, started)
+    return await _execute_and_record(run_id, plan, req.query, started, req.budget_usd)
 
 
 @app.post("/tasks/conflict-demo")
@@ -286,3 +287,15 @@ def audit_log(limit: int = 100, action: str | None = None):
 @app.get("/audit/verify")
 def audit_verify():
     return audit.verify_chain()
+
+
+@app.get("/runs/{run_id}/usage")
+def run_usage(run_id: str):
+    """Tokens, LLM calls and notional cost per node and for the whole run (from the event log)."""
+    data = crud.get_run(run_id)
+    if data is None:
+        raise HTTPException(status_code=404, detail="Run not found")
+    finished = [e for e in data["events"] if e["type"] == "run_finished" and e["payload"].get("usage")]
+    if not finished:
+        raise HTTPException(status_code=404, detail="No usage recorded for this run (older run or still running)")
+    return finished[-1]["payload"]["usage"]
