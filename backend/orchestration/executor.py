@@ -1,7 +1,8 @@
 import asyncio
 import os
 import time
-from agents.base_agent import run_agent
+from agents.base_agent import _only_provider, force_provider, run_agent
+from config import LOCAL_PROVIDERS
 from registry.registry import REGISTRY, get_agents_for_skill, get_manifest
 from security import audit, task_tokens
 from security.task_tokens import TaskTokenError
@@ -14,6 +15,7 @@ from agents.drafting_tools import write_draft
 from agents.factcheck_tools import fact_check
 from agents.usage import start_ledger, summarise
 from orchestration.budget import Budget, default_budget
+from orchestration.self_correct import self_correct
 
 MAX_ATTEMPTS = 2
 BACKOFF_SECONDS = 2
@@ -137,6 +139,8 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
         takeover.mark_started(node_id)
 
     candidates = get_agents_for_skill(skill)
+    if _only_provider.get():   # local LLM mode: only agents that run on the local model
+        candidates = [c for c in candidates if REGISTRY[c].provider == _only_provider.get()]
     if not candidates:
         meta[node_id] = {"status": "failed", "agent": None, "attempts": 0, "duration_s": 0,
                          "error": f"No registered agent for skill '{skill}'"}
@@ -172,8 +176,9 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
         manifest = get_manifest(chosen)
         call_started = time.time()
         try:
+            limit = NODE_TIMEOUT_S * (3 if manifest.provider in LOCAL_PROVIDERS else 1)
             state[node_id] = await asyncio.wait_for(
-                _call_agent(skill, prompt, manifest, getattr(emit, "run_id", "adhoc"), node_id), NODE_TIMEOUT_S)
+                _call_agent(skill, prompt, manifest, getattr(emit, "run_id", "adhoc"), node_id), limit)
             latency = round(time.time() - call_started, 2)
             quality, reason = assess(skill, state[node_id])
             stats = update_score(chosen, quality=quality, latency_s=latency)
@@ -214,7 +219,9 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
 
 
 async def execute_plan(plan, query, emit=None, initial_state=None, forced_agents=None, instructions=None,
-                       takeover=None, budget_usd=None):
+                       takeover=None, budget_usd=None, local_only=False):
+    if local_only:
+        force_provider("ollama")   # every LLM call of this run, including arbitration, stays on the laptop
     budget = Budget(budget_usd if budget_usd is not None else default_budget())
     state = dict(initial_state or {})
     reused = set(state)
@@ -249,6 +256,14 @@ async def execute_plan(plan, query, emit=None, initial_state=None, forced_agents
         await asyncio.gather(*(run_node(n, state, query, meta, emit, forced_agents, instructions, takeover, budget) for n in ready))
         remaining = [n for n in remaining if n["id"] not in meta]
 
+    correction_ledger = start_ledger()
+    corrections = []
+    if not budget.exhausted:
+        corrections = await self_correct(plan, query, state, meta, lambda t, p: _emit(emit, t, p),
+                                         _call_agent, get_manifest, getattr(emit, "run_id", "adhoc"))
+    correction_usage = summarise(correction_ledger)
+    await _spend(budget, correction_usage["cost_usd"], emit)
+
     arbitration_ledger = start_ledger()
     if any(n not in reused for n in state):
         skills = {n["id"]: n["agent"] for n in plan}
@@ -267,15 +282,18 @@ async def execute_plan(plan, query, emit=None, initial_state=None, forced_agents
     status = "complete" if all_ok else ("partial" if state else "failed")
     if status == "complete" and any(c["status"] == "open" for c in conflicts):
         status = "needs_review"  # human approval gate: open conflicts must be decided
-    usage = run_usage(meta, summarise(arbitration_ledger), budget)
+    usage = run_usage(meta, summarise(arbitration_ledger), budget, correction_usage)
     await _emit(emit, "run_finished", {"status": status, "usage": usage})
-    return {"outputs": state, "conflicts": conflicts, "node_status": meta, "status": status, "usage": usage}
+    return {"outputs": state, "conflicts": conflicts, "node_status": meta, "status": status, "usage": usage,
+            "self_correction": corrections}
 
 
-def run_usage(meta: dict, arbitration: dict, budget) -> dict:
+def run_usage(meta: dict, arbitration: dict, budget, self_correction: dict | None = None) -> dict:
     nodes = {nid: m["usage"] for nid, m in meta.items() if m.get("usage")}
-    parts = list(nodes.values()) + [arbitration]
-    return {"nodes": nodes, "arbitration": arbitration,
+    self_correction = self_correction or {"llm_calls": 0, "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0,
+                                          "tokens_estimated": False}
+    parts = list(nodes.values()) + [arbitration, self_correction]
+    return {"nodes": nodes, "arbitration": arbitration, "self_correction": self_correction,
             "total": {"llm_calls": sum(p["llm_calls"] for p in parts),
                       "tokens_in": sum(p["tokens_in"] for p in parts),
                       "tokens_out": sum(p["tokens_out"] for p in parts),

@@ -1,0 +1,1759 @@
+{
+ "summary": {
+  "new": {
+   "n": 64,
+   "tp": 25,
+   "fp": 2,
+   "fn": 7,
+   "tn": 30,
+   "precision": 0.926,
+   "recall": 0.781,
+   "f1": 0.847,
+   "accuracy": 0.859,
+   "precision_ci95": [
+    0.766,
+    0.979
+   ],
+   "recall_ci95": [
+    0.612,
+    0.89
+   ],
+   "errors": 0,
+   "excluded_infra": 0,
+   "mean_latency_s": 15.34,
+   "by_category": {
+    "digit_swap": {
+     "n": 4,
+     "correct": 4,
+     "label": true
+    },
+    "different_value": {
+     "n": 6,
+     "correct": 5,
+     "label": true
+    },
+    "wrong_year": {
+     "n": 4,
+     "correct": 4,
+     "label": true
+    },
+    "unit_error": {
+     "n": 4,
+     "correct": 3,
+     "label": true
+    },
+    "percentage": {
+     "n": 2,
+     "correct": 2,
+     "label": true
+    },
+    "direction": {
+     "n": 1,
+     "correct": 1,
+     "label": true
+    },
+    "date": {
+     "n": 2,
+     "correct": 2,
+     "label": true
+    },
+    "multi_claim": {
+     "n": 5,
+     "correct": 3,
+     "label": true
+    },
+    "non_numeric": {
+     "n": 4,
+     "correct": 1,
+     "label": true
+    },
+    "rounding": {
+     "n": 6,
+     "correct": 6,
+     "label": false
+    },
+    "unit_conversion": {
+     "n": 5,
+     "correct": 5,
+     "label": false
+    },
+    "paraphrase": {
+     "n": 5,
+     "correct": 4,
+     "label": false
+    },
+    "different_period": {
+     "n": 4,
+     "correct": 3,
+     "label": false
+    },
+    "different_entity": {
+     "n": 4,
+     "correct": 4,
+     "label": false
+    },
+    "different_metric": {
+     "n": 4,
+     "correct": 4,
+     "label": false
+    },
+    "agreement_text": {
+     "n": 2,
+     "correct": 2,
+     "label": false
+    },
+    "verifier_quote": {
+     "n": 1,
+     "correct": 1,
+     "label": false
+    },
+    "summary_repeat": {
+     "n": 1,
+     "correct": 1,
+     "label": false
+    }
+   }
+  },
+  "old": {
+   "n": 64,
+   "tp": 30,
+   "fp": 0,
+   "fn": 2,
+   "tn": 32,
+   "precision": 1.0,
+   "recall": 0.938,
+   "f1": 0.968,
+   "accuracy": 0.969,
+   "precision_ci95": [
+    0.886,
+    1.0
+   ],
+   "recall_ci95": [
+    0.799,
+    0.983
+   ],
+   "errors": 1,
+   "excluded_infra": 0,
+   "mean_latency_s": 2.87,
+   "by_category": {
+    "digit_swap": {
+     "n": 4,
+     "correct": 4,
+     "label": true
+    },
+    "different_value": {
+     "n": 6,
+     "correct": 5,
+     "label": true
+    },
+    "wrong_year": {
+     "n": 4,
+     "correct": 3,
+     "label": true
+    },
+    "unit_error": {
+     "n": 4,
+     "correct": 4,
+     "label": true
+    },
+    "percentage": {
+     "n": 2,
+     "correct": 2,
+     "label": true
+    },
+    "direction": {
+     "n": 1,
+     "correct": 1,
+     "label": true
+    },
+    "date": {
+     "n": 2,
+     "correct": 2,
+     "label": true
+    },
+    "multi_claim": {
+     "n": 5,
+     "correct": 5,
+     "label": true
+    },
+    "non_numeric": {
+     "n": 4,
+     "correct": 4,
+     "label": true
+    },
+    "rounding": {
+     "n": 6,
+     "correct": 6,
+     "label": false
+    },
+    "unit_conversion": {
+     "n": 5,
+     "correct": 5,
+     "label": false
+    },
+    "paraphrase": {
+     "n": 5,
+     "correct": 5,
+     "label": false
+    },
+    "different_period": {
+     "n": 4,
+     "correct": 4,
+     "label": false
+    },
+    "different_entity": {
+     "n": 4,
+     "correct": 4,
+     "label": false
+    },
+    "different_metric": {
+     "n": 4,
+     "correct": 4,
+     "label": false
+    },
+    "agreement_text": {
+     "n": 2,
+     "correct": 2,
+     "label": false
+    },
+    "verifier_quote": {
+     "n": 1,
+     "correct": 1,
+     "label": false
+    },
+    "summary_repeat": {
+     "n": 1,
+     "correct": 1,
+     "label": false
+    }
+   }
+  }
+ },
+ "rows": [
+  {
+   "id": "P01",
+   "label": true,
+   "category": "digit_swap",
+   "a": "Tesla's total revenue in 2023 was $96.77 billion.",
+   "b": "Tesla reported 2023 total revenue of $97.69 billion.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Tesla revenue (2023): node a says $96.77 billion (no cited source); node b says $97.69 billion (no cited source). The values differ by 0.9%."
+    ],
+    "latency_s": 10.73,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states Tesla's 2023 total revenue was $96.77 billion, while Text B states it was $97.69 billion. These are contradictory numerical claims regarding the same metric."
+    ],
+    "latency_s": 4.23,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P02",
+   "label": true,
+   "category": "digit_swap",
+   "a": "Apple's net sales in fiscal 2023 were $383.29 billion.",
+   "b": "In fiscal 2023 Apple's net sales came to $338.29 billion.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Apple revenue (2023): node a says $383.29 billion (no cited source); node b says $338.29 billion (no cited source). The values differ by 11.7%."
+    ],
+    "latency_s": 10.91,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states Apple's net sales were $383.29 billion while Text B claims they were $338.29 billion; the figures differ by exactly $45 billion."
+    ],
+    "latency_s": 4.17,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P03",
+   "label": true,
+   "category": "digit_swap",
+   "a": "Microsoft's fiscal 2023 revenue was $211.92 billion.",
+   "b": "Microsoft recorded revenue of $219.12 billion in fiscal 2023.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Microsoft revenue (2023): node a says $211.92 billion (no cited source); node b says $219.12 billion (no cited source). The values differ by 3.3%."
+    ],
+    "latency_s": 11.0,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states revenue was $211.92 billion, while Text B states it was $219.12 billion, creating a direct numerical contradiction."
+    ],
+    "latency_s": 3.48,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P04",
+   "label": true,
+   "category": "digit_swap",
+   "a": "Mount Everest is 8,848.86 metres high.",
+   "b": "Mount Everest stands 8,884.86 metres tall.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Mount Everest height: node a says 8,848.86 metres (no cited source); node b says 8,884.86 metres (no cited source). The values differ by 0.4%."
+    ],
+    "latency_s": 11.48,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states the height is 8,848.86 metres, while Text B claims it is 8,884.86 metres. The difference of exactly 36 meters in the hundreds place constitutes a factual conflict regarding the stated measurement."
+    ],
+    "latency_s": 5.02,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P05",
+   "label": true,
+   "category": "different_value",
+   "a": "Ford's revenue in 2023 was $176.19 billion.",
+   "b": "Ford generated $165.9 billion of revenue in 2023.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Ford revenue (2023): node a says $176.19 billion (no cited source); node b says $165.9 billion (no cited source). The values differ by 5.8%."
+    ],
+    "latency_s": 10.91,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states Ford's 2023 revenue as $176.19 billion, while Text B states it as $165.9 billion; these numbers contradict each other."
+    ],
+    "latency_s": 3.91,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P06",
+   "label": true,
+   "category": "different_value",
+   "a": "General Motors reported 2023 revenue of $171.84 billion.",
+   "b": "GM's 2023 revenue was $157.0 billion.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "General Motors revenue (2023): node a says $171.84 billion (no cited source); node b says $157 billion (no cited source). The values differ by 8.6%."
+    ],
+    "latency_s": 11.7,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A reports GM's 2023 revenue as $171.84 billion while Text B reports it as $157.0 billion, creating a factual discrepancy of approximately $14.84 billion."
+    ],
+    "latency_s": 4.48,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P07",
+   "label": true,
+   "category": "different_value",
+   "a": "K2 is 8,611 metres high.",
+   "b": "K2 rises to 8,516 metres.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "K2 height: node a says 8,611 metres m (no cited source); node b says 8,516 metres (no cited source). The values differ by 1.1%."
+    ],
+    "latency_s": 11.38,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states K2 is 8,611 metres high, while Text B states it rises to 8,516 metres. These numbers differ by 95 meters, creating a factual contradiction regarding the mountain's height."
+    ],
+    "latency_s": 4.91,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P08",
+   "label": true,
+   "category": "different_value",
+   "a": "The Eiffel Tower is 330 metres tall.",
+   "b": "The Eiffel Tower is 300 metres tall.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Eiffel Tower height: node a says 330 metres metres (no cited source); node b says 300 metres m (no cited source). The values differ by 9.1%."
+    ],
+    "latency_s": 12.09,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states the Eiffel Tower is 330 metres tall, while Text B states it is 300 metres tall. These are contradictory numerical claims regarding the same fact."
+    ],
+    "latency_s": 3.95,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P09",
+   "label": true,
+   "category": "different_value",
+   "a": "Nvidia's revenue for fiscal 2024 was $60.92 billion.",
+   "b": "Nvidia earned $26.97 billion in revenue in fiscal 2024.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Nvidia revenue (2024): node a says $60.92 billion (no cited source); node b says $26,970,000,000 billion (no cited source). The values differ by 55.7%."
+    ],
+    "latency_s": 16.02,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 0.71,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P10",
+   "label": true,
+   "category": "different_value",
+   "a": "Tesla had 140,473 employees at the end of 2023.",
+   "b": "At the end of 2023 Tesla employed 127,855 people.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 13.78,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states 140,473 employees at the end of 2023, while Text B states 127,855 people at the end of 2023. The number of employees differs significantly (approximately 12,618 people)."
+    ],
+    "latency_s": 5.16,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P11",
+   "label": true,
+   "category": "wrong_year",
+   "a": "Ford's 2023 revenue was $176.19 billion.",
+   "b": "Ford's revenue for 2023 was $158.06 billion.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Ford revenue (2023): node a says $176.19 billion (no cited source); node b says $158.06 billion (no cited source). The values differ by 10.3%."
+    ],
+    "latency_s": 13.72,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states Ford's 2023 revenue was $176.19 billion while Text B states it was $158.06 billion. These are contradictory numerical values for the same metric and year."
+    ],
+    "latency_s": 5.2,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P12",
+   "label": true,
+   "category": "wrong_year",
+   "a": "Tesla's revenue in 2023 was $96.77 billion.",
+   "b": "Tesla's 2023 revenue totalled $81.46 billion.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Tesla revenue (2023): node a says $96.77 billion (no cited source); node b says $81,460 billion (no cited source). The values differ by 99.9%."
+    ],
+    "latency_s": 15.22,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states Tesla's 2023 revenue was $96.77 billion while Text B states it was $81.46 billion, creating a direct numerical contradiction."
+    ],
+    "latency_s": 3.97,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P13",
+   "label": true,
+   "category": "wrong_year",
+   "a": "Apple's fiscal 2023 net sales were $383.29 billion.",
+   "b": "Apple's net sales for fiscal 2023 were $394.33 billion.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Apple revenue (2023): node a says $383.29 billion (no cited source); node b says $394.33 billion (no cited source). The values differ by 2.8%."
+    ],
+    "latency_s": 14.89,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": "JSONDecodeError: Expecting ',' delimiter: line 1 column 310 (char 309)",
+    "detail": [],
+    "latency_s": 4.72,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P14",
+   "label": true,
+   "category": "wrong_year",
+   "a": "Amazon's net sales in 2023 were $574.79 billion.",
+   "b": "Amazon reported 2023 net sales of $513.98 billion.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Amazon revenue (2023): node a says $574.79 billion (no cited source); node b says $513.98 billion (no cited source). The values differ by 10.6%."
+    ],
+    "latency_s": 14.2,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states Amazon's 2023 net sales were $574.79 billion, while Text B claims they were $513.98 billion. These two figures are significantly different and directly contradict each other."
+    ],
+    "latency_s": 4.87,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P15",
+   "label": true,
+   "category": "unit_error",
+   "a": "Apple's fiscal 2023 net sales were $383.29 billion.",
+   "b": "Apple's fiscal 2023 net sales were $383.29 million.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Apple revenue (2023): node b says $383.29 million (no cited source); node a says $383.29 billion (no cited source). The values differ by 99.9%."
+    ],
+    "latency_s": 14.2,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states net sales were $383.29 billion while Text B states $383.29 million, which are contradictory amounts differing by a factor of 1,000."
+    ],
+    "latency_s": 3.31,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P16",
+   "label": true,
+   "category": "unit_error",
+   "a": "Ford's net income in 2023 was $4.35 billion.",
+   "b": "Ford's 2023 net income was $4.35 million.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Ford net income (2023): node b says $4.35 million (no cited source); node a says $4.35 billion (no cited source). The values differ by 99.9%."
+    ],
+    "latency_s": 14.56,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states Ford's net income was $4.35 billion ($4,350,000,000), while Text B states it was $4.35 million ($4,350,000). These represent a difference of a factor of 1,000."
+    ],
+    "latency_s": 6.26,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P17",
+   "label": true,
+   "category": "unit_error",
+   "a": "Tesla delivered 1.81 million vehicles in 2023.",
+   "b": "Tesla delivered 1.81 thousand vehicles in 2023.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Tesla deliveries (2023): node b says -1,810 thousand vehicles (no cited source); node a says 1.81 million vehicles (no cited source). The values differ by 100.1%."
+    ],
+    "latency_s": 14.45,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states 1.81 million vehicles while Text B states 1.81 thousand vehicles; these represent a factor of 1000 difference in quantity."
+    ],
+    "latency_s": 3.03,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P18",
+   "label": true,
+   "category": "unit_error",
+   "a": "Microsoft's fiscal 2023 revenue was $211.92 billion.",
+   "b": "Microsoft's fiscal 2023 revenue was $211.92 trillion.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 8.8,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states the revenue was $211.92 billion while Text B states it was $211.92 trillion; billion and trillion represent a difference of 1,000 in magnitude."
+    ],
+    "latency_s": 3.01,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P19",
+   "label": true,
+   "category": "percentage",
+   "a": "Tesla's gross margin in 2023 was 18.2%.",
+   "b": "Tesla's 2023 gross margin was 25.6%.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Tesla gross margin (2023): node a says 18.2 % % (no cited source); node b says 25.6 % % (no cited source). The values differ by 28.9%."
+    ],
+    "latency_s": 14.41,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states Tesla's 2023 gross margin was 18.2%, while Text B claims it was 25.6%. These are contradictory numerical values for the same metric and year."
+    ],
+    "latency_s": 4.82,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P20",
+   "label": true,
+   "category": "percentage",
+   "a": "The US unemployment rate averaged 3.6% in 2023.",
+   "b": "In 2023 the US unemployment rate averaged 4.6%.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "US unemployment rate (2023): node a says 3.6 % % (no cited source); node b says 4.6 % (no cited source). The values differ by 21.7%."
+    ],
+    "latency_s": 13.66,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states the US unemployment rate averaged 3.6% in 2023, while Text B states it averaged 4.6%. These are directly contradictory numerical claims for the same metric and time period."
+    ],
+    "latency_s": 7.51,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P21",
+   "label": true,
+   "category": "direction",
+   "a": "Apple's net sales fell 2.8% in fiscal 2023.",
+   "b": "Apple's net sales rose 2.8% in fiscal 2023.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Apple net sales change (2023): node a says -2.8 % (no cited source); node b says 2.8 % (no cited source). The values differ by 200.0%."
+    ],
+    "latency_s": 14.65,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states sales fell by 2.8% while Text B states sales rose by the same percentage."
+    ],
+    "latency_s": 3.77,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P22",
+   "label": true,
+   "category": "date",
+   "a": "Python was first released in 1991.",
+   "b": "Python was first released in 1989.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Python first release year: node a says 1,991 (no cited source); node b says 1,989 (no cited source). The values differ by 0.1%."
+    ],
+    "latency_s": 13.68,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states Python was first released in 1991, while Text B states it was released in 1989. These are contradictory factual claims about the release year."
+    ],
+    "latency_s": 5.26,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P23",
+   "label": true,
+   "category": "date",
+   "a": "Mount Everest was first summited in 1953.",
+   "b": "Mount Everest was first summited in 1963.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Mount Everest first summited year: node a says 1,953 (no cited source); node b says 1,963 (no cited source). The values differ by 0.5%."
+    ],
+    "latency_s": 14.73,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states Mount Everest was first summited in 1953, while Text B states it was first summited in 1963. These are contradictory dates for the same event."
+    ],
+    "latency_s": 3.54,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P24",
+   "label": true,
+   "category": "multi_claim",
+   "a": "In 2023 Tesla's revenue was $96.77 billion and Ford's was $176.19 billion.",
+   "b": "In 2023 Tesla earned $96.77 billion in revenue while Ford earned $167.19 billion.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Tesla revenue (2023): node a says $96.77 billion (no cited source); node b says $96,770 billion (no cited source). The values differ by 99.9%.",
+     "Ford revenue (2023): node a says $176.19 billion (no cited source); node b says $167,190 billion (no cited source). The values differ by 99.9%."
+    ],
+    "latency_s": 28.08,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states Ford's revenue was $176.19 billion while Text B states Ford's revenue was $167.19 billion; these figures contradict each other by a difference of approximately 9.00 billion."
+    ],
+    "latency_s": 9.74,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P25",
+   "label": true,
+   "category": "multi_claim",
+   "a": "In fiscal 2023 Apple's net sales were $383.29 billion and Microsoft's revenue was $211.92 billion.",
+   "b": "Fiscal 2023: Apple net sales $383.29 billion; Microsoft revenue $221.92 billion.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 27.52,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states Microsoft's revenue was $211.92 billion, while Text B states it was $221.92 billion, which is a discrepancy of exactly $1.00 billion."
+    ],
+    "latency_s": 4.75,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P26",
+   "label": true,
+   "category": "multi_claim",
+   "a": "Mount Everest is 8,848.86 m high and K2 is 8,611 m high.",
+   "b": "Everest reaches 8,848.86 m, while K2 reaches 8,661 m.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Everest height: node b says 8,848.86 m (no cited source); node a says 8,848.86 m m (no cited source). The values differ by 100.0%.",
+     "K2 height: node b says 8,661 m (no cited source); node a says 8,611 m m (no cited source). The values differ by 100.0%."
+    ],
+    "latency_s": 25.42,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states K2 is 8,611 m high, while Text B states K2 reaches 8,661 m. This is a factual numerical discrepancy of 50 meters."
+    ],
+    "latency_s": 6.6,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P27",
+   "label": true,
+   "category": "multi_claim",
+   "a": "GM's revenue was $156.74 billion in 2022 and $171.84 billion in 2023.",
+   "b": "GM's revenue: 2022 $156.74 billion, 2023 $161.84 billion.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 32.23,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states GM's 2023 revenue as $171.84 billion, while Text B states it as $161.84 billion."
+    ],
+    "latency_s": 3.77,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P28",
+   "label": true,
+   "category": "multi_claim",
+   "a": "Tesla's 2023 revenue was $96.77 billion and its net income was $15.00 billion.",
+   "b": "Tesla made $96.77 billion of revenue in 2023 and a net income of $12.6 billion.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Tesla net income (2023): node b says $12,600,000,000 billion (no cited source); node a says $15 billion (no cited source). The values differ by 16.0%."
+    ],
+    "latency_s": 37.27,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Both texts agree on Tesla's 2023 revenue ($96.77 billion) but disagree on net income; Text A states $15.00 billion while Text B states $12.6 billion."
+    ],
+    "latency_s": 6.23,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P29",
+   "label": true,
+   "category": "non_numeric",
+   "a": "The capital of Australia is Canberra.",
+   "b": "The capital of Australia is Sydney.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 10.28,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states the capital of Australia is Canberra, while Text B states it is Sydney. These are contradictory factual claims regarding the same entity (capital of Australia)."
+    ],
+    "latency_s": 3.4,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P30",
+   "label": true,
+   "category": "non_numeric",
+   "a": "Tesla's chief executive is Elon Musk.",
+   "b": "Tesla's chief executive is Tim Cook.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 14.39,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states Elon Musk is Tesla's chief executive, while Text B states Tim Cook is Tesla's chief executive. These are contradictory names for the same role."
+    ],
+    "latency_s": 3.9,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P31",
+   "label": true,
+   "category": "non_numeric",
+   "a": "Python was created by Guido van Rossum.",
+   "b": "Python was created by James Gosling.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 9.43,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A claims Python was created by Guido van Rossum, while Text B claims it was created by James Gosling. This is a factual contradiction regarding the creator's identity."
+    ],
+    "latency_s": 4.15,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "P32",
+   "label": true,
+   "category": "non_numeric",
+   "a": "The Eiffel Tower is located in Paris.",
+   "b": "The Eiffel Tower is located in Lyon.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Eiffel Tower location: node a says Paris (no cited source); node b says Lyon (no cited source). The statements give different values."
+    ],
+    "latency_s": 14.83,
+    "infra": false
+   },
+   "old": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Text A states the Eiffel Tower is in Paris while Text B states it is in Lyon, which are different cities."
+    ],
+    "latency_s": 2.97,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N01",
+   "label": false,
+   "category": "rounding",
+   "a": "Tesla's 2023 revenue was $96.77 billion.",
+   "b": "Tesla's revenue in 2023 was about $97 billion.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 15.13,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 0.86,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N02",
+   "label": false,
+   "category": "rounding",
+   "a": "Apple's fiscal 2023 net sales were $383.29 billion.",
+   "b": "Apple's fiscal 2023 net sales were $383.3 billion.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 15.36,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 0.94,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N03",
+   "label": false,
+   "category": "rounding",
+   "a": "Mount Everest is 8,848.86 metres high.",
+   "b": "Mount Everest is 8,849 metres high.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 14.58,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.16,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N04",
+   "label": false,
+   "category": "rounding",
+   "a": "Ford's 2023 revenue was $176.19 billion.",
+   "b": "Ford's revenue was roughly $176 billion in 2023.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 17.51,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 0.97,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N05",
+   "label": false,
+   "category": "rounding",
+   "a": "Microsoft's fiscal 2023 revenue was $211.92 billion.",
+   "b": "Microsoft's fiscal 2023 revenue was about $212 billion.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 19.28,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 0.94,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N06",
+   "label": false,
+   "category": "rounding",
+   "a": "GM's 2023 revenue was $171.84 billion.",
+   "b": "GM had revenue of $171.8 billion in 2023.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 15.44,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.0,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N07",
+   "label": false,
+   "category": "unit_conversion",
+   "a": "Ford's 2023 revenue was $176.19 billion.",
+   "b": "Ford's 2023 revenue was $176,191 million.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 11.99,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 0.96,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N08",
+   "label": false,
+   "category": "unit_conversion",
+   "a": "Apple's fiscal 2023 net sales were $383.29 billion.",
+   "b": "Apple's net sales for fiscal 2023 were $383,285 million.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 17.31,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.26,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N09",
+   "label": false,
+   "category": "unit_conversion",
+   "a": "Mount Everest is 8,848.86 metres high.",
+   "b": "Mount Everest is 8.85 km high.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 14.78,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.37,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N10",
+   "label": false,
+   "category": "unit_conversion",
+   "a": "Tesla's 2023 revenue was $96.77 billion.",
+   "b": "Tesla's 2023 revenue was $96,773 million.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 13.82,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.32,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N11",
+   "label": false,
+   "category": "unit_conversion",
+   "a": "Microsoft's fiscal 2023 revenue was $211,915 million.",
+   "b": "Microsoft's fiscal 2023 revenue was $211.9 billion.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 15.93,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.33,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N12",
+   "label": false,
+   "category": "paraphrase",
+   "a": "Tesla's total revenue for 2023 was $96.77 billion.",
+   "b": "In 2023, Tesla generated revenues of $96.77bn.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 14.26,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.34,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N13",
+   "label": false,
+   "category": "paraphrase",
+   "a": "Apple's net sales in fiscal 2023 were $383.29 billion.",
+   "b": "Apple's fiscal-year 2023 revenue: $383.29 billion.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 14.54,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.21,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N14",
+   "label": false,
+   "category": "paraphrase",
+   "a": "K2 rises 8,611 metres above sea level.",
+   "b": "K2's height is 8,611 m.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 13.15,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.09,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N15",
+   "label": false,
+   "category": "paraphrase",
+   "a": "GM reported 2023 revenue of $171.84 billion.",
+   "b": "General Motors' 2023 total revenues reached $171.84 billion.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "General Motors revenue (2023): node b says $171.84 billion (no cited source); node a says $171,840 billion (no cited source). The values differ by 99.9%."
+    ],
+    "latency_s": 15.15,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.35,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N16",
+   "label": false,
+   "category": "paraphrase",
+   "a": "The Eiffel Tower is 330 metres tall.",
+   "b": "The Eiffel Tower stands 330 m tall.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 17.65,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.1,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N17",
+   "label": false,
+   "category": "different_period",
+   "a": "Tesla's 2022 revenue was $81.46 billion.",
+   "b": "Tesla's 2023 revenue was $96.77 billion.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 18.15,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.07,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N18",
+   "label": false,
+   "category": "different_period",
+   "a": "Ford's revenue was $158.06 billion in 2022.",
+   "b": "Ford's revenue was $176.19 billion in 2023.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 18.21,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.37,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N19",
+   "label": false,
+   "category": "different_period",
+   "a": "Apple's fiscal 2022 net sales were $394.33 billion.",
+   "b": "Apple's fiscal 2023 net sales were $383.29 billion.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 16.86,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.35,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N20",
+   "label": false,
+   "category": "different_period",
+   "a": "A 1955 survey measured Mount Everest at 8,848 metres.",
+   "b": "A 2020 survey measured Mount Everest at 8,848.86 metres.",
+   "new": {
+    "pred": true,
+    "error": null,
+    "detail": [
+     "Mount Everest height: node b says 8,848.86 metres (no cited source); node a says 8,848 metres m (no cited source). The values differ by 0.0%."
+    ],
+    "latency_s": 15.4,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.58,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N21",
+   "label": false,
+   "category": "different_entity",
+   "a": "Tesla's 2023 revenue was $96.77 billion.",
+   "b": "Ford's 2023 revenue was $176.19 billion.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 14.36,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.29,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N22",
+   "label": false,
+   "category": "different_entity",
+   "a": "Mount Everest is 8,848.86 metres high.",
+   "b": "K2 is 8,611 metres high.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 14.97,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.36,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N23",
+   "label": false,
+   "category": "different_entity",
+   "a": "Apple's fiscal 2023 net sales were $383.29 billion.",
+   "b": "Microsoft's fiscal 2023 revenue was $211.92 billion.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 15.29,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.37,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N24",
+   "label": false,
+   "category": "different_entity",
+   "a": "GM's 2023 revenue was $171.84 billion.",
+   "b": "Ford's 2023 revenue was $176.19 billion.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 14.19,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.31,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N25",
+   "label": false,
+   "category": "different_metric",
+   "a": "Tesla's 2023 revenue was $96.77 billion.",
+   "b": "Tesla's 2023 net income was $15.00 billion.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 14.47,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.32,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N26",
+   "label": false,
+   "category": "different_metric",
+   "a": "Tesla's gross margin in 2023 was 18.2%.",
+   "b": "Tesla's operating margin in 2023 was 8.2%.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 13.27,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.31,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N27",
+   "label": false,
+   "category": "different_metric",
+   "a": "Apple's fiscal 2023 net sales were $383.29 billion.",
+   "b": "Apple's fiscal 2023 net income was $97.0 billion.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 13.65,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.15,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N28",
+   "label": false,
+   "category": "different_metric",
+   "a": "Tesla's 2023 revenue was $96.77 billion.",
+   "b": "Tesla delivered 1.81 million vehicles in 2023.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 12.5,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.12,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N29",
+   "label": false,
+   "category": "agreement_text",
+   "a": "The capital of Australia is Canberra.",
+   "b": "Canberra is Australia's capital city.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 10.81,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 0.85,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N30",
+   "label": false,
+   "category": "agreement_text",
+   "a": "Python was created by Guido van Rossum.",
+   "b": "Guido van Rossum designed the Python language.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 10.74,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.66,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N31",
+   "label": false,
+   "category": "verifier_quote",
+   "a": "Tesla's 2023 revenue was $96.77 billion [1].",
+   "b": "Fact check: the claim that Tesla's 2023 revenue was $96.77 billion is supported by the SEC filing.",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 13.94,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.33,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  },
+  {
+   "id": "N32",
+   "label": false,
+   "category": "summary_repeat",
+   "a": "Ford earned $176.19 billion in revenue in 2023.",
+   "b": "Ford's 2023 revenue ($176.19 billion) was higher than GM's ($171.84 billion).",
+   "new": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 18.62,
+    "infra": false
+   },
+   "old": {
+    "pred": false,
+    "error": null,
+    "detail": [],
+    "latency_s": 1.1,
+    "infra": false,
+    "reused_from": "conflicts_20261124T152632Z-local.json"
+   }
+  }
+ ],
+ "llm": "local qwen3.5:9b (Ollama)"
+}

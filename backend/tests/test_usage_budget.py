@@ -104,10 +104,11 @@ async def test_budget_downgrades_then_skips():
     kinds = [t for t, _ in events]
     assert "budget_economy" in kinds and "budget_downgrade" in kinds
     downgrade = next(p for t, p in events if t == "budget_downgrade")
-    # cheapest per skill in PRICES: drafting-v1 (gpt-oss-120b) beats qwen; chart-v2 (gpt-oss-20b) beats 120b
-    assert downgrade["to"] in (["drafting-v1"], ["chart-v2"])
-    assert "budget_exhausted" in kinds
-    assert result["usage"]["budget"]["mode"] == "exhausted"
+    # cheapest per skill in PRICES: the local model on the laptop costs nothing per token
+    assert downgrade["to"] in (["drafting-local"], ["chart-local"])
+    # the downgraded nodes run on the free local model, so the budget is never used up
+    assert "budget_exhausted" not in kinds
+    assert result["usage"]["budget"]["mode"] == "economy" and result["status"] == "complete"
 
 
 async def test_exhausted_budget_skips_unstarted_nodes():

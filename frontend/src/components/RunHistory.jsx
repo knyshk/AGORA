@@ -177,6 +177,15 @@ export default function RunHistory({ backendUrl }) {
                   ` · budget $${state.runUsage.budget.limit_usd}, mode ${state.runUsage.budget.mode}`}
               </div>
             )}
+            <div style={{ margin: "8px 0", display: "flex", gap: 8 }}>
+              <a style={{ ...button, textDecoration: "none" }} href={`${backendUrl}/runs/${detail.run.id}/report.docx`}>
+                📄 Word report
+              </a>
+              <a style={{ ...button, textDecoration: "none" }} href={`${backendUrl}/runs/${detail.run.id}/report.html`}
+                 target="_blank" rel="noreferrer">
+                🖨 Printable report (PDF)
+              </a>
+            </div>
             {detail.run.conflicts?.length > 0 && (
               <div style={{ color: "#ff9187" }}>Conflicts in this run: {detail.run.conflicts.length}</div>
             )}

@@ -3,48 +3,72 @@
   "prior": 0.917,
   "n": 10,
   "bench_mean": 1.0,
-  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json"
+  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json,bench_20261124T143503Z.json,bench_20261124T143549Z.json,bench_20261124T143841Z.json,bench_20261124T144538Z.json"
  },
  "chart-v2": {
   "prior": 0.917,
   "n": 10,
   "bench_mean": 1.0,
-  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json"
+  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json,bench_20261124T143503Z.json,bench_20261124T143549Z.json,bench_20261124T143841Z.json,bench_20261124T144538Z.json"
  },
  "drafting-v1": {
   "prior": 0.902,
   "n": 10,
   "bench_mean": 0.982,
-  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json"
+  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json,bench_20261124T143503Z.json,bench_20261124T143549Z.json,bench_20261124T143841Z.json,bench_20261124T144538Z.json"
  },
  "drafting-v2": {
   "prior": 0.902,
   "n": 10,
   "bench_mean": 0.982,
-  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json"
+  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json,bench_20261124T143503Z.json,bench_20261124T143549Z.json,bench_20261124T143841Z.json,bench_20261124T144538Z.json"
  },
  "fact_check-v1": {
   "prior": 0.917,
   "n": 10,
   "bench_mean": 1.0,
-  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json"
+  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json,bench_20261124T143503Z.json,bench_20261124T143549Z.json,bench_20261124T143841Z.json,bench_20261124T144538Z.json"
  },
  "fact_check-v2": {
   "prior": 0.917,
   "n": 10,
   "bench_mean": 1.0,
-  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json"
+  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json,bench_20261124T143503Z.json,bench_20261124T143549Z.json,bench_20261124T143841Z.json,bench_20261124T144538Z.json"
  },
  "research-v1": {
   "prior": 0.917,
   "n": 10,
   "bench_mean": 1.0,
-  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json"
+  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json,bench_20261124T143503Z.json,bench_20261124T143549Z.json,bench_20261124T143841Z.json,bench_20261124T144538Z.json"
  },
  "research-v2": {
   "prior": 0.496,
   "n": 10,
   "bench_mean": 0.495,
-  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json"
+  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json,bench_20261124T143503Z.json,bench_20261124T143549Z.json,bench_20261124T143841Z.json,bench_20261124T144538Z.json"
+ },
+ "chart-local": {
+  "prior": 0.889,
+  "n": 10,
+  "bench_mean": 0.967,
+  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json,bench_20261124T143503Z.json,bench_20261124T143549Z.json,bench_20261124T143841Z.json,bench_20261124T144538Z.json"
+ },
+ "drafting-local": {
+  "prior": 0.812,
+  "n": 10,
+  "bench_mean": 0.875,
+  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json,bench_20261124T143503Z.json,bench_20261124T143549Z.json,bench_20261124T143841Z.json,bench_20261124T144538Z.json"
+ },
+ "fact_check-local": {
+  "prior": 0.792,
+  "n": 10,
+  "bench_mean": 0.85,
+  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json,bench_20261124T143503Z.json,bench_20261124T143549Z.json,bench_20261124T143841Z.json,bench_20261124T144538Z.json"
+ },
+ "research-local": {
+  "prior": 0.917,
+  "n": 10,
+  "bench_mean": 1.0,
+  "results_file": "bench_20261124T091935Z-regraded.json,bench_20261124T093456Z.json,bench_20261124T093858Z.json,bench_20261124T094147Z.json,bench_20261124T143503Z.json,bench_20261124T143549Z.json,bench_20261124T143841Z.json,bench_20261124T144538Z.json"
  }
 }

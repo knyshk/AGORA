@@ -1,7 +1,9 @@
 import os
 import time
 from langchain_openai import ChatOpenAI
-from config import PROVIDER_ENDPOINTS, PROVIDER_DEFAULT_MODELS, FALLBACK_CHAIN
+import contextvars
+
+from config import PROVIDER_ENDPOINTS, PROVIDER_DEFAULT_MODELS, FALLBACK_CHAIN, LOCAL_PROVIDERS
 from agents.usage import record_call
 
 FAST_SKILLS = {"chart", "fact_check"}
@@ -15,7 +17,24 @@ SKILL_PREFERRED_PROVIDER = {
     "arbitrator": "gemini",
 }
 
+LOCAL_TIMEOUT_S = int(os.getenv("LOCAL_TIMEOUT_S", "180"))  # a laptop model is slower than a cloud API
+
+# "Local LLM mode": every LLM call of the current run goes to the local model only (set by the executor)
+_only_provider: contextvars.ContextVar = contextvars.ContextVar("agora_only_provider", default=None)
+
+
+def force_provider(provider: str | None):
+    _only_provider.set(provider)
+
+
 def _make_llm(provider: str, model: str = None, timeout: int = 25):
+    if provider in LOCAL_PROVIDERS:
+        # reasoning_effort "none": the local model answers directly instead of writing thousands of hidden
+        # "thinking" tokens first (measured: 99 s -> 1.5 s for the same one-sentence answer)
+        return ChatOpenAI(base_url=PROVIDER_ENDPOINTS[provider], api_key="local",
+                          model=model or PROVIDER_DEFAULT_MODELS.get(provider),
+                          timeout=max(timeout, LOCAL_TIMEOUT_S), max_retries=0,
+                          extra_body={"reasoning_effort": os.getenv("LOCAL_REASONING_EFFORT", "none")})
     api_key = os.getenv(f"{provider.upper()}_API_KEY")
     if not api_key:
         raise ValueError(f"No API key set for provider '{provider}' — "
@@ -35,11 +54,16 @@ def _is_rate_limit(e: Exception) -> bool:
 
 async def run_agent(role: str, prompt: str,
                     provider: str = None, model: str = None) -> str:
-    preferred = provider or SKILL_PREFERRED_PROVIDER.get(role)
-    chain = [preferred] if preferred else []
-    for p in FALLBACK_CHAIN:
-        if p not in chain:
-            chain.append(p)
+    only = _only_provider.get()
+    if only:
+        keep_model = model if provider == only else None   # a cloud agent's model name means nothing locally
+        provider, model, chain = only, keep_model, [only]
+    else:
+        preferred = provider or SKILL_PREFERRED_PROVIDER.get(role)
+        chain = [preferred] if preferred else []
+        for p in FALLBACK_CHAIN:
+            if p not in chain:
+                chain.append(p)
 
     last_err = None
     for attempt_provider in chain:

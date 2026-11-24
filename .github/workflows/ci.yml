@@ -45,7 +45,7 @@ jobs:
           DATABASE_URL: postgresql+psycopg2://agora:agora@localhost:5432/agora
         run: alembic upgrade head && alembic check
       - name: Every committed agent manifest has a valid Ed25519 signature
-        run: python -c "from registry.registry import REGISTRY, REJECTED; assert not REJECTED, REJECTED; assert len(REGISTRY) == 8; print('8 manifests verified')"
+        run: python -c "from registry.registry import REGISTRY, REJECTED; assert not REJECTED, REJECTED; assert len(REGISTRY) == 12; print('12 manifests verified')"
 
   frontend:
     name: Frontend lint and build

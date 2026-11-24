@@ -23,7 +23,10 @@ append-only log, so any run can be replayed, forked from a checkpoint and audite
 | **Live collaboration** | Accounts (argon2 + JWT), sessions (isolated → collaborative without losing state), owner/editor/viewer roles, invite links, WebSocket broadcast of the event log, presence, node takeover with locks (a person writes the node instead of an agent), catch-up digest. |
 | **Security** | Agents served as a real **MCP** server (official SDK); Ed25519-**signed agent manifests** verified at startup (a tampered manifest is rejected); short-lived **task-scoped tokens** for every agent call; **append-only, hash-chained audit log** (UPDATE/DELETE blocked by the database). |
 | **Cost and reliability** | Per-node ledger of every LLM call (tokens, latency, notional cost); budget governor (economy mode at 80 %, skip at 100 %); per-node timeout with reassignment. |
-| **Observability** | Dashboard computed only from stored events: runs per day, per-agent success/latency/quality/cost, trust over time, conflicts, human decisions, audit-log integrity. |
+| **Observability** | Dashboard computed only from stored events: runs per day, per-agent success/latency/quality/cost, trust over time, conflicts, human decisions, audit-log integrity, and the routing-strategy simulation. |
+| **Local LLM (on the laptop)** | An open-weight model (qwen3.5 9B via Ollama) is a provider and the last fallback: when every cloud tier is rate-limited, work continues locally. "Run on my laptop" plans and runs a whole task with no cloud LLM; local agents carry signed manifests and benchmark-derived trust. |
+| **Self-correction** | Claims the fact-checker marks unsupported or contradicted go back to the drafting agent with the evidence; the rewrite is fact-checked again and kept only if more claims are supported. The original stays visible. |
+| **Shareable report** | One click exports a run as a Word document or a printable page (Save as PDF): the cited report, the chart, sources, fact-check table, conflicts and decisions, and how it was produced (agents, models, quality, tokens, why each agent was chosen, audit-log state). |
 
 ## Measured results so far
 
@@ -36,6 +39,10 @@ Sample sizes are given next to each number. The full evaluation (RQ1–RQ5 with 
 | Agent quality (all skills) | 0.98–1.00 for every tool-using agent | 10 tasks per agent | AGORA-Bench |
 | Conflict detection (RQ2) | structured F1 0.955 (precision 0.91, recall 1.00) vs pairwise-LLM baseline F1 0.941 (precision 0.89) | 64 labelled pairs | `bench/eval_conflicts.py` — a rounding bug behind all 3 false positives has been fixed since; a confirming run is pending (free-tier quota) |
 | Fork vs full re-run (RQ5) | 21 s vs 51 s | 1 run | early measurement, to be repeated |
+| Local 9B model vs cloud 120B (same tools) | research 1.00 vs 1.00 · chart 0.97 vs 1.00 · drafting 0.88 vs 0.98 · fact-check 0.85 vs 1.00; local is slower (research 41 s vs 9 s) | 10 tasks per agent | AGORA-Bench (deterministic checks) |
+| Routing when the default agent degrades (RQ1, simulation) | reputation strategies keep quality ≈ 0.97 and switch within ≈ 21–38 tasks; fixed routing drops to 0.56 and never recovers | 600 tasks × 30 seeds | `bench/simulate_routing.py` (production router, agents drawn from measured bench scores) |
+| Same, two-agent hard case | the simulation exposed that a fixed-weight benchmark prior slowed recovery (Thompson: 262 tasks, 21/30 seeds never switched); a fading prior fixed it (175 tasks, 0/30) | 600 × 30 | `routing_sim_20261124T141735Z` vs `…141746Z` |
+| Conflict detection on the local 9B model | pairwise-LLM baseline F1 0.968 vs structured F1 0.847 (precision 0.93) — structured checking needs a strong extraction model; with the cloud model it wins | 64 labelled pairs | `bench/eval_conflicts.py --local` |
 
 The benchmark also found real bugs (mixed units in charts, stale SEC data for Apple); both were fixed and
 re-measured, and the before/after result files are kept.
@@ -55,7 +62,9 @@ React + Vite UI ──HTTP/WebSocket──► FastAPI ──► planner ─► D
 
 ## Run it
 
-Needs Docker Desktop (running) and Node 22+. All tools and LLM tiers are free.
+Needs Docker Desktop (running) and Node 22+. All tools and LLM tiers are free. Optional local model:
+`brew install ollama`, `ollama pull qwen3.5:9b` (about 7.6 GB), then
+`OLLAMA_CONTEXT_LENGTH=12288 OLLAMA_KEEP_ALIVE=30m ollama serve` before starting AGORA.
 
 ```bash
 cp backend/.env.example backend/.env      # then fill in your own free API keys (never commit .env)
@@ -68,6 +77,7 @@ cd frontend && npm install && npm run dev # UI on http://localhost:5173
 | `make test` | backend tests inside Docker (no network, LLMs mocked) |
 | `cd frontend && npm run test:e2e` | Playwright browser tests (backend mocked) |
 | `make bench` / `make priors` | run AGORA-Bench; set reputation priors from it |
+| `docker compose exec backend python -m bench.simulate_routing` | routing-strategy simulation (RQ1); `--fixed-prior` reproduces the earlier design |
 | `docker compose exec backend python -m bench.eval_conflicts` | conflict-detection evaluation (RQ2) |
 | `docker compose exec backend python -m security.sign_manifests` | re-sign agent manifests after editing `registry/specs.py` (needs the private key in `backend/keys/`, which is never committed) |
 | `docker compose exec backend alembic revision --autogenerate -m "..."` | new database migration after changing `db/models.py` |

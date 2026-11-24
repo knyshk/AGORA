@@ -1,0 +1,296 @@
+{
+ "meta": {
+  "finished_at": "20261124T143503Z",
+  "n_tasks": 40,
+  "judge": false,
+  "filters": {
+   "skill": null,
+   "agent": "chart-local",
+   "tasks": null,
+   "tier": null
+  }
+ },
+ "summary": {
+  "chart-local": {
+   "skill": "chart",
+   "model": "qwen3.5:9b",
+   "strategy": "spec",
+   "n_scored": 10,
+   "n_infra_errors": 0,
+   "mean": 0.967,
+   "ci95": [
+    0.901,
+    1
+   ],
+   "mean_latency_s": 3.98
+  }
+ },
+ "records": [
+  {
+   "task": "C1",
+   "skill": "chart",
+   "agent": "chart-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "spec",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "2 point(s), max 2"
+    }
+   },
+   "judge": null,
+   "latency_s": 4.03,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: Tesla Revenue by Year** (bar)\n\n| Year | Series | Value (USD billions) |\n|---|---|---|\n| 2022 | - | 81.46 |\n| 2023 | - | 96.77 |\n\nAll 2 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"Tesla Revenue by Year\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"2022\",\n    \"series\": \"Revenue\",\n    \"value\": 81.46\n   },\n   {\n    \"category\": \"2023\",\n    \"series\": \"Revenue\",\n    \"value\": 96.77\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"nominal\",\n   \"title\": \"Year\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Revenue (USD billions)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Year\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Revenue (USD billions)\",\n    \"format\": \",.2f\"\n   }\n  ]\n },\n \"mark\": {\n  \"type\": \"bar\"\n }\n}\n```"
+  },
+  {
+   "task": "C2",
+   "skill": "chart",
+   "agent": "chart-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "spec",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "3 point(s), max 3"
+    }
+   },
+   "judge": null,
+   "latency_s": 3.46,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: 2023 Revenue of Tesla, Ford and GM** (bar)\n\n| Company | Series | Value (USD billions) |\n|---|---|---|\n| Tesla | - | 96.77 |\n| Ford | - | 176.19 |\n| General Motors | - | 171.84 |\n\nAll 3 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"2023 Revenue of Tesla, Ford and GM\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"Tesla\",\n    \"series\": \"Revenue\",\n    \"value\": 96.77\n   },\n   {\n    \"category\": \"Ford\",\n    \"series\": \"Revenue\",\n    \"value\": 176.19\n   },\n   {\n    \"category\": \"General Motors\",\n    \"series\": \"Revenue\",\n    \"value\": 171.84\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"nominal\",\n   \"title\": \"Company\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Revenue (USD billions)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Company\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Revenue (USD billions)\",\n    \"format\": \",.2f\"\n   }\n  ]\n },\n \"mark\": {\n  \"type\": \"bar\"\n }\n}\n```"
+  },
+  {
+   "task": "C3",
+   "skill": "chart",
+   "agent": "chart-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "spec",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "4 point(s), max 4"
+    }
+   },
+   "judge": null,
+   "latency_s": 5.38,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: Apple and Microsoft Revenue Fiscal 2022-2023** (grouped bar)\n\n| Company | Series | Value (USD millions) |\n|---|---|---|\n| Apple | Fiscal 2022 | 394,328 |\n| Apple | Fiscal 2023 | 383,285 |\n| Microsoft | Fiscal 2022 | 198,270 |\n| Microsoft | Fiscal 2023 | 211,915 |\n\nAll 4 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"Apple and Microsoft Revenue Fiscal 2022-2023\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"Apple\",\n    \"series\": \"Fiscal 2022\",\n    \"value\": 394328\n   },\n   {\n    \"category\": \"Apple\",\n    \"series\": \"Fiscal 2023\",\n    \"value\": 383285\n   },\n   {\n    \"category\": \"Microsoft\",\n    \"series\": \"Fiscal 2022\",\n    \"value\": 198270\n   },\n   {\n    \"category\": \"Microsoft\",\n    \"series\": \"Fiscal 2023\",\n    \"value\": 211915\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"nominal\",\n   \"title\": \"Company\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Revenue (USD millions)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Company\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Revenue (USD millions)\",\n    \"format\": \",.2f\"\n   }\n  ],\n  \"color\": {\n   \"field\": \"series\",\n   \"type\": \"nominal\",\n   \"title\": \"Series\"\n  },\n  \"xOffset\": {\n   \"field\": \"series\"\n  }\n },\n \"mark\": {\n  \"type\": \"bar\"\n }\n}\n```"
+  },
+  {
+   "task": "C4",
+   "skill": "chart",
+   "agent": "chart-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "spec",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "2 point(s), max 2"
+    }
+   },
+   "judge": null,
+   "latency_s": 2.55,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: Heights of Mount Everest and K2** (bar)\n\n| Mountain | Series | Value (metres) |\n|---|---|---|\n| Mount Everest | - | 8,848.86 |\n| K2 | - | 8,611 |\n\nAll 2 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"Heights of Mount Everest and K2\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"Mount Everest\",\n    \"series\": \"Height\",\n    \"value\": 8848.86\n   },\n   {\n    \"category\": \"K2\",\n    \"series\": \"Height\",\n    \"value\": 8611\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"nominal\",\n   \"title\": \"Mountain\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Height (metres)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Mountain\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Height (metres)\",\n    \"format\": \",.2f\"\n   }\n  ]\n },\n \"mark\": {\n  \"type\": \"bar\"\n }\n}\n```"
+  },
+  {
+   "task": "C5",
+   "skill": "chart",
+   "agent": "chart-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "spec",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "3 point(s), max 3"
+    }
+   },
+   "judge": null,
+   "latency_s": 4.16,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: 2023 Revenue of Tesla, Ford, GM and Stellantis** (bar)\n\n| Company | Series | Value (USD billions) |\n|---|---|---|\n| Tesla | 2023 | 96.77 |\n| Ford | 2023 | 176.19 |\n| GM | 2023 | 171.84 |\n\nAll 3 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"2023 Revenue of Tesla, Ford, GM and Stellantis\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"Tesla\",\n    \"series\": \"2023\",\n    \"value\": 96.77\n   },\n   {\n    \"category\": \"Ford\",\n    \"series\": \"2023\",\n    \"value\": 176.19\n   },\n   {\n    \"category\": \"GM\",\n    \"series\": \"2023\",\n    \"value\": 171.84\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"nominal\",\n   \"title\": \"Company\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Revenue (USD billions)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Company\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Revenue (USD billions)\",\n    \"format\": \",.2f\"\n   }\n  ],\n  \"color\": {\n   \"field\": \"series\",\n   \"type\": \"nominal\",\n   \"title\": \"Series\"\n  }\n },\n \"mark\": {\n  \"type\": \"bar\"\n }\n}\n```"
+  },
+  {
+   "task": "C6",
+   "skill": "chart",
+   "agent": "chart-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "spec",
+   "score": 0.667,
+   "deterministic": 0.667,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "5 point(s), max 5"
+    },
+    "chart_mark": {
+     "score": 0.0,
+     "detail": "chart type bar, expected line"
+    }
+   },
+   "judge": null,
+   "latency_s": 3.99,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: Tesla Revenue by Year** (bar)\n\n| Year | Series | Value (USD billions) |\n|---|---|---|\n| 2019 | - | 24.58 |\n| 2020 | - | 31.54 |\n| 2021 | - | 53.82 |\n| 2022 | - | 81.46 |\n| 2023 | - | 96.77 |\n\nAll 5 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"Tesla Revenue by Year\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"2019\",\n    \"series\": \"Revenue\",\n    \"value\": 24.58\n   },\n   {\n    \"category\": \"2020\",\n    \"series\": \"Revenue\",\n    \"value\": 31.54\n   },\n   {\n    \"category\": \"2021\",\n    \"series\": \"Revenue\",\n    \"value\": 53.82\n   },\n   {\n    \"category\": \"2022\",\n    \"series\": \"Revenue\",\n    \"value\": 81.46\n   },\n   {\n    \"category\": \"2023\",\n    \"series\": \"Revenue\",\n    \"value\": 96.77\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"nominal\",\n   \"title\": \"Year\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Revenue (USD billions)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Year\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Revenue (USD billions)\",\n    \"format\": \",.2f\"\n   }\n  ]\n },\n \"mark\": {\n  \"type\": \"bar\"\n }\n}\n```"
+  },
+  {
+   "task": "C7",
+   "skill": "chart",
+   "agent": "chart-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "spec",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "2 point(s), max 2"
+    },
+    "chart_consistent_scale": {
+     "score": 1.0,
+     "detail": "consistent unit (scale x1)"
+    }
+   },
+   "judge": null,
+   "latency_s": 3.48,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: 2023 Revenue: Tesla and Ford** (bar)\n\n| Company | Series | Value (billion USD) |\n|---|---|---|\n| Tesla | 2023 | 96.77 |\n| Ford | 2023 | 176.19 |\n\nAll 2 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"2023 Revenue: Tesla and Ford\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"Tesla\",\n    \"series\": \"2023\",\n    \"value\": 96.77\n   },\n   {\n    \"category\": \"Ford\",\n    \"series\": \"2023\",\n    \"value\": 176.19\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"nominal\",\n   \"title\": \"Company\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Revenue (billion USD)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Company\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Revenue (billion USD)\",\n    \"format\": \",.2f\"\n   }\n  ],\n  \"color\": {\n   \"field\": \"series\",\n   \"type\": \"nominal\",\n   \"title\": \"Series\"\n  }\n },\n \"mark\": {\n  \"type\": \"bar\"\n }\n}\n```"
+  },
+  {
+   "task": "C8",
+   "skill": "chart",
+   "agent": "chart-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "spec",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "2 point(s), max 2"
+    }
+   },
+   "judge": null,
+   "latency_s": 2.95,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: Tesla Gross Margin by Year** (bar)\n\n| Year | Series | Value (%) |\n|---|---|---|\n| 2022 | - | 25.6 |\n| 2023 | - | 18.2 |\n\nAll 2 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"Tesla Gross Margin by Year\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"2022\",\n    \"series\": \"Gross margin\",\n    \"value\": 25.6\n   },\n   {\n    \"category\": \"2023\",\n    \"series\": \"Gross margin\",\n    \"value\": 18.2\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"nominal\",\n   \"title\": \"Year\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Gross margin (%)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Year\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Gross margin (%)\",\n    \"format\": \",.2f\"\n   }\n  ]\n },\n \"mark\": {\n  \"type\": \"bar\"\n }\n}\n```"
+  },
+  {
+   "task": "C9",
+   "skill": "chart",
+   "agent": "chart-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "spec",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "6 point(s), max 6"
+    },
+    "chart_mark": {
+     "score": 1.0,
+     "detail": "chart type grouped_bar, expected grouped_bar"
+    }
+   },
+   "judge": null,
+   "latency_s": 6.36,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: Automaker Revenue 2022-2023** (grouped bar)\n\n| Company | Series | Value (USD billions) |\n|---|---|---|\n| Tesla | 2022 | 81.46 |\n| Tesla | 2023 | 96.77 |\n| Ford | 2022 | 158.06 |\n| Ford | 2023 | 176.19 |\n| General Motors | 2022 | 156.74 |\n| General Motors | 2023 | 171.84 |\n\nAll 6 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"Automaker Revenue 2022-2023\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"Tesla\",\n    \"series\": \"2022\",\n    \"value\": 81.46\n   },\n   {\n    \"category\": \"Tesla\",\n    \"series\": \"2023\",\n    \"value\": 96.77\n   },\n   {\n    \"category\": \"Ford\",\n    \"series\": \"2022\",\n    \"value\": 158.06\n   },\n   {\n    \"category\": \"Ford\",\n    \"series\": \"2023\",\n    \"value\": 176.19\n   },\n   {\n    \"category\": \"General Motors\",\n    \"series\": \"2022\",\n    \"value\": 156.74\n   },\n   {\n    \"category\": \"General Motors\",\n    \"series\": \"2023\",\n    \"value\": 171.84\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"nominal\",\n   \"title\": \"Company\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Revenue (USD billions)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Company\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Revenue (USD billions)\",\n    \"format\": \",.2f\"\n   }\n  ],\n  \"color\": {\n   \"field\": \"series\",\n   \"type\": \"nominal\",\n   \"title\": \"Series\"\n  },\n  \"xOffset\": {\n   \"field\": \"series\"\n  }\n },\n \"mark\": {\n  \"type\": \"bar\"\n }\n}\n```"
+  },
+  {
+   "task": "C10",
+   "skill": "chart",
+   "agent": "chart-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "spec",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "2 point(s), max 2"
+    },
+    "chart_consistent_scale": {
+     "score": 1.0,
+     "detail": "consistent unit (scale x1)"
+    }
+   },
+   "judge": null,
+   "latency_s": 3.4,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: Tesla and Ford Net Income in 2023** (bar)\n\n| Company | Series | Value (billion USD) |\n|---|---|---|\n| Tesla | 2023 | 15.0 |\n| Ford | 2023 | 4.35 |\n\nAll 2 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"Tesla and Ford Net Income in 2023\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"Tesla\",\n    \"series\": \"2023\",\n    \"value\": 15.0\n   },\n   {\n    \"category\": \"Ford\",\n    \"series\": \"2023\",\n    \"value\": 4.35\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"nominal\",\n   \"title\": \"Company\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Net Income (billion USD)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Company\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Net Income (billion USD)\",\n    \"format\": \",.2f\"\n   }\n  ],\n  \"color\": {\n   \"field\": \"series\",\n   \"type\": \"nominal\",\n   \"title\": \"Series\"\n  }\n },\n \"mark\": {\n  \"type\": \"bar\"\n }\n}\n```"
+  }
+ ]
+}

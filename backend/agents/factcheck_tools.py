@@ -174,8 +174,17 @@ async def fact_check(prompt: str, provider: str = None, model: str = None) -> st
     verdicts = {}
     if to_judge:
         block = "\n\n".join(f"Claim {c['id']}: {c['text']}\nEvidence:\n{evidence[c['id']]}" for c in to_judge)
-        raw = await run_agent("fact_check", PROMPT.format(claims=block), provider=provider, model=model)
-        verdicts = parse_verdicts(raw)
+        ask = PROMPT.format(claims=block)
+        for attempt in range(2):   # one retry with the parse error fed back (small models sometimes break JSON)
+            raw = await run_agent("fact_check", ask, provider=provider, model=model)
+            try:
+                verdicts = parse_verdicts(raw)
+                break
+            except (ValueError, TypeError) as e:
+                if attempt == 1:
+                    raise
+                ask = (PROMPT.format(claims=block) + f"\n\nYour previous answer was not valid JSON ({e}). "
+                       "Return ONLY the JSON list.")
 
     results = {c["id"]: combine(c, evidence[c["id"]], missing[c["id"]], verdicts.get(c["id"])) for c in claims}
     return render(claims, results, sources)

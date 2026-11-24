@@ -81,3 +81,12 @@ async def test_no_cited_claims_does_not_call_llm():
 def test_code_blocks_are_not_claims():
     claims = fc.extract_claims("n2: Revenue was $96.77 billion [1].\n```\nTesla ███ 96.8B [1]\n```")
     assert [c["text"] for c in claims] == ["Revenue was $96.77 billion [1]."]
+
+
+async def test_invalid_json_is_retried_once():
+    good = '[{"id": 1, "verdict": "supported", "quote": "$96.77 billion", "note": ""}]'
+    with patch.object(fc, "fetch_source_text", new=AsyncMock(side_effect=_fake_fetch)), \
+         patch.object(fc, "run_agent", new=AsyncMock(side_effect=['[{"id": 1, "verdict": supported}]', good])) as llm:
+        out = await fc.fact_check(DRAFT)
+    assert llm.await_count == 2 and "not valid JSON" in llm.await_args_list[1].args[1]
+    assert "1 supported" in out

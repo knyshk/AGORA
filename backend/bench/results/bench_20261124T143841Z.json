@@ -1,0 +1,360 @@
+{
+ "meta": {
+  "finished_at": "20261124T143841Z",
+  "n_tasks": 40,
+  "judge": false,
+  "filters": {
+   "skill": null,
+   "agent": "drafting-local",
+   "tasks": null,
+   "tier": null
+  }
+ },
+ "summary": {
+  "drafting-local": {
+   "skill": "drafting",
+   "model": "qwen3.5:9b",
+   "strategy": "cited",
+   "n_scored": 10,
+   "n_infra_errors": 0,
+   "mean": 0.875,
+   "ci95": [
+    0.765,
+    0.985
+   ],
+   "mean_latency_s": 16.29
+  }
+ },
+ "records": [
+  {
+   "task": "D1",
+   "skill": "drafting",
+   "agent": "drafting-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "cited",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "citation_check_passed": {
+     "score": 1.0,
+     "detail": "citation check passed"
+    },
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "3/3 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "3 distinct citation(s), need 3"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "205 words (limit 450)"
+    }
+   },
+   "judge": null,
+   "latency_s": 27.71,
+   "error": null,
+   "infra_error": false,
+   "output": "# Tesla vs. Ford vs. GM Revenue Comparison (2022–2023)\n\n## Total Revenue Overview\nIn 2022, Tesla reported total revenue of $81.46 billion [1]. That same year, Ford reported total revenue of $158.06 billion [2]. General Motors also reported total revenue of $156.74 billion in 2022 [3].\n\nBy 2023, Tesla's total revenue increased to $96.77 billion [1]. For the same period, Ford reported total revenue of $176.19 billion [2]. General Motors reported total revenue of $171.84 billion in 2023 [3].\n\n## Year-Over-Year Growth\nBetween 2022 and 2023, Tesla's revenue grew from $81.46 billion to $96.77 billion [1]. Ford's revenue increased from $158.06 billion in 2022 to $176.19 billion in 2023 [2]. General Motors saw its revenue rise from $156.74 billion in 2022 to $171.84 billion in 2023 [3].\n\n## Comparative Scale\nIn both years, Tesla's total revenue was lower than that of Ford and GM. In 2022, Tesla reported $81.46 billion while Ford reported $158.06 billion [2] and GM reported $156.74 billion [3]. In 2023, Tesla reported $96.77 billion while Ford reported $176.19 billion [2] and GM reported $171.84 billion [3].\n\nThe research data confirms no figures exist beyond those stated for specific fiscal years; thus, trends outside this scope are not available [1, 2, 3].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n[3] SEC EDGAR 10-K data: General Motors Co (GM) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001467858/us-gaap/Revenues.json\n\nCitation check: passed. 23 figure(s), all cited and found in the research; 3 source(s) cited."
+  },
+  {
+   "task": "D2",
+   "skill": "drafting",
+   "agent": "drafting-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "cited",
+   "score": 0.75,
+   "deterministic": 0.75,
+   "checks": {
+    "citation_check_passed": {
+     "score": 0.0,
+     "detail": "citation check not passed"
+    },
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "2/2 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "2 distinct citation(s), need 2"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "151 words (limit 450)"
+    }
+   },
+   "judge": null,
+   "latency_s": 23.29,
+   "error": null,
+   "infra_error": false,
+   "output": "# Revenue Comparison: Apple vs. Microsoft (Fiscal 2022–2023)\n\n## Fiscal Year Performance\n*   **Apple**: Net sales declined from $394,328 million in fiscal 2022 to $383,285 million in fiscal 2023 [1].\n*   **Microsoft**: Revenue increased from $198,270 million in fiscal 2022 to $211,915 million in fiscal 2023 [2].\n\n## Scale Comparison\nApple's net sales were substantially higher than Microsoft's revenue in both reported years. In fiscal 2023, Apple's $383,285 million exceeded Microsoft's $211,915 million [1, 2]. Similarly, Apple's fiscal 2022 net sales of $394,328 million were higher than Microsoft's $198,270 million revenue for that period [1, 2].\n\n## Summary of Figures\n*   Fiscal 2023: Apple ($383,285 million) vs. Microsoft ($211,915 million) [1, 2]\n*   Fiscal 2022: Apple ($394,328 million) vs. Microsoft ($198,270 million) [1, 2]\n\nAll revenue figures are derived directly from SEC EDGAR 10-K data for the respective companies [1, 2]. No projections or calculated percentages are included in this report.\n\n---\nSources\n[1] SEC EDGAR 10-K data: Apple Inc. (AAPL) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000320193/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json\n[2] SEC EDGAR 10-K data: MICROSOFT CORP (MSFT) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000789019/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json\n\nCitation check: NOT fully passed. these sentences contain figures but no citation: *   Fiscal 2023: Apple ($383,285 million) vs. | *   Fiscal 2022: Apple ($394,328 million) vs.."
+  },
+  {
+   "task": "D3",
+   "skill": "drafting",
+   "agent": "drafting-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "cited",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "citation_check_passed": {
+     "score": 1.0,
+     "detail": "citation check passed"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "1 distinct citation(s), need 1"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "177 words (limit 450)"
+    },
+    "mentions": {
+     "score": 1.0,
+     "detail": "mentions 2/2: ['1991', '2008']"
+    }
+   },
+   "judge": null,
+   "latency_s": 8.78,
+   "error": null,
+   "infra_error": false,
+   "output": "# History of the Python Programming Language\n\nPython was created by Guido van Rossum and first released in 1991 [1]. The version known as Python 3.0 was released in 2008 [1]. Support for Python 2 ended on 1 January 2020 [1]. No other specific release dates or figures regarding the history of the language are contained in the provided research context [1].\n\n### Key Milestones\n*   **Creation and First Release**: The language was developed by Guido van Rossum with its initial release occurring in 1991 [1].\n*   **Major Version Update**: A significant transition occurred with the release of Python 3.0 in 2008 [1].\n*   **End of Life for Legacy Version**: Python 2 reached end of life on 1 January 2020 [1].\n\nThe provided research source list only contains entries from source [1], which offers these three specific data points regarding the timeline and key figures of the language's history. Any further details, such as intermediate version releases, specific patch dates within the versions mentioned, or subsequent developments after 2020, are not available in the current context [1].\n\n---\nSources\n[1] Python (programming language) (Wikipedia) - https://en.wikipedia.org/wiki/Python_(programming_language)\n\nCitation check: passed. 3 figure(s), all cited and found in the research; 1 source(s) cited."
+  },
+  {
+   "task": "D4",
+   "skill": "drafting",
+   "agent": "drafting-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "cited",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "citation_check_passed": {
+     "score": 1.0,
+     "detail": "citation check passed"
+    },
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "1/1 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "1 distinct citation(s), need 1"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "45 words (limit 450)"
+    },
+    "mentions": {
+     "score": 1.0,
+     "detail": "mentions 1/1: ['1889']"
+    }
+   },
+   "judge": null,
+   "latency_s": 2.54,
+   "error": null,
+   "infra_error": false,
+   "output": "# The Eiffel Tower\n\nThe Eiffel Tower is an iconic structure located in Paris. It was completed in 1889 [1]. The tower was constructed by Gustave Eiffel's engineering company specifically for the 1889 World's Fair [1]. Its total height, including antennas, measures 330 metres [1].\n\n---\nSources\n[1] Eiffel Tower (Wikipedia) - https://en.wikipedia.org/wiki/Eiffel_Tower\n\nCitation check: passed. 3 figure(s), all cited and found in the research; 1 source(s) cited."
+  },
+  {
+   "task": "D5",
+   "skill": "drafting",
+   "agent": "drafting-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "cited",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "citation_check_passed": {
+     "score": 1.0,
+     "detail": "citation check passed"
+    },
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "2/2 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "2 distinct citation(s), need 2"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "245 words (limit 450)"
+    }
+   },
+   "judge": null,
+   "latency_s": 14.26,
+   "error": null,
+   "infra_error": false,
+   "output": "# Comparison of Mount Everest and K2\n\nMount Everest is the highest mountain on Earth, reaching an elevation of 8,848.86 metres as determined by the 2020 survey jointly conducted by China and Nepal [1]. In contrast, K2 is the second-highest mountain on Earth with a height of 8,611 metres [2]. Despite the difference in total height, K2 is often considered more challenging due to its technical difficulty and extreme weather conditions.\n\nEverest was first summited in 1953 by Edmund Hillary and Tenzing Norgay [1]. The 2020 survey established the precise height of Everest at 8,848.86 metres [1]. K2 stands at 8,611 metres high [2]. While Everest holds the title for altitude, K2 remains a formidable peak below it on Earth's topography.\n\n| Feature | Mount Everest | K2 |\n| :--- | :--- | :--- |\n| Elevation | 8,848.86 metres [1] | 8,611 metres [2] |\n| Rank by Height | First | Second |\n| First Summit Year | 1953 [1] | Not specified in research context |\n| First Summitees | Edmund Hillary and Tenzing Norgay [1] | Not specified in research context |\n\nMount Everest's elevation is explicitly defined as 8,848.86 metres according to the 2020 survey by China and Nepal [1]. K2's elevation is recorded as 8,611 metres [2]. The first successful ascent of Mount Everest occurred in 1953 via Edmund Hillary and Tenzing Norgay [1]. No specific year for K2's first summit is provided in the available research context.\n\n---\nSources\n[1] Mount Everest (Wikipedia) - https://en.wikipedia.org/wiki/Mount_Everest\n[2] K2 (Wikipedia) - https://en.wikipedia.org/wiki/K2\n\nCitation check: passed. 8 figure(s), all cited and found in the research; 2 source(s) cited."
+  },
+  {
+   "task": "D6",
+   "skill": "drafting",
+   "agent": "drafting-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "cited",
+   "score": 0.75,
+   "deterministic": 0.75,
+   "checks": {
+    "citation_check_passed": {
+     "score": 0.0,
+     "detail": "citation check not passed"
+    },
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "3/3 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "3 distinct citation(s), need 3"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "185 words (limit 450)"
+    }
+   },
+   "judge": null,
+   "latency_s": 24.32,
+   "error": null,
+   "infra_error": false,
+   "output": "### Height Comparison: Mount Everest vs. K2\n\nThe research provides specific height measurements for both mountains but does not contain information regarding their relative technical difficulty or climbing challenges.\n\nMount Everest was measured at 8,848.86 metres in a 2020 survey conducted by China and Nepal [1]. An earlier measurement by the Survey of India in 1955 recorded Mount Everest's height as 8,848 metres [2].\n\nIn comparison, K2 is recorded as being 8,611 metres high [3]. Based on these figures provided in the research:\n*   The difference between the 2020 Everest measurement and K2 is 237.86 metres (calculated from 8,848.86 - 8,611).\n*   The difference between the 1955 Everest measurement and K2 is 237 metres (calculated from 8,848 - 8,611).\n\nThe research context does not specify the exact calculated differences; it only lists the individual height figures [1][2][3]. Therefore, any comparison of magnitude relies strictly on these listed values:\n*   Mount Everest (2020): 8,848.86 metres [1]\n*   Mount Everest (1955): 8,848 metres [2]\n*   K2: 8,611 metres [3]\n\nNo further details regarding the nature of these differences or climbing profiles are available in the provided sources.\n\n---\nSources\n[1] Mount Everest (Wikipedia) - https://en.wikipedia.org/wiki/Mount_Everest\n[2] Survey of India 1955 Everest measurement - https://example.org/everest-1955-survey\n[3] K2 (Wikipedia) - https://en.wikipedia.org/wiki/K2\n\nCitation check: NOT fully passed. these sentences contain figures but no citation: *   The difference between the 2020 Everest measurement and K2 is 237.86 metres (calculated from 8,848.86 - 8,611). | *   The difference between the 1955 Everest measurement and K2 is 237 metres (calculated from 8,848 - 8,611).; these figures do not appear in the research: ['237', '237.86']."
+  },
+  {
+   "task": "D7",
+   "skill": "drafting",
+   "agent": "drafting-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "cited",
+   "score": 0.75,
+   "deterministic": 0.75,
+   "checks": {
+    "citation_check_passed": {
+     "score": 0.0,
+     "detail": "citation check not passed"
+    },
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "3/3 expected figures present"
+    },
+    "mentions_any": {
+     "score": 1.0,
+     "detail": "mentions 'no data'"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "183 words (limit 450)"
+    }
+   },
+   "judge": null,
+   "latency_s": 32.28,
+   "error": null,
+   "infra_error": false,
+   "output": "# Tesla, Ford, and GM Revenue Analysis (2022–2024)\n\nTesla reported total revenue of $81.46 billion in 2022 and $96.77 billion in 2023 [1].\nFord reported total revenue of $158.06 billion in 2022 and $176.19 billion in 2023 [2].\nGeneral Motors reported total revenue of $156.74 billion in 2022 and $171.84 billion in 2023 [3].\n\n## Comparison of Reported Years\nIn 2022, Ford generated the highest reported revenue among the three companies at $158.06 billion [2]. General Motors followed closely with $156.74 billion [3], while Tesla reported significantly lower revenue at $81.46 billion [1].\n\nIn 2023, all three companies continued to show growth relative to their 2022 figures. Ford's revenue increased to $176.19 billion [2]. General Motors' revenue rose to $171.84 billion [3]. Tesla's revenue grew to $96.77 billion [1].\n\n## Limitations\nNo data exists in the research context for fiscal year 2024 [1, 2, 3].\nTherefore, any comparison or trend analysis extending into 2024 cannot be supported by facts from this source list.\nForecasting future revenue figures is not permitted as the research does not contain projections or analyst estimates [1, 2, 3].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n[3] SEC EDGAR 10-K data: General Motors Co (GM) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001467858/us-gaap/Revenues.json\n\nCitation check: NOT fully passed. these sentences contain figures but no citation: In 2023, all three companies continued to show growth relative to their 2022 figures.."
+  },
+  {
+   "task": "D8",
+   "skill": "drafting",
+   "agent": "drafting-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "cited",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "citation_check_passed": {
+     "score": 1.0,
+     "detail": "citation check passed"
+    },
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "3/3 expected figures present"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "42 words (limit 90)"
+    }
+   },
+   "judge": null,
+   "latency_s": 4.16,
+   "error": null,
+   "infra_error": false,
+   "output": "In 2023, Tesla reported total revenue of $96.77 billion [1]. Ford recorded total revenue of $176.19 billion [2]. General Motors reported total revenue of $171.84 billion [3]. These figures represent the respective annual revenues for each company during the 2023 fiscal year.\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n[3] SEC EDGAR 10-K data: General Motors Co (GM) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001467858/us-gaap/Revenues.json\n\nCitation check: passed. 4 figure(s), all cited and found in the research; 3 source(s) cited."
+  },
+  {
+   "task": "D9",
+   "skill": "drafting",
+   "agent": "drafting-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "cited",
+   "score": 0.5,
+   "deterministic": 0.5,
+   "checks": {
+    "citation_check_passed": {
+     "score": 0.0,
+     "detail": "citation check not passed"
+    },
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "2/2 expected figures present"
+    },
+    "forbidden_numbers": {
+     "score": 0.0,
+     "detail": "forbidden figures present: [15.31]"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "136 words (limit 450)"
+    }
+   },
+   "judge": null,
+   "latency_s": 15.34,
+   "error": null,
+   "infra_error": false,
+   "output": "# Tesla Revenue Growth: 2022 to 2023\n\nTesla reported total revenue of $81.46 billion in 2022 and $96.77 billion in 2023 [1]. The difference between these two reported figures is $15.31 billion, though this calculated amount is not explicitly stated in the source text. The source data does not provide a specific percentage growth rate for this period; therefore, no percentage figure can be reported as fact. The only available revenue values are the specific amounts of $81.46 billion for 2022 and $96.77 billion for 2023 [1]. No other sources within the research context provide alternative figures or forecasts for Tesla's revenue growth during this period.\n\nNote: Any calculated differences or percentages derived from these numbers are not present in the provided research context and thus cannot be cited as factual claims according to the constraints.\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n\nCitation check: NOT fully passed. these sentences contain figures but no citation: The difference between these two reported figures is $15.31 billion, though this calculated amount is not explicitly stated in the source text.; these figures do not appear in the research: ['15.31']."
+  },
+  {
+   "task": "D10",
+   "skill": "drafting",
+   "agent": "drafting-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "cited",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "citation_check_passed": {
+     "score": 1.0,
+     "detail": "citation check passed"
+    },
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "4/4 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "3 distinct citation(s), need 3"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "137 words (limit 450)"
+    }
+   },
+   "judge": null,
+   "latency_s": 10.19,
+   "error": null,
+   "infra_error": false,
+   "output": "### Financial Comparison: Tesla vs. Ford in 2023\n\n**Revenue Performance**\nTesla reported total revenue of $96.77 billion in 2023 [1]. This represents an increase from $81.46 billion in 2022 [1]. In comparison, Ford reported total revenue of $176,191 million in 2023 [3].\n\n**Profitability**\nTesla's net income was $15.00 billion in 2023 [2]. Conversely, Ford's net income was $4.35 billion in 2023 [3].\n\n**Operational Scale and Efficiency**\nTesla delivered 1.81 million vehicles in 2023 [2]. The company employed 140,473 people at year end [2]. Tesla's gross margin was 18.2% in 2023 [2], which is lower than the 25.6% recorded in 2022 [2].\n\n**Summary of Differences**\nWhile Ford generated significantly higher total revenue in 2023 compared to Tesla, Tesla achieved a substantially higher net income figure that year. Additionally, Tesla's gross margin experienced a decline from 2022 to 2023.\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] Tesla 2023 results summary - https://example.org/tesla-2023-results\n[3] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n\nCitation check: passed. 9 figure(s), all cited and found in the research; 3 source(s) cited."
+  }
+ ]
+}

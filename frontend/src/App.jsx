@@ -23,6 +23,7 @@ export default function App() {
     "Compare renewable energy adoption in Germany and France with current metrics, policy differences, and 2030 projections."
   );
   const [loading, setLoading] = useState(false);
+  const [localOnly, setLocalOnly] = useState(false);
   const [loadingMode, setLoadingMode] = useState(null); // 'task' | 'conflict'
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
@@ -73,8 +74,8 @@ export default function App() {
     try {
       const res = await axios.post(
         `${BACKEND_URL}/tasks/run`,
-        { query: query.trim() },
-        { timeout: 240000 }
+        { query: query.trim(), local_only: localOnly },
+        { timeout: localOnly ? 900000 : 240000 }
       );
       setResponse(res.data);
       if (res.data.plan && res.data.plan.length > 0) {
@@ -237,6 +238,8 @@ export default function App() {
               loading={loading}
               loadingMode={loadingMode}
               onRunTask={handleRunTask}
+              localOnly={localOnly}
+              setLocalOnly={setLocalOnly}
               onRunConflictDemo={handleRunConflictDemo}
               onReset={handleReset}
               hasResult={!!response}

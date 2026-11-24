@@ -57,6 +57,8 @@ export default function TaskControl({
   onReset,
   hasResult,
   error,
+  localOnly = false,
+  setLocalOnly = () => {},
 }) {
   const [elapsed, setElapsed] = useState(0);
 
@@ -153,6 +155,11 @@ export default function TaskControl({
             </motion.button>
           </div>
 
+          <label className="action-hint" style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+                 title="Plan and run every agent on the open-weight model running on this laptop (Ollama). No cloud LLM, no rate limits; web search still uses the internet.">
+            <input type="checkbox" checked={localOnly} disabled={loading} onChange={(e) => setLocalOnly(e.target.checked)} />
+            <span>🖥 Run on my laptop (local model, no cloud LLM)</span>
+          </label>
           <div className="action-hint">
             <span>Independent nodes execute concurrently • Numeric claims compared field by field</span>
           </div>

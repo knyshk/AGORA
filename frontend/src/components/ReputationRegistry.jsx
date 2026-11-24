@@ -135,7 +135,9 @@ export default function ReputationRegistry() {
             </div>
 
             <div className="rep-footer-info">
-              <span className="rep-provider">{data.provider} · {data.model}</span>
+              <span className="rep-provider">
+                {data.provider === "ollama" ? "🖥 local on this laptop" : data.provider} · {data.model}
+              </span>
             </div>
           </motion.div>
         ))}

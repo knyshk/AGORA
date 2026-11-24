@@ -127,7 +127,8 @@ def report_md(summary, stamp):
               "|---|---|" + "---|" * len(summary)]
     for c in cats:
         first = next(s["by_category"][c] for s in summary.values() if c in s["by_category"])
-        cells = [f"{s['by_category'][c]['correct']}/{s['by_category'][c]['n']}" for s in summary.values()]
+        cells = [f"{s['by_category'][c]['correct']}/{s['by_category'][c]['n']}" if c in s["by_category"] else "excluded"
+                 for s in summary.values()]
         lines.append(f"| {c} | {'yes' if first['label'] else 'no'} | " + " | ".join(cells) + " |")
     return "\n".join(lines) + "\n"
 
@@ -138,7 +139,12 @@ async def main():
     ap.add_argument("--ids")
     ap.add_argument("--sleep", type=float, default=4.0)
     ap.add_argument("--reuse", help="earlier results file: copy the method(s) NOT being run from it, by pair id")
+    ap.add_argument("--local", action="store_true",
+                    help="run every LLM call on the local model (Ollama) - same model for both methods, no quota")
     args = ap.parse_args()
+    if args.local:
+        from agents.base_agent import force_provider
+        force_provider("ollama")
     methods = ["new", "old"] if args.method == "both" else [args.method]
     pairs = load_pairs(set(args.ids.split(",")) if args.ids else None)
 
@@ -162,10 +168,11 @@ async def main():
                     r[m] = {**old_rows[r["id"]][m], "reused_from": path.name}
                 methods.append(m)
     summary = {m: metrics(rows, m) for m in sorted(methods)}
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + ("-local" if args.local else "")
     RESULTS.mkdir(exist_ok=True)
     out = RESULTS / f"conflicts_{stamp}.json"
-    out.write_text(json.dumps({"summary": summary, "rows": rows}, indent=1, ensure_ascii=False))
+    model = "local qwen3.5:9b (Ollama)" if args.local else "cloud free tiers"
+    out.write_text(json.dumps({"summary": summary, "rows": rows, "llm": model}, indent=1, ensure_ascii=False))
     md = report_md(summary, stamp)
     (RESULTS / f"conflicts_{stamp}.md").write_text(md)
     print("\n" + md + f"\nSaved {out}")

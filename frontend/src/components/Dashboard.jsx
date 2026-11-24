@@ -3,12 +3,13 @@ import axios from "axios";
 import { VegaChart } from "./NodeOutput";
 
 // Palette (validated with the dataviz validator on the panel surface #241c14, dark mode):
-// series v1 / v2 = categorical slots 1-2; run status = the reserved status palette (always with a label).
-const SERIES = { v1: "#3987e5", v2: "#d95926" };
+// series v1 / v2 / local = categorical slots 1-3 (validated all-pairs); run status = the reserved status palette (always with a label).
+const SERIES = { v1: "#3987e5", v2: "#d95926", local: "#199e70" };
 const STATUS = { complete: "#0ca30c", needs_review: "#fab219", partial: "#ec835a", failed: "#d03b3b",
                  running: "#8a8278", planned: "#8a8278" };
 const STATUS_LABEL = { complete: "✓ complete", needs_review: "⚖ needs review", partial: "◐ partial",
                        failed: "✕ failed", running: "running", planned: "planned" };
+const STRATEGY = { thompson: "#3987e5", greedy: "#d95926", success_rate: "#199e70", fixed: "#c98500", random: "#d55181" };
 const TEXT = "#f1e8da";
 const MUTED = "rgba(241,232,218,0.65)";
 const PANEL = "#241c14";
@@ -64,7 +65,7 @@ function trustSpec(skill, series) {
   const values = Object.entries(series)
     .filter(([agent]) => agent.startsWith(`${skill}-`))
     .flatMap(([agent, pts]) => pts.map((p) => ({ agent, t: p.t, trust: p.trust, quality: p.quality, source: p.source })));
-  const agents = [`${skill}-v1`, `${skill}-v2`];
+  const agents = [`${skill}-v1`, `${skill}-v2`, `${skill}-local`];
   return {
     values: values.length,
     spec: {
@@ -72,9 +73,9 @@ function trustSpec(skill, series) {
       width: "container", height: 140, data: { values },
       mark: { type: "line", strokeWidth: 2, point: { size: 64, filled: true, stroke: PANEL, strokeWidth: 2 } },
       encoding: {
-        x: { field: "t", type: "temporal", title: null },
+        x: { field: "t", type: "temporal", title: null, axis: { format: "%d %b %H:%M", labelOverlap: true, tickCount: 4 } },
         y: { field: "trust", type: "quantitative", title: "Trust", scale: { domain: [0, 1] } },
-        color: { field: "agent", type: "nominal", title: null, scale: { domain: agents, range: [SERIES.v1, SERIES.v2] } },
+        color: { field: "agent", type: "nominal", title: null, scale: { domain: agents, range: [SERIES.v1, SERIES.v2, SERIES.local] } },
         tooltip: [{ field: "agent", title: "Agent" }, { field: "t", type: "temporal", title: "When", format: "%d %b %H:%M" },
                   { field: "trust", title: "Trust after", format: ".3f" }, { field: "quality", title: "Graded quality" },
                   { field: "source", title: "Evidence" }],
@@ -82,6 +83,92 @@ function trustSpec(skill, series) {
       config: { axis: AXIS, legend: { orient: "top", labelColor: TEXT } },
     },
   };
+}
+
+function simSpec(scenario, results, driftAt) {
+  const values = Object.entries(results[scenario]).flatMap(([strategy, r]) =>
+    r.curve.map((p) => ({ strategy, step: p.step, quality: p.quality })));
+  const layers = [{
+    mark: { type: "line", strokeWidth: 2 },
+    encoding: {
+      x: { field: "step", type: "quantitative", title: "Task number" },
+      y: { field: "quality", type: "quantitative", title: "Quality of routed agent (rolling 25)", scale: { domain: [0, 1] } },
+      color: { field: "strategy", type: "nominal", title: "Strategy",
+               scale: { domain: Object.keys(STRATEGY), range: Object.values(STRATEGY) } },
+      tooltip: [{ field: "strategy", title: "Strategy" }, { field: "step", title: "Task" },
+                { field: "quality", title: "Quality", format: ".3f" }],
+    },
+  }];
+  if (scenario === "drift") {
+    layers.push({ data: { values: [{ step: driftAt }] }, mark: { type: "rule", strokeDash: [4, 4], color: MUTED },
+                  encoding: { x: { field: "step", type: "quantitative" } } });
+  }
+  return { $schema: "https://vega.github.io/schema/vega-lite/v5.json", width: "container", height: 220,
+           data: { values }, layer: layers, config: { axis: AXIS, legend: { labelColor: TEXT, titleColor: MUTED } } };
+}
+
+const SCENARIO_NOTE = {
+  drift: "At the dashed line the best agent's quality suddenly drops (as if its provider swapped the model).",
+  stationary: "Agents keep their measured quality.",
+  cold_start: "No benchmark priors: every agent starts from 0.5.",
+};
+
+function RoutingSimulation({ backendUrl }) {
+  const [sim, setSim] = useState(null);
+  const [scenario, setScenario] = useState("drift");
+  const [error, setError] = useState(null);
+  useEffect(() => {
+    axios.get(`${backendUrl}/evaluation/routing`, { timeout: 10000 })
+      .then((res) => setSim(res.data))
+      .catch((e) => setError(e.response?.data?.detail || e.message));
+  }, [backendUrl]);
+  if (error) return <div style={card}><b>Routing strategies</b><div style={{ color: MUTED, marginTop: 6 }}>No simulation yet: {error}</div></div>;
+  if (!sim) return null;
+  const { meta, results } = sim.current;
+  const rows = Object.entries(results[scenario]).sort((a, b) => b[1].mean_quality - a[1].mean_quality);
+  const before = sim.fixed_prior?.results?.drift?.thompson;
+  const after = results.drift?.thompson;
+  return (
+    <div style={card}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <b style={{ flex: 1 }}>Routing strategies (simulation, {meta.steps} tasks × {meta.seeds} seeds, production router)</b>
+        <select value={scenario} onChange={(e) => setScenario(e.target.value)}
+                style={{ background: "#0e0c0a", color: TEXT, border: `1px solid ${LINE}`, borderRadius: 8, padding: "6px 8px" }}>
+          <option value="drift">Sudden quality drop</option>
+          <option value="stationary">Steady state</option>
+          <option value="cold_start">Cold start (no benchmark)</option>
+        </select>
+      </div>
+      <div style={{ fontSize: 12, color: MUTED, margin: "4px 0" }}>
+        {SCENARIO_NOTE[scenario]} Agents: {Object.entries(meta.means).map(([a, m]) => `${a} (measured ${m})`).join(", ")}.
+      </div>
+      <VegaChart source={JSON.stringify(simSpec(scenario, results, meta.drift_at))} />
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+        <thead><tr style={{ color: MUTED, textAlign: "left" }}>
+          {["Strategy", "Mean quality (95% CI)", "Picks of the current best agent", "Tasks to switch after the drop"].map((h) => (
+            <th key={h} style={{ padding: "6px 8px", borderBottom: `1px solid ${LINE}`, fontWeight: 500 }}>{h}</th>))}
+        </tr></thead>
+        <tbody>{rows.map(([name, r]) => (
+          <tr key={name}>
+            <td style={{ padding: "6px 8px" }}>
+              <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: 4, marginRight: 6, background: STRATEGY[name] }} />{name}
+            </td>
+            <td style={{ padding: "6px 8px" }}>{r.mean_quality}{r.ci95_half ? ` ± ${r.ci95_half}` : ""}</td>
+            <td style={{ padding: "6px 8px" }}>{Math.round(r.picks_best_share * 100)}%</td>
+            <td style={{ padding: "6px 8px" }}>{r.never_recovered == null ? "—" :
+              `${r.recovery_steps_mean ?? "never"}${r.never_recovered ? ` (never in ${r.never_recovered}/${meta.seeds} seeds)` : ""}`}</td>
+          </tr>))}
+        </tbody>
+      </table>
+      {before && after && (
+        <div style={{ fontSize: 13, marginTop: 8 }}>
+          Design fix found by this simulation: with a benchmark prior of fixed weight, Thompson took {before.recovery_steps_mean} tasks to
+          switch after the drop and never switched in {before.never_recovered}/{meta.seeds} seeds; with a fading prior (current design) it
+          takes {after.recovery_steps_mean} tasks and always switches.
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function Dashboard({ backendUrl }) {
@@ -165,10 +252,13 @@ export default function Dashboard({ backendUrl }) {
                     <tr key={a.agent}>
                       <td style={{ padding: "6px 8px" }}>
                         <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: 4, marginRight: 6,
-                                       background: a.agent.endsWith("-v1") ? SERIES.v1 : SERIES.v2 }} />
+                                       background: a.agent.endsWith("-v1") ? SERIES.v1 : a.agent.endsWith("-v2") ? SERIES.v2 : SERIES.local }} />
                         {a.agent}
                       </td>
-                      <td style={{ padding: "6px 8px", color: MUTED }}>{a.model}</td>
+                      <td style={{ padding: "6px 8px", color: MUTED }}>
+                        {a.model}
+                        {a.agent.endsWith("-local") && <span style={{ marginLeft: 6, color: TEXT }} title="Runs on this laptop via Ollama">🖥 local</span>}
+                      </td>
                       <td style={{ padding: "6px 8px" }}>{num(a.trust_mean, 3)} <span style={{ color: MUTED }}>({a.trust_ci95 ? `${num(a.trust_ci95[0])}–${num(a.trust_ci95[1])}` : "—"})</span></td>
                       <td style={{ padding: "6px 8px" }}>{a.nodes}</td>
                       <td style={{ padding: "6px 8px" }}><Meter value={a.success_rate} /></td>
@@ -198,6 +288,8 @@ export default function Dashboard({ backendUrl }) {
               })}
             </div>
           </div>
+
+          <RoutingSimulation backendUrl={backendUrl} />
 
           <div style={card}>
             <b>Conflicts</b>

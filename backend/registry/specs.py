@@ -22,4 +22,13 @@ AGENT_SPECS = [
      "strategy": "verify", "default_prior": 0.75},
     {"name": "fact_check-v2", "skill": "fact_check", "provider": "gemini", "model": "gemini-3.1-flash-lite",
      "strategy": "verify", "default_prior": 0.65},
+    # local open-weight model on the user's laptop (Ollama): no cloud, no rate limits, no data leaves the machine
+    {"name": "research-local", "skill": "research", "provider": "ollama", "model": "qwen3.5:9b",
+     "strategy": "grounded", "default_prior": 0.55},
+    {"name": "drafting-local", "skill": "drafting", "provider": "ollama", "model": "qwen3.5:9b",
+     "strategy": "cited", "default_prior": 0.55},
+    {"name": "chart-local", "skill": "chart", "provider": "ollama", "model": "qwen3.5:9b",
+     "strategy": "spec", "default_prior": 0.55},
+    {"name": "fact_check-local", "skill": "fact_check", "provider": "ollama", "model": "qwen3.5:9b",
+     "strategy": "verify", "default_prior": 0.55},
 ]

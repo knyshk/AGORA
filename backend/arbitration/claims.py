@@ -113,18 +113,33 @@ def make_text_claim(node_id, agent, entity, attribute, period, text_value, quote
             "quote": str(quote or "")[:240], "sources": sources}
 
 
+def trailing_zeros(v: float) -> int:
+    n = int(abs(v)) if float(v).is_integer() else 0
+    count = 0
+    while n and n % 10 == 0:
+        n //= 10
+        count += 1
+    return count
+
+
 def make_claim(node_id, agent, entity, attribute, period, value, scale, unit, quote, sources):
     scale_mult = SCALES.get(str(scale or "").lower().strip(), 1.0)
     length_unit = (unit or "").lower()
     if length_unit in ("km",):
         scale_mult *= 1000
     v = float(value)
+    if scale_mult > 1 and abs(v) >= scale_mult:
+        # the model wrote the number already expanded AND kept the scale word ("171840000000", "billion"):
+        # do not multiply twice; its rounding is given by its trailing zeros
+        absolute, precision = v, 0.5 * 10 ** trailing_zeros(v)
+    else:
+        # half a unit in the last written digit, in absolute terms ("about $97 billion" -> +/- 0.5 bn)
+        absolute, precision = v * scale_mult, 0.5 * 10 ** (-decimals(value)) * scale_mult
     return {"node_id": node_id, "agent": agent, "entity": normalize_entity(entity),
             "entity_display": str(entity), "attribute": normalize_attribute(attribute),
             "period": normalize_period(period), "value": v, "scale": str(scale or ""), "unit": str(unit or ""),
-            "kind": unit_kind(unit), "absolute": v * scale_mult,
-            # half a unit in the last written digit, in absolute terms ("about $97 billion" -> +/- 0.5 bn)
-            "precision": 0.5 * 10 ** (-decimals(value)) * scale_mult,
+            "kind": unit_kind(unit), "absolute": absolute,
+            "precision": precision,
             "quote": str(quote or "")[:240], "sources": sources}
 
 

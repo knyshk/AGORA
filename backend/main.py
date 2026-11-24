@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from agents.base_agent import run_agent
+from agents.base_agent import force_provider, run_agent
 from orchestration.planner import plan_task
 from orchestration.executor import execute_plan
 from orchestration.conflict_demo import conflict_demo_plan
@@ -55,6 +55,7 @@ app.include_router(collab_router)
 class TaskRequest(BaseModel):
     query: str
     budget_usd: float | None = None   # notional per-run budget; None = RUN_BUDGET_USD env or no limit
+    local_only: bool = False          # Local LLM mode: plan and run everything on the laptop's model
 
 
 @app.get("/health")
@@ -71,20 +72,24 @@ async def research_grounded(req: TaskRequest):
     return {"output": await grounded_research(f"Task: {req.query}")}
 
 
-async def _execute_and_record(run_id: str, plan: list, query: str, started: float, budget_usd=None):
+async def _execute_and_record(run_id: str, plan: list, query: str, started: float, budget_usd=None,
+                              local_only=False):
     recorder = RunRecorder(run_id)
-    await recorder("plan_created", {"plan": plan})
-    result = await execute_plan(plan, query, emit=recorder, budget_usd=budget_usd)
+    await recorder("plan_created", {"plan": plan, "local_only": local_only})
+    result = await execute_plan(plan, query, emit=recorder, budget_usd=budget_usd, local_only=local_only)
     crud.finish_run(run_id, plan, result["status"], result["conflicts"], started)
     return {"run_id": run_id, "plan": plan, "result": result["outputs"],
             "conflicts": result["conflicts"], "node_status": result["node_status"],
-            "status": result["status"], "usage": result["usage"]}
+            "status": result["status"], "usage": result["usage"],
+            "self_correction": result.get("self_correction", [])}
 
 
 @app.post("/tasks/run")
 async def run_task(req: TaskRequest):
     started = time.time()
     run_id = crud.create_run(req.query)
+    if req.local_only:
+        force_provider("ollama")
     try:
         plan = await plan_task(req.query)
     except PlanError as e:
@@ -93,7 +98,7 @@ async def run_task(req: TaskRequest):
     except Exception:
         crud.finish_run(run_id, [], "failed", [], started)
         raise
-    return await _execute_and_record(run_id, plan, req.query, started, req.budget_usd)
+    return await _execute_and_record(run_id, plan, req.query, started, req.budget_usd, req.local_only)
 
 
 @app.post("/tasks/conflict-demo")
@@ -307,3 +312,41 @@ def metrics_overview(days: int = 30):
     conflicts, human involvement and audit-log integrity. Computed from stored events only."""
     from metrics.overview import overview
     return overview(max(1, min(days, 365)))
+
+
+@app.get("/evaluation/routing")
+def routing_evaluation():
+    """Latest routing simulation (RQ1): current design and the earlier fixed-prior design for comparison."""
+    from bench.simulate_routing import latest_results
+    current = latest_results("fading")
+    if current is None:
+        raise HTTPException(status_code=404, detail="Run: python -m bench.simulate_routing")
+    return {"current": current, "fixed_prior": latest_results("fixed")}
+
+
+# ---------------- shareable report ----------------
+
+@app.get("/runs/{run_id}/report.docx")
+def report_docx(run_id: str):
+    """The run as a Word document: report with citations, chart, sources, fact-check, conflicts, provenance."""
+    from fastapi.responses import Response
+    from reports.builder import collect, to_docx
+    data = crud.get_run(run_id)
+    if data is None:
+        raise HTTPException(status_code=404, detail="Run not found")
+    audit.record("api", "report_exported", run_id, {"format": "docx"})
+    return Response(to_docx(collect(data)),
+                    media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    headers={"Content-Disposition": f'attachment; filename="agora-report-{run_id[:8]}.docx"'})
+
+
+@app.get("/runs/{run_id}/report.html")
+def report_html(run_id: str):
+    """The same report as a printable page (use the browser's Save as PDF)."""
+    from fastapi.responses import HTMLResponse
+    from reports.builder import collect, to_html
+    data = crud.get_run(run_id)
+    if data is None:
+        raise HTTPException(status_code=404, detail="Run not found")
+    audit.record("api", "report_exported", run_id, {"format": "html"})
+    return HTMLResponse(to_html(collect(data)))

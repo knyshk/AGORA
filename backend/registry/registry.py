@@ -53,7 +53,8 @@ def load_registry():
     REGISTRY.clear()
     REJECTED.clear()
     trusted = load_trusted_keys()
-    for fname, signed, error in load_manifests():
+    order = {f"{s['name']}.json": i for i, s in enumerate(AGENT_SPECS)}   # keep the order defined in specs.py
+    for fname, signed, error in sorted(load_manifests(), key=lambda m: order.get(m[0], len(order))):
         if error:
             REJECTED[fname] = error
             continue

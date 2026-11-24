@@ -1,0 +1,235 @@
+{
+ "meta": {
+  "finished_at": "20261124T143549Z",
+  "n_tasks": 40,
+  "judge": false,
+  "filters": {
+   "skill": null,
+   "agent": "fact_check-local",
+   "tasks": null,
+   "tier": null
+  }
+ },
+ "summary": {
+  "fact_check-local": {
+   "skill": "fact_check",
+   "model": "qwen3.5:9b",
+   "strategy": "verify",
+   "n_scored": 10,
+   "n_infra_errors": 0,
+   "mean": 0.85,
+   "ci95": [
+    0.641,
+    1
+   ],
+   "mean_latency_s": 3.59
+  }
+ },
+ "records": [
+  {
+   "task": "F1",
+   "skill": "fact_check",
+   "agent": "fact_check-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "verify",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "verdicts": {
+     "score": 1.0,
+     "detail": "verdicts ['supported', 'contradicted'] vs expected ['supported', 'contradicted']"
+    }
+   },
+   "judge": null,
+   "latency_s": 5.11,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fact check: 2 cited claim(s)** — 1 supported, 0 unsupported, 1 contradicted, 0 unverifiable. Each claim was checked against the source it cites.\n\n| # | Claim | Verdict | Evidence |\n|---|---|---|---|\n| 1 | Tesla's revenue was $96.77 billion in 2023 [1]. | ✅ supported | \"Official annual revenue from 10-K filings: fiscal year ended 2023-12-31: $96.77 billion\" [1] — Direct match of Tesla's revenue claim with the evidence. |\n| 2 | Ford's revenue was $200.5 billion in 2023 [2]. | ❌ contradicted | \"Official annual revenue from 10-K filings: fiscal year ended 2023-12-31: $176.19 billion\" [2] — The evidence shows a different number for Ford's revenue than claimed in the claim. |\n\nClaims needing attention: #2."
+  },
+  {
+   "task": "F2",
+   "skill": "fact_check",
+   "agent": "fact_check-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "verify",
+   "score": 0.0,
+   "deterministic": 0.0,
+   "checks": {},
+   "judge": null,
+   "latency_s": 3.74,
+   "error": "JSONDecodeError: Expecting value: line 1 column 45 (char 44)",
+   "infra_error": false,
+   "output": null
+  },
+  {
+   "task": "F3",
+   "skill": "fact_check",
+   "agent": "fact_check-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "verify",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "verdicts": {
+     "score": 1.0,
+     "detail": "verdicts ['supported', 'unsupported'] vs expected ['supported', 'unsupported']"
+    }
+   },
+   "judge": null,
+   "latency_s": 2.36,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fact check: 2 cited claim(s)** — 1 supported, 1 unsupported, 0 contradicted, 0 unverifiable. Each claim was checked against the source it cites.\n\n| # | Claim | Verdict | Evidence |\n|---|---|---|---|\n| 1 | The Eiffel Tower is 330 metres tall [1]. | ✅ supported | \"The tower is 330 metres tall including antennas.\" [1] — Evidence matches claim exactly. |\n| 2 | It receives 50 million visitors every year [1]. | ⚠️ unsupported | [1] — Evidence mentions no visitor statistics. |\n\nClaims needing attention: #2."
+  },
+  {
+   "task": "F4",
+   "skill": "fact_check",
+   "agent": "fact_check-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "verify",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "verdicts": {
+     "score": 1.0,
+     "detail": "verdicts ['supported', 'supported', 'unsupported'] vs expected ['supported', 'supported', 'unsupported']"
+    }
+   },
+   "judge": null,
+   "latency_s": 3.12,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fact check: 3 cited claim(s)** — 2 supported, 1 unsupported, 0 contradicted, 0 unverifiable. Each claim was checked against the source it cites.\n\n| # | Claim | Verdict | Evidence |\n|---|---|---|---|\n| 1 | Apple's fiscal 2023 net sales were $383.29 billion [1]. | ✅ supported | \"$383.29 billion\" [1] — Evidence confirms exact figure. |\n| 2 | Microsoft's fiscal 2023 revenue was $211.92 billion [2]. | ✅ supported | \"$211.92 billion\" [2] — Evidence confirms exact figure. |\n| 3 | Microsoft has 500,000 employees [2]. | ⚠️ unsupported | [2] — Evidence only mentions revenue, not employee count. |\n\nClaims needing attention: #3."
+  },
+  {
+   "task": "F5",
+   "skill": "fact_check",
+   "agent": "fact_check-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "verify",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "verdicts": {
+     "score": 1.0,
+     "detail": "verdicts ['supported', 'contradicted', 'supported'] vs expected ['supported', 'contradicted', 'supported']"
+    }
+   },
+   "judge": null,
+   "latency_s": 4.79,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fact check: 3 cited claim(s)** — 2 supported, 0 unsupported, 1 contradicted, 0 unverifiable. Each claim was checked against the source it cites.\n\n| # | Claim | Verdict | Evidence |\n|---|---|---|---|\n| 1 | Mount Everest is 8,848.86 metres high [1]. | ✅ supported | \"In 2020 China and Nepal announced a height of 8,848.86 m.\" [1] — Evidence matches claim exactly. |\n| 2 | Everest was first summited in 1963 [1]. | ❌ contradicted | \"The first ascent was made in 1953 by Tenzing Norgay and Edmund Hillary.\" [1] — Evidence says 1953, claim says 1963. |\n| 3 | K2 is 8,611 metres high [2]. | ✅ supported | \"K2, at 8,611 metres above sea level, is the second-highest mountain on Earth,\" [2] — Evidence matches claim exactly. |\n\nClaims needing attention: #2."
+  },
+  {
+   "task": "F6",
+   "skill": "fact_check",
+   "agent": "fact_check-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "verify",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "verdicts": {
+     "score": 1.0,
+     "detail": "verdicts ['contradicted', 'supported'] vs expected ['contradicted', 'supported']"
+    }
+   },
+   "judge": null,
+   "latency_s": 2.93,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fact check: 2 cited claim(s)** — 1 supported, 0 unsupported, 1 contradicted, 0 unverifiable. Each claim was checked against the source it cites.\n\n| # | Claim | Verdict | Evidence |\n|---|---|---|---|\n| 1 | Tesla's revenue was $97.69 billion in 2023 [1]. | ❌ contradicted | \"$96.77 billion\" [1] — Evidence states $96.77 billion, not $97.69 billion |\n| 2 | Ford's revenue was $176.19 billion in 2023 [2]. | ✅ supported | \"$176.19 billion\" [2] — Evidence states $176.19 billion |\n\nClaims needing attention: #1."
+  },
+  {
+   "task": "F7",
+   "skill": "fact_check",
+   "agent": "fact_check-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "verify",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "verdicts": {
+     "score": 1.0,
+     "detail": "verdicts ['contradicted', 'supported'] vs expected ['contradicted', 'supported']"
+    }
+   },
+   "judge": null,
+   "latency_s": 4.34,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fact check: 2 cited claim(s)** — 1 supported, 0 unsupported, 1 contradicted, 0 unverifiable. Each claim was checked against the source it cites.\n\n| # | Claim | Verdict | Evidence |\n|---|---|---|---|\n| 1 | Ford's revenue was $158.06 billion in 2023 [1]. | ❌ contradicted | \"$176.19 billion; fiscal year ended 2022-12-31: $158.06 billion\" [1] — Revenue was $176.19B in 2023, not $158.06B (which was 2022) |\n| 2 | GM's revenue was $171.84 billion in 2023 [2]. | ✅ supported | \"$171.84 billion; fiscal year ended 2023-12-31: $171.84 billion\" [2] — Revenue matches exactly for fiscal year 2023 |\n\nClaims needing attention: #1."
+  },
+  {
+   "task": "F8",
+   "skill": "fact_check",
+   "agent": "fact_check-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "verify",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "verdicts": {
+     "score": 1.0,
+     "detail": "verdicts ['contradicted', 'supported'] vs expected ['contradicted', 'supported']"
+    }
+   },
+   "judge": null,
+   "latency_s": 3.0,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fact check: 2 cited claim(s)** — 1 supported, 0 unsupported, 1 contradicted, 0 unverifiable. Each claim was checked against the source it cites.\n\n| # | Claim | Verdict | Evidence |\n|---|---|---|---|\n| 1 | Apple's fiscal 2023 net sales were $383.29 million [1]. | ❌ contradicted | \"$383.29 billion\" [1] — Evidence states billions, not millions as claimed |\n| 2 | Microsoft's fiscal 2023 revenue was $211.92 billion [2]. | ✅ supported | \"fiscal year ended 2023-06-30: $211.92 billion\" [2] — Matches claim exactly |\n\nClaims needing attention: #1."
+  },
+  {
+   "task": "F9",
+   "skill": "fact_check",
+   "agent": "fact_check-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "verify",
+   "score": 0.5,
+   "deterministic": 0.5,
+   "checks": {
+    "verdicts": {
+     "score": 0.5,
+     "detail": "verdicts ['supported', 'contradicted'] vs expected ['supported', 'supported']"
+    }
+   },
+   "judge": null,
+   "latency_s": 3.58,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fact check: 2 cited claim(s)** — 1 supported, 0 unsupported, 1 contradicted, 0 unverifiable. Each claim was checked against the source it cites.\n\n| # | Claim | Verdict | Evidence |\n|---|---|---|---|\n| 1 | Microsoft's fiscal 2023 revenue was about $212 billion [2]. | ✅ supported | \"$211.92 billion\" [2] — 211.92 rounds to approximately 212 billion |\n| 2 | Apple's net sales were lower in fiscal 2023 than in fiscal 2022 [1]. | ❌ contradicted | \"$383.29 billion; ... $394.33 billion\" [1] — Fiscal 2023 ($383.29B) was higher than fiscal 2022 ($394.33B) |\n\nClaims needing attention: #2."
+  },
+  {
+   "task": "F10",
+   "skill": "fact_check",
+   "agent": "fact_check-local",
+   "model": "qwen3.5:9b",
+   "provider": "ollama",
+   "strategy": "verify",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "verdicts": {
+     "score": 1.0,
+     "detail": "verdicts ['supported', 'unsupported'] vs expected ['supported', 'unsupported']"
+    }
+   },
+   "judge": null,
+   "latency_s": 2.9,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fact check: 2 cited claim(s)** — 1 supported, 1 unsupported, 0 contradicted, 0 unverifiable. Each claim was checked against the source it cites.\n\n| # | Claim | Verdict | Evidence |\n|---|---|---|---|\n| 1 | Mount Everest is 8,848.86 metres high [1]. | ✅ supported | \"In 2020 China and Nepal announced a height of 8,848.86 m.\" [1] — Evidence directly states the claimed height for Mount Everest. |\n| 2 | K2 is 8,611 metres high [1]. | ⚠️ unsupported | [1] — Evidence mentions no information about K2's height. |\n\nClaims needing attention: #2."
+  }
+ ]
+}

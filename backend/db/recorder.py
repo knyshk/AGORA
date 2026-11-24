@@ -38,6 +38,11 @@ class RunRecorder:
                 for field in ("agent", "attempts", "duration_s", "error", "output"):
                     if field in payload:
                         setattr(node, "agent_name" if field == "agent" else field, payload[field])
+            if event_type == "node_revised":   # self-correction replaced this node's output
+                node = s.scalar(select(NodeRun).where(
+                    NodeRun.run_id == self.run_id, NodeRun.node_id == payload["node_id"]))
+                if node is not None:
+                    node.output = payload["output"]
             s.commit()
             stored = {"id": event.id, "run_id": self.run_id, "seq": self.seq, "type": event_type, "payload": payload}
         if self.on_event:

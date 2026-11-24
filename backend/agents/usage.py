@@ -18,6 +18,7 @@ PRICES = {  # notional list-price assumptions, USD per 1M tokens (input, output)
     "gemini-3.5-flash-lite": (0.10, 0.40),
     "gemini-3.1-flash-lite": (0.075, 0.30),
     "google/gemma-4-31b-it:free": (0.0, 0.0),
+    "qwen3.5:9b": (0.0, 0.0),   # runs on the user's own laptop: no per-token price
 }
 DEFAULT_PRICE = (0.20, 0.80)  # unknown models: deliberately pessimistic
 

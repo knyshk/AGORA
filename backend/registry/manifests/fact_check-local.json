@@ -1,0 +1,13 @@
+{
+ "manifest": {
+  "name": "fact_check-local",
+  "skill": "fact_check",
+  "provider": "ollama",
+  "model": "qwen3.5:9b",
+  "strategy": "verify",
+  "publisher": "agora-core",
+  "version": 1
+ },
+ "key_id": "agora-core",
+ "signature": "gv3JJVK2W9HKfz1ult0o41ShmpZVefA+3AjXgzBdnRCywWn1+QGZXhivY+mZrleEuzQuH5oaWYBviQlGDIiwAQ=="
+}

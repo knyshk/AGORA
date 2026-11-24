@@ -159,6 +159,18 @@ export default function InspectorAndConflicts({
                 </svg>
                 Export Briefing (.md)
               </button>
+              {runId && (
+                <>
+                  <a className="btn-export" href={`${BACKEND_URL}/runs/${runId}/report.docx`}
+                     title="Cited report as a Word document: text, chart, sources, fact-check, conflicts, how it was produced">
+                    📄 Word report
+                  </a>
+                  <a className="btn-export" href={`${BACKEND_URL}/runs/${runId}/report.html`} target="_blank" rel="noreferrer"
+                     title="Printable report: use Save as PDF">
+                    🖨 Printable report (PDF)
+                  </a>
+                </>
+              )}
             </div>
           </div>
 
@@ -217,6 +229,16 @@ export default function InspectorAndConflicts({
                 </span>
               </div>
             )}
+            {nodeStatus[activeNode.id]?.revision && (
+              <div className="meta-item">
+                <span className="meta-k">Self-corrected:</span>
+                <span className="meta-v">
+                  {Math.round(nodeStatus[activeNode.id].revision.supported_rate_before * 100)}% →{" "}
+                  {Math.round(nodeStatus[activeNode.id].revision.supported_rate_after * 100)}% of claims supported after{" "}
+                  {nodeStatus[activeNode.id].revision.rounds} fact-check round(s)
+                </span>
+              </div>
+            )}
             <div className="meta-item">
               <span className="meta-k">Output Volume:</span>
               <span className="meta-v">
@@ -236,6 +258,14 @@ export default function InspectorAndConflicts({
               transition={{ duration: 0.2 }}
             >
               <div className="output-prose"><NodeOutput text={activeOutput} /></div>
+              {nodeStatus[activeNode.id]?.revision && (
+                <details style={{ marginTop: 12, opacity: 0.85 }}>
+                  <summary style={{ cursor: "pointer", color: "#f5ab3d" }}>
+                    Show the original version (before fact-check feedback)
+                  </summary>
+                  <div className="output-prose"><NodeOutput text={nodeStatus[activeNode.id].revision.original_output} /></div>
+                </details>
+              )}
             </motion.div>
           </AnimatePresence>
         </section>

@@ -48,6 +48,8 @@ def test_normalisation():
     (claim("x", 96.77), claim("y", 96.8), True),                         # rounding to one decimal
     (claim("x", 176.19), claim("y", 176191, scale="million"), True),     # same value, other unit
     (claim("x", 383.29), claim("y", 383.29, scale="million"), False),    # million vs billion
+    (claim("x", 171.84), claim("y", 171840000000), True),                # model expanded the number and kept "billion"
+    (claim("x", 383.29), claim("y", 338290000000), False),               # ...and a real digit swap is still caught
     (claim("x", 8848.86, scale="", unit="m"), claim("y", 8849, scale="", unit="m"), True),
     (claim("x", 8848.86, scale="", unit="m"), claim("y", 8848, scale="", unit="m"), False),
 ])

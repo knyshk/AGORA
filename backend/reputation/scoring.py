@@ -23,6 +23,7 @@ import redis
 r = redis.from_url(os.getenv("REDIS_URL", "redis://redis:6379"))
 
 PRIOR_STRENGTH = 10.0
+MIN_PRIOR_STRENGTH = 2.0   # the benchmark prior fades as live evidence accumulates, but never below this
 DECAY = 0.97
 LATENCY_WEIGHT = 0.15
 MODES = ("thompson", "greedy", "success_rate", "random", "fixed")
@@ -38,7 +39,8 @@ local q = tonumber(ARGV[1])
 local decay = tonumber(ARGV[2])
 local a = tonumber(redis.call('HGET', k, 'a_ev') or '0') * decay + q
 local b = tonumber(redis.call('HGET', k, 'b_ev') or '0') * decay + (1 - q)
-redis.call('HSET', k, 'a_ev', tostring(a), 'b_ev', tostring(b))
+local pw = math.max(tonumber(ARGV[5]), tonumber(redis.call('HGET', k, 'pw') or ARGV[4]) * decay)
+redis.call('HSET', k, 'a_ev', tostring(a), 'b_ev', tostring(b), 'pw', tostring(pw))
 redis.call('HINCRBY', k, 'n', 1)
 redis.call('HINCRBYFLOAT', k, 'quality_sum', q)
 if ARGV[3] ~= '' then
@@ -61,15 +63,16 @@ def seed_score(agent_name: str, prior: float):
 
 def reset_scores():
     for k in r.scan_iter("rep:*"):
-        r.hset(k, mapping={"a_ev": 0, "b_ev": 0, "n": 0, "quality_sum": 0})
+        r.hset(k, mapping={"a_ev": 0, "b_ev": 0, "n": 0, "quality_sum": 0, "pw": PRIOR_STRENGTH})
         r.hdel(k, "lat_ema")
 
 
 def get_stats(agent_name: str) -> dict:
     raw = {k.decode(): v.decode() for k, v in r.hgetall(_key(agent_name)).items()}
     prior = float(raw.get("prior", 0.7))
-    a = prior * PRIOR_STRENGTH + float(raw.get("a_ev", 0))
-    b = (1 - prior) * PRIOR_STRENGTH + float(raw.get("b_ev", 0))
+    pw = float(raw.get("pw", PRIOR_STRENGTH))   # current weight of the benchmark prior
+    a = prior * pw + float(raw.get("a_ev", 0))
+    b = (1 - prior) * pw + float(raw.get("b_ev", 0))
     mean = a / (a + b)
     sd = math.sqrt(a * b / ((a + b) ** 2 * (a + b + 1)))
     n = int(float(raw.get("n", 0)))
@@ -78,7 +81,7 @@ def get_stats(agent_name: str) -> dict:
     return {"agent": agent_name, "prior": prior, "alpha": round(a, 3), "beta": round(b, 3),
             "mean": round(mean, 4), "ci95": [round(max(0, mean - 1.96 * sd), 3), round(min(1, mean + 1.96 * sd), 3)],
             "n": n, "avg_quality": round(qsum / n, 3) if n else None,
-            "latency_s": round(lat, 2) if lat is not None else None}
+            "latency_s": round(lat, 2) if lat is not None else None, "prior_weight": round(pw, 2)}
 
 
 def get_score(agent_name: str) -> float:
@@ -88,17 +91,19 @@ def get_score(agent_name: str) -> float:
 def update_score(agent_name: str, success: bool = None, quality: float = None, latency_s: float = None) -> dict:
     q = float(quality) if quality is not None else (1.0 if success else 0.0)
     q = min(1.0, max(0.0, q))
-    _UPDATE(keys=[_key(agent_name)], args=[q, DECAY, "" if latency_s is None else latency_s])
+    _UPDATE(keys=[_key(agent_name)], args=[q, DECAY, "" if latency_s is None else latency_s,
+                                           PRIOR_STRENGTH, MIN_PRIOR_STRENGTH])
     return get_stats(agent_name)
 
 
-def route(candidates: list, mode: str = None, rng: random.Random = None) -> tuple:
-    """Choose an agent and explain why. Returns (chosen, explanation dict)."""
+def route(candidates: list, mode: str = None, rng: random.Random = None, stats_fn=None) -> tuple:
+    """Choose an agent and explain why. Returns (chosen, explanation dict).
+    stats_fn lets the routing simulator use in-memory statistics with exactly this code."""
     mode = mode or os.getenv("ROUTING_MODE", "thompson")
     if mode not in MODES:
         mode = "thompson"
     rng = rng or random
-    stats = [get_stats(c) for c in candidates]
+    stats = [(stats_fn or get_stats)(c) for c in candidates]
     latencies = [s["latency_s"] for s in stats if s["latency_s"]]
     slowest = max(latencies) if latencies else None
     typical = sum(latencies) / len(latencies) if latencies else None  # unmeasured agents count as average
@@ -140,3 +145,15 @@ def route(candidates: list, mode: str = None, rng: random.Random = None) -> tupl
 
 def pick_best_agent(candidates: list) -> str:
     return route(candidates)[0]
+
+
+def posterior(prior: float, a_ev: float, b_ev: float, n: int, quality_sum: float, latency=None, name="",
+              prior_weight: float = PRIOR_STRENGTH) -> dict:
+    """The same statistics as get_stats, from plain numbers (used by the routing simulator)."""
+    a = prior * prior_weight + a_ev
+    b = (1 - prior) * prior_weight + b_ev
+    mean = a / (a + b)
+    sd = math.sqrt(a * b / ((a + b) ** 2 * (a + b + 1)))
+    return {"agent": name, "prior": prior, "alpha": a, "beta": b, "mean": mean,
+            "ci95": [max(0, mean - 1.96 * sd), min(1, mean + 1.96 * sd)], "n": n,
+            "avg_quality": quality_sum / n if n else None, "latency_s": latency}

@@ -54,7 +54,7 @@ def test_unknown_key_wrong_publisher_and_malformed(keypair):
 
 
 def test_committed_manifests_all_verify_and_registry_rejects_tampering():
-    assert len(registry.REGISTRY) == 8 and registry.REJECTED == {}
+    assert len(registry.REGISTRY) == 12 and registry.REJECTED == {}
     assert all(m.verified and m.key_id == "agora-core" for m in registry.REGISTRY.values())
     signed = json.loads((manifests.MANIFEST_DIR / "chart-v1.json").read_text())
     tampered = copy.deepcopy(signed)
@@ -120,7 +120,7 @@ async def test_mcp_server_lists_agents_and_refuses_bad_tokens():
         names = [t.name for t in (await client.list_tools()).tools]
         assert names == ["list_agents", "invoke_agent_tool"]
         listed = json.loads(result_text(await client.call_tool("list_agents", {})))
-        assert len(listed["agents"]) == 8
+        assert len(listed["agents"]) == 12
         bad = await client.call_tool("invoke_agent_tool", {"agent": "chart-v1", "prompt": "p", "task_token": "forged"})
         assert "refused" in " ".join(c.text for c in bad.content)
 
