@@ -1,0 +1,241 @@
+{
+ "meta": {
+  "repeats": 2,
+  "provider": "ollama",
+  "plan": [
+   {
+    "id": "n1",
+    "agent": "research",
+    "depends_on": []
+   },
+   {
+    "id": "n2",
+    "agent": "drafting",
+    "depends_on": [
+     "n1"
+    ]
+   },
+   {
+    "id": "n3",
+    "agent": "fact_check",
+    "depends_on": [
+     "n2"
+    ]
+   }
+  ]
+ },
+ "summary": {
+  "runs": 20,
+  "judged": 20,
+  "with_flagged_claims": 16,
+  "revised_and_kept": 14,
+  "supported_before_mean": 0.7234,
+  "supported_after_mean": 0.8714500000000001,
+  "flagged_before_mean": 0.65425,
+  "flagged_after_mean": 0.8393125,
+  "fully_supported_before": 4,
+  "fully_supported_after": 9
+ },
+ "rows": [
+  {
+   "task": "D1",
+   "repeat": 0,
+   "ok": true,
+   "seconds": 213.9,
+   "before": 0.8,
+   "after": 0.8,
+   "revised": false,
+   "extra_calls": 0
+  },
+  {
+   "task": "D2",
+   "repeat": 0,
+   "ok": true,
+   "seconds": 88.7,
+   "before": 0.333,
+   "after": 1.0,
+   "revised": true,
+   "extra_calls": 2
+  },
+  {
+   "task": "D3",
+   "repeat": 0,
+   "ok": true,
+   "seconds": 30.7,
+   "before": 1.0,
+   "after": 1.0,
+   "revised": false,
+   "extra_calls": 0
+  },
+  {
+   "task": "D4",
+   "repeat": 0,
+   "ok": true,
+   "seconds": 26.4,
+   "before": 0.667,
+   "after": 1.0,
+   "revised": true,
+   "extra_calls": 2
+  },
+  {
+   "task": "D5",
+   "repeat": 0,
+   "ok": true,
+   "seconds": 75.1,
+   "before": 0.8,
+   "after": 0.8,
+   "revised": true,
+   "extra_calls": 2
+  },
+  {
+   "task": "D6",
+   "repeat": 0,
+   "ok": true,
+   "seconds": 62.0,
+   "before": 0.4,
+   "after": 0.8,
+   "revised": true,
+   "extra_calls": 2
+  },
+  {
+   "task": "D7",
+   "repeat": 0,
+   "ok": true,
+   "seconds": 102.6,
+   "before": 0.7,
+   "after": 0.7,
+   "revised": true,
+   "extra_calls": 2
+  },
+  {
+   "task": "D8",
+   "repeat": 0,
+   "ok": true,
+   "seconds": 33.2,
+   "before": 0.75,
+   "after": 1.0,
+   "revised": true,
+   "extra_calls": 2
+  },
+  {
+   "task": "D9",
+   "repeat": 0,
+   "ok": true,
+   "seconds": 84.2,
+   "before": 0.7,
+   "after": 0.75,
+   "revised": true,
+   "extra_calls": 2
+  },
+  {
+   "task": "D10",
+   "repeat": 0,
+   "ok": true,
+   "seconds": 67.0,
+   "before": 0.5,
+   "after": 0.5,
+   "revised": true,
+   "extra_calls": 2
+  },
+  {
+   "task": "D1",
+   "repeat": 1,
+   "ok": true,
+   "seconds": 96.3,
+   "before": 0.5,
+   "after": 1.0,
+   "revised": true,
+   "extra_calls": 2
+  },
+  {
+   "task": "D2",
+   "repeat": 1,
+   "ok": true,
+   "seconds": 44.1,
+   "before": 1.0,
+   "after": 1.0,
+   "revised": false,
+   "extra_calls": 0
+  },
+  {
+   "task": "D3",
+   "repeat": 1,
+   "ok": true,
+   "seconds": 14.1,
+   "before": 1.0,
+   "after": 1.0,
+   "revised": false,
+   "extra_calls": 0
+  },
+  {
+   "task": "D4",
+   "repeat": 1,
+   "ok": true,
+   "seconds": 27.3,
+   "before": 0.667,
+   "after": 1.0,
+   "revised": true,
+   "extra_calls": 3
+  },
+  {
+   "task": "D5",
+   "repeat": 1,
+   "ok": true,
+   "seconds": 42.9,
+   "before": 0.8,
+   "after": 0.8,
+   "revised": true,
+   "extra_calls": 2
+  },
+  {
+   "task": "D6",
+   "repeat": 1,
+   "ok": true,
+   "seconds": 75.3,
+   "before": 0.833,
+   "after": 0.833,
+   "revised": true,
+   "extra_calls": 2
+  },
+  {
+   "task": "D7",
+   "repeat": 1,
+   "ok": true,
+   "seconds": 74.0,
+   "before": 0.429,
+   "after": 0.857,
+   "revised": true,
+   "extra_calls": 2
+  },
+  {
+   "task": "D8",
+   "repeat": 1,
+   "ok": true,
+   "seconds": 24.2,
+   "before": 1.0,
+   "after": 1.0,
+   "revised": false,
+   "extra_calls": 0
+  },
+  {
+   "task": "D9",
+   "repeat": 1,
+   "ok": true,
+   "seconds": 84.5,
+   "before": 0.875,
+   "after": 0.875,
+   "revised": false,
+   "extra_calls": 3
+  },
+  {
+   "task": "D10",
+   "repeat": 1,
+   "ok": true,
+   "seconds": 101.8,
+   "before": 0.714,
+   "after": 0.714,
+   "revised": true,
+   "extra_calls": 3
+  }
+ ]
+}

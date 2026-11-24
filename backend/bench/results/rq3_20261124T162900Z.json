@@ -1,0 +1,487 @@
+{
+ "meta": {
+  "runs_per_mode": 20,
+  "pause_s": 20.0,
+  "provider": "groq",
+  "plan": [
+   {
+    "id": "n1",
+    "agent": "research",
+    "depends_on": []
+   },
+   {
+    "id": "n2",
+    "agent": "drafting",
+    "depends_on": [
+     "n1"
+    ]
+   },
+   {
+    "id": "n3",
+    "agent": "chart",
+    "depends_on": [
+     "n1"
+    ]
+   }
+  ]
+ },
+ "summary": {
+  "parallel": {
+   "n": 9,
+   "mean_s": 4.1066666666666665,
+   "ci95_half": 0.7555398187903651,
+   "median_s": 3.73
+  },
+  "sequential": {
+   "n": 3,
+   "mean_s": 7.01,
+   "ci95_half": 0.7266112394763334,
+   "median_s": 6.9
+  },
+  "speedup_of_means": 1.707,
+  "speedup_median_of_pairs": 1.848,
+  "excluded": 28
+ },
+ "rows": [
+  {
+   "i": 0,
+   "mode": "parallel",
+   "wall_s": 7.16,
+   "ok": true,
+   "node_s": {
+    "n3": 1.42,
+    "n2": 7.16
+   },
+   "error": null
+  },
+  {
+   "i": 1,
+   "mode": "sequential",
+   "wall_s": 6.9,
+   "ok": true,
+   "node_s": {
+    "n2": 3.69,
+    "n3": 3.19
+   },
+   "error": null
+  },
+  {
+   "i": 2,
+   "mode": "parallel",
+   "wall_s": 3.16,
+   "ok": false,
+   "node_s": {
+    "n2": 2.26,
+    "n3": 3.15
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 3,
+   "mode": "sequential",
+   "wall_s": 8.21,
+   "ok": false,
+   "node_s": {
+    "n2": 4.84,
+    "n3": 3.37
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 4,
+   "mode": "parallel",
+   "wall_s": 3.66,
+   "ok": false,
+   "node_s": {
+    "n2": 3.62,
+    "n3": 3.66
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 5,
+   "mode": "sequential",
+   "wall_s": 6.76,
+   "ok": false,
+   "node_s": {
+    "n2": 3.61,
+    "n3": 3.15
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 6,
+   "mode": "parallel",
+   "wall_s": 3.48,
+   "ok": true,
+   "node_s": {
+    "n2": 3.46,
+    "n3": 3.48
+   },
+   "error": null
+  },
+  {
+   "i": 7,
+   "mode": "sequential",
+   "wall_s": 5.86,
+   "ok": false,
+   "node_s": {
+    "n2": 2.25,
+    "n3": 3.6
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 8,
+   "mode": "parallel",
+   "wall_s": 3.53,
+   "ok": true,
+   "node_s": {
+    "n3": 3.12,
+    "n2": 3.53
+   },
+   "error": null
+  },
+  {
+   "i": 9,
+   "mode": "sequential",
+   "wall_s": 6.8,
+   "ok": false,
+   "node_s": {
+    "n2": 3.43,
+    "n3": 3.38
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 10,
+   "mode": "parallel",
+   "wall_s": 4.31,
+   "ok": false,
+   "node_s": {
+    "n3": 3.32,
+    "n2": 4.31
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 11,
+   "mode": "sequential",
+   "wall_s": 5.3,
+   "ok": false,
+   "node_s": {
+    "n2": 2.23,
+    "n3": 3.07
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 12,
+   "mode": "parallel",
+   "wall_s": 3.5,
+   "ok": false,
+   "node_s": {
+    "n2": 3.45,
+    "n3": 3.5
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 13,
+   "mode": "sequential",
+   "wall_s": 6.43,
+   "ok": true,
+   "node_s": {
+    "n2": 3.56,
+    "n3": 2.88
+   },
+   "error": null
+  },
+  {
+   "i": 14,
+   "mode": "parallel",
+   "wall_s": 4.75,
+   "ok": false,
+   "node_s": {
+    "n3": 3.14,
+    "n2": 4.75
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 15,
+   "mode": "sequential",
+   "wall_s": 5.42,
+   "ok": false,
+   "node_s": {
+    "n2": 2.27,
+    "n3": 3.14
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 16,
+   "mode": "parallel",
+   "wall_s": 4.39,
+   "ok": false,
+   "node_s": {
+    "n3": 3.06,
+    "n2": 4.39
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 17,
+   "mode": "sequential",
+   "wall_s": 9.98,
+   "ok": false,
+   "node_s": {
+    "n2": 7.0,
+    "n3": 2.98
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 18,
+   "mode": "parallel",
+   "wall_s": 3.94,
+   "ok": true,
+   "node_s": {
+    "n2": 3.64,
+    "n3": 3.94
+   },
+   "error": null
+  },
+  {
+   "i": 19,
+   "mode": "sequential",
+   "wall_s": 5.46,
+   "ok": false,
+   "node_s": {
+    "n2": 2.22,
+    "n3": 3.25
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 20,
+   "mode": "parallel",
+   "wall_s": 3.68,
+   "ok": false,
+   "node_s": {
+    "n3": 3.43,
+    "n2": 3.67
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 21,
+   "mode": "sequential",
+   "wall_s": 6.44,
+   "ok": false,
+   "node_s": {
+    "n2": 3.58,
+    "n3": 2.86
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 22,
+   "mode": "parallel",
+   "wall_s": 3.84,
+   "ok": true,
+   "node_s": {
+    "n3": 2.92,
+    "n2": 3.84
+   },
+   "error": null
+  },
+  {
+   "i": 23,
+   "mode": "sequential",
+   "wall_s": 5.02,
+   "ok": false,
+   "node_s": {
+    "n2": 2.29,
+    "n3": 2.73
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 24,
+   "mode": "parallel",
+   "wall_s": 3.69,
+   "ok": true,
+   "node_s": {
+    "n3": 3.28,
+    "n2": 3.69
+   },
+   "error": null
+  },
+  {
+   "i": 25,
+   "mode": "sequential",
+   "wall_s": 6.64,
+   "ok": false,
+   "node_s": {
+    "n2": 3.61,
+    "n3": 3.04
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 26,
+   "mode": "parallel",
+   "wall_s": 3.15,
+   "ok": false,
+   "node_s": {
+    "n2": 2.25,
+    "n3": 3.14
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 27,
+   "mode": "sequential",
+   "wall_s": 7.23,
+   "ok": false,
+   "node_s": {
+    "n2": 3.85,
+    "n3": 3.38
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 28,
+   "mode": "parallel",
+   "wall_s": 3.95,
+   "ok": false,
+   "node_s": {
+    "n3": 3.24,
+    "n2": 3.95
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 29,
+   "mode": "sequential",
+   "wall_s": 5.69,
+   "ok": false,
+   "node_s": {
+    "n2": 2.23,
+    "n3": 3.46
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 30,
+   "mode": "parallel",
+   "wall_s": 3.65,
+   "ok": true,
+   "node_s": {
+    "n3": 3.22,
+    "n2": 3.65
+   },
+   "error": null
+  },
+  {
+   "i": 31,
+   "mode": "sequential",
+   "wall_s": 7.7,
+   "ok": true,
+   "node_s": {
+    "n2": 4.33,
+    "n3": 3.38
+   },
+   "error": null
+  },
+  {
+   "i": 32,
+   "mode": "parallel",
+   "wall_s": 2.93,
+   "ok": false,
+   "node_s": {
+    "n2": 2.22,
+    "n3": 2.93
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 33,
+   "mode": "sequential",
+   "wall_s": 6.48,
+   "ok": false,
+   "node_s": {
+    "n2": 3.46,
+    "n3": 3.02
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 34,
+   "mode": "parallel",
+   "wall_s": 3.73,
+   "ok": true,
+   "node_s": {
+    "n3": 1.78,
+    "n2": 3.73
+   },
+   "error": null
+  },
+  {
+   "i": 35,
+   "mode": "sequential",
+   "wall_s": 5.46,
+   "ok": false,
+   "node_s": {
+    "n2": 2.22,
+    "n3": 3.24
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 36,
+   "mode": "parallel",
+   "wall_s": 3.94,
+   "ok": true,
+   "node_s": {
+    "n3": 3.22,
+    "n2": 3.93
+   },
+   "error": null
+  },
+  {
+   "i": 37,
+   "mode": "sequential",
+   "wall_s": 5.77,
+   "ok": false,
+   "node_s": {
+    "n2": 2.2,
+    "n3": 3.57
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 38,
+   "mode": "parallel",
+   "wall_s": 4.96,
+   "ok": false,
+   "node_s": {
+    "n2": 3.79,
+    "n3": 4.96
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  },
+  {
+   "i": 39,
+   "mode": "sequential",
+   "wall_s": 7.94,
+   "ok": false,
+   "node_s": {
+    "n2": 4.15,
+    "n3": 3.79
+   },
+   "error": "All providers exhausted for role 'drafting'. Last error: Error code: 429 - Rate "
+  }
+ ]
+}

@@ -30,6 +30,12 @@ append-only log, so any run can be replayed, forked from a checkpoint and audite
 
 ## Measured results so far
 
+Full write-up with every number, sample size and result file: [docs/EVALUATION.md](docs/EVALUATION.md).
+Headline: forking saves 92 % of time (n = 5); self-correction raises supported claims 0.72 → 0.87
+(n = 20); reputation routing keeps quality ≈ 0.97 when the default agent degrades while fixed routing
+drops to 0.56 (simulation, 600 × 30); parallel execution 1.71× (indicative, n = 9 / 3).
+
+
 Every number comes from a script in this repository and a saved results file in `backend/bench/results/`.
 Sample sizes are given next to each number. The full evaluation (RQ1–RQ5 with baselines) is in progress.
 

@@ -131,3 +131,23 @@ async def test_quality_is_graded_and_fact_check_feeds_back_to_drafting_agent():
     assert len(feedback) == 1 and feedback[0]["agent"] == "drafting-v1" and feedback[0]["quality"] == 0.5
     assert upd.call_args_list[-1].kwargs["quality"] == 0.5
     assert sum(1 for t, _ in events if t == "agent_routed") == 3
+
+
+async def test_sequential_baseline_runs_one_node_at_a_time():
+    import asyncio as aio
+    active, peak = [0], {"parallel": 0, "sequential": 0}
+
+    async def slow(role, prompt, provider=None, model=None):
+        active[0] += 1
+        peak[mode] = max(peak[mode], active[0])
+        await aio.sleep(0.02)
+        active[0] -= 1
+        return f"{role} out"
+
+    plan = [{"id": "n1", "agent": "research", "depends_on": []},
+            {"id": "n2", "agent": "drafting", "depends_on": ["n1"]},
+            {"id": "n3", "agent": "chart", "depends_on": ["n1"]}]
+    with patch.object(executor, "run_agent", side_effect=slow):
+        for mode in ("parallel", "sequential"):
+            await executor.execute_plan(plan, "q", initial_state={"n1": "frozen"}, sequential=(mode == "sequential"))
+    assert peak == {"parallel": 2, "sequential": 1}

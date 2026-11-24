@@ -219,7 +219,7 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
 
 
 async def execute_plan(plan, query, emit=None, initial_state=None, forced_agents=None, instructions=None,
-                       takeover=None, budget_usd=None, local_only=False):
+                       takeover=None, budget_usd=None, local_only=False, sequential=False):
     if local_only:
         force_provider("ollama")   # every LLM call of this run, including arbitration, stays on the laptop
     budget = Budget(budget_usd if budget_usd is not None else default_budget())
@@ -253,7 +253,12 @@ async def execute_plan(plan, query, emit=None, initial_state=None, forced_agents
                 raise RuntimeError(f"Deadlock: {remaining}")
             break
 
-        await asyncio.gather(*(run_node(n, state, query, meta, emit, forced_agents, instructions, takeover, budget) for n in ready))
+        if sequential:   # evaluation baseline: one node at a time, same order
+            for n in ready:
+                await run_node(n, state, query, meta, emit, forced_agents, instructions, takeover, budget)
+        else:
+            await asyncio.gather(*(run_node(n, state, query, meta, emit, forced_agents, instructions, takeover, budget)
+                                   for n in ready))
         remaining = [n for n in remaining if n["id"] not in meta]
 
     correction_ledger = start_ledger()

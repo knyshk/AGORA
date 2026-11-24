@@ -1,0 +1,89 @@
+{
+ "meta": {
+  "runs": 5,
+  "provider": "ollama",
+  "plan": [
+   {
+    "id": "n1",
+    "agent": "research",
+    "depends_on": []
+   },
+   {
+    "id": "n2",
+    "agent": "drafting",
+    "depends_on": [
+     "n1"
+    ]
+   },
+   {
+    "id": "n3",
+    "agent": "chart",
+    "depends_on": [
+     "n1"
+    ]
+   }
+  ]
+ },
+ "summary": {
+  "n": 5,
+  "full_mean_s": 95.208,
+  "full_ci95_half": 13.54819628520343,
+  "fork_mean_s": 7.43,
+  "fork_ci95_half": 0.8142850606513669,
+  "time_saved_mean": 0.92,
+  "tokens_saved_mean": 0.851,
+  "excluded": 0
+ },
+ "rows": [
+  {
+   "query": "Tesla total revenue in 2022 and 2023, with a chart",
+   "ok": true,
+   "full_s": 107.41,
+   "fork_s": 7.27,
+   "full_calls": 6,
+   "fork_calls": 1,
+   "full_tokens": 11491,
+   "fork_tokens": 1470
+  },
+  {
+   "query": "Ford total revenue in 2022 and 2023, with a chart",
+   "ok": true,
+   "full_s": 82.48,
+   "fork_s": 6.33,
+   "full_calls": 6,
+   "fork_calls": 1,
+   "full_tokens": 8262,
+   "fork_tokens": 1000
+  },
+  {
+   "query": "General Motors total revenue in 2022 and 2023, with a chart",
+   "ok": true,
+   "full_s": 74.82,
+   "fork_s": 8.89,
+   "full_calls": 4,
+   "fork_calls": 1,
+   "full_tokens": 6218,
+   "fork_tokens": 1266
+  },
+  {
+   "query": "Apple total net sales in fiscal 2022 and 2023, with a chart",
+   "ok": true,
+   "full_s": 107.94,
+   "fork_s": 7.51,
+   "full_calls": 5,
+   "fork_calls": 1,
+   "full_tokens": 9178,
+   "fork_tokens": 1435
+  },
+  {
+   "query": "Microsoft total revenue in fiscal 2022 and 2023, with a chart",
+   "ok": true,
+   "full_s": 103.39,
+   "fork_s": 7.15,
+   "full_calls": 5,
+   "fork_calls": 1,
+   "full_tokens": 9248,
+   "fork_tokens": 1244
+  }
+ ]
+}
