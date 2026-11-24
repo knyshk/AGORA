@@ -7,6 +7,7 @@ from arbitration.engine import detect_conflict
 from agents.research_tools import grounded_research
 from agents.chart_tools import build_chart, strip_chart_blocks
 from agents.drafting_tools import write_draft
+from agents.factcheck_tools import fact_check
 
 MAX_ATTEMPTS = 2
 BACKOFF_SECONDS = 2
@@ -24,6 +25,8 @@ async def _call_agent(skill, prompt, manifest):
         return await grounded_research(prompt, provider=manifest.provider, model=manifest.model)
     if skill == "drafting" and getattr(manifest, "strategy", "plain") == "cited":
         return await write_draft(prompt, provider=manifest.provider, model=manifest.model)
+    if skill == "fact_check" and getattr(manifest, "strategy", "plain") == "verify":
+        return await fact_check(prompt, provider=manifest.provider, model=manifest.model)
     if skill == "chart" and getattr(manifest, "strategy", "plain") == "spec":
         return await build_chart(prompt, provider=manifest.provider, model=manifest.model)
     return await run_agent(skill, prompt, provider=manifest.provider, model=manifest.model)

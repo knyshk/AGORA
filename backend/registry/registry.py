@@ -43,6 +43,6 @@ register_agent("chart-v2", "chart", 0.60,
                provider="groq", model="openai/gpt-oss-20b", strategy="spec")
 
 register_agent("fact_check-v1", "fact_check", 0.75,
-               provider="groq", model="openai/gpt-oss-120b")
+               provider="groq", model="openai/gpt-oss-120b", strategy="verify")
 register_agent("fact_check-v2", "fact_check", 0.65,
-               provider="gemini", model="gemini-3.1-flash-lite")
+               provider="gemini", model="gemini-3.1-flash-lite", strategy="verify")

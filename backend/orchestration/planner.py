@@ -6,7 +6,7 @@ AVAILABLE_AGENTS = {
     "research": "Gathers facts on a topic",
     "drafting": "Writes a report from the research with verified inline citations",
     "chart": "Builds a validated, data-grounded chart (Vega-Lite) from numbers in the research",
-    "fact_check": "Verifies drafted claims against the original research",
+    "fact_check": "Checks each cited claim in the draft against the source it cites",
 }
 
 MAX_ATTEMPTS = 2

@@ -31,7 +31,8 @@ Rules:
 - Every sentence that contains a figure MUST have a citation. Copy figures exactly as the research states them.
 - Only use source numbers that appear in the research source list: {ids}.
 - If the research does not contain something, say it is not available; never fill gaps from memory.
-- No forecasts, analyst projections or percentages unless the research states them.
+- No forecasts, analyst projections or percentages unless the research states them. Do not calculate new figures.
+- Do not draw charts, ASCII art or code blocks; a separate chart agent makes the chart.
 - At most {max_words} words. Markdown headings and bullet points are fine.
 - Do NOT write a sources or references list; it is added automatically.
 
