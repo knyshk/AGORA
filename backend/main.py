@@ -299,3 +299,11 @@ def run_usage(run_id: str):
     if not finished:
         raise HTTPException(status_code=404, detail="No usage recorded for this run (older run or still running)")
     return finished[-1]["payload"]["usage"]
+
+
+@app.get("/metrics/overview")
+def metrics_overview(days: int = 30):
+    """Dashboard data: runs, per-agent reliability/latency/quality/cost, reputation history,
+    conflicts, human involvement and audit-log integrity. Computed from stored events only."""
+    from metrics.overview import overview
+    return overview(max(1, min(days, 365)))

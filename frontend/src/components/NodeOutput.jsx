@@ -3,7 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 // Renders a Vega-Lite spec produced (and validated) by the backend chart agent.
-function VegaChart({ source }) {
+export function VegaChart({ source }) {
   const ref = useRef(null);
   const [error, setError] = useState(null);
 

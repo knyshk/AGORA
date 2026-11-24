@@ -11,6 +11,7 @@ import LatencyBenchmark from "./components/LatencyBenchmark";
 import "./App.css";
 import RunHistory from "./components/RunHistory";
 import LiveSessions from "./components/LiveSessions";
+import Dashboard from "./components/Dashboard";
 
 const BACKEND_URL = "http://127.0.0.1:8000";
 
@@ -217,6 +218,14 @@ export default function App() {
             <span className="tab-text">Live Sessions</span>
             <span className="tab-pill">Collaborate</span>
           </button>
+          <button
+            className={`module-tab ${activeTab === "dashboard" ? "module-tab-active" : ""}`}
+            onClick={() => setActiveTab("dashboard")}
+          >
+            <span className="tab-icon">📊</span>
+            <span className="tab-text">Observability</span>
+            <span className="tab-pill">Metrics</span>
+          </button>
         </div>
 
         {/* Tab 1: Task Orchestrator & Live DAG Floor */}
@@ -291,6 +300,7 @@ export default function App() {
         {activeTab === "reputation" && <ReputationRegistry />}
         {activeTab === "history" && <RunHistory backendUrl={BACKEND_URL} />}
         {activeTab === "live" && <LiveSessions backendUrl={BACKEND_URL} />}
+        {activeTab === "dashboard" && <Dashboard backendUrl={BACKEND_URL} />}
       </main>
 
       {/* Classical Agora Footer */}
