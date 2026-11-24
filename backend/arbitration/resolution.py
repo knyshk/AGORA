@@ -20,16 +20,18 @@ def resolve(conflicts: list, cid: str, choice: int, note: str = "") -> tuple:
     conflict = next((c for c in conflicts if c.get("id") == cid), None)
     if conflict is None:
         raise ResolutionError(f"conflict '{cid}' not found in this run")
-    if conflict.get("status") != "open":
+    if conflict.get("status") not in ("open", "auto_resolved"):   # a person may override an automatic decision
         raise ResolutionError(f"conflict '{cid}' is already {conflict.get('status')}")
+    overridden = conflict.get("resolution") if conflict.get("status") == "auto_resolved" else None
     sides = conflict.get("sides") or []
     if not 0 <= choice < len(sides):
         raise ResolutionError(f"choice must be between 0 and {len(sides) - 1}")
     winner = sides[choice]
     losers = [s for i, s in enumerate(sides) if i != choice]
     conflict["status"] = "resolved"
-    conflict["resolution"] = {"choice": choice, "value": winner["value"], "note": note[:500],
-                              "agreed_with_recommendation": choice == conflict.get("recommended", 0)}
+    conflict["resolution"] = {"choice": choice, "value": winner["value"], "note": note[:500], "by": "person",
+                              "agreed_with_recommendation": choice == conflict.get("recommended", 0),
+                              **({"overrode_policy": overridden["value"]} if overridden else {})}
     return conflicts, conflict, winner, losers
 
 
@@ -52,7 +54,7 @@ def origin_agents(side: dict, plan: list) -> list:
     return sorted({by_node[n] for n in origins if by_node.get(n)})
 
 
-def reputation_updates(winner: dict, losers: list, plan: list = None) -> list:
+def reputation_updates(winner: dict, losers: list, plan: list = None, loser_weight: int = LOSER_WEIGHT) -> list:
     """(agent, quality, reason) tuples to apply."""
     updates = [(a, 1.0, "won a reviewed conflict") for a in origin_agents(winner, plan)]
     win_agents = set(origin_agents(winner, plan))
@@ -60,7 +62,7 @@ def reputation_updates(winner: dict, losers: list, plan: list = None) -> list:
         for a in origin_agents(side, plan):
             if a in win_agents:
                 continue  # same agent on both sides: no net evidence
-            updates += [(a, 0.0, "lost a reviewed conflict")] * LOSER_WEIGHT
+            updates += [(a, 0.0, "lost a reviewed conflict")] * loser_weight
     return updates
 
 

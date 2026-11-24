@@ -26,3 +26,13 @@ async def test_run_is_saved_with_events_and_nodes():
 def test_unknown_run_returns_none():
     init_db()
     assert crud.get_run("does-not-exist") is None
+
+async def test_two_recorders_on_one_run_never_reuse_a_sequence_number():
+    init_db()
+    run_id = crud.create_run("q")
+    executor_log, api_log = RunRecorder(run_id), RunRecorder.resume(run_id)
+    await executor_log("node_started", {"node_id": "n1", "skill": "research", "depends_on": []})
+    await api_log("node_paused", {"node_id": "n2"})          # a person acts while the run is going
+    await executor_log("node_started", {"node_id": "n2", "skill": "drafting", "depends_on": []})
+    seqs = [e["seq"] for e in crud.get_run(run_id)["events"]]
+    assert seqs == [1, 2, 3]

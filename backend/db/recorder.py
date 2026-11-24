@@ -22,8 +22,11 @@ class RunRecorder:
         return rec
 
     async def __call__(self, event_type: str, payload: dict):
-        self.seq += 1
         with SessionLocal() as s:
+            # The next number comes from the database, not a private counter: the executor and the API
+            # (e.g. a person pausing a node mid-run) may write to the same run's log. There is no await
+            # between reading and committing, so in this single-process server the number stays unique.
+            self.seq = (s.scalar(select(func.max(RunEvent.seq)).where(RunEvent.run_id == self.run_id)) or 0) + 1
             event = RunEvent(run_id=self.run_id, seq=self.seq, type=event_type, payload=payload)
             s.add(event)
             if event_type in NODE_EVENTS:

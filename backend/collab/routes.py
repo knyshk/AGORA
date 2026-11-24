@@ -81,7 +81,8 @@ def _session_view(sess, role: str) -> dict:
     view = {"id": sess.id, "title": sess.title, "mode": sess.mode, "role": role,
             "members": service.members(sess.id), "online": hub.presence(sess.id),
             "runs": service.runs_of(sess.id),
-            "takeovers": {r["id"]: hub.takeover(r["id"]).snapshot() for r in service.runs_of(sess.id)}}
+            "takeovers": {r["id"]: hub.takeover(r["id"]).snapshot() for r in service.runs_of(sess.id)},
+            "controls": {r["id"]: hub.control(r["id"]).snapshot() for r in service.runs_of(sess.id)}}
     if role == "owner":
         view["invites"] = {"editor": sess.editor_token, "viewer": sess.viewer_token}
     return view
@@ -134,6 +135,7 @@ async def set_role(session_id: str, user_id: str, req: RoleRequest, user: User =
 
 class SessionRunRequest(BaseModel):
     query: str
+    local_only: bool = False   # plan and run on the laptop's model (no cloud LLM, no rate limits)
 
 
 class SubmitRequest(BaseModel):
@@ -149,13 +151,17 @@ async def plan_run(session_id: str, req: SessionRunRequest, user: User = Depends
     service.require_role(session_id, user, "editor")
     run_id = crud.create_run(req.query)
     service.link_run(session_id, run_id)
+    if req.local_only:
+        from agents.base_agent import force_provider
+        force_provider("ollama")
     try:
         plan = await plan_task(req.query)
     except PlanError as e:
         crud.set_plan(run_id, [], "failed")
         raise HTTPException(status_code=422, detail=str(e))
     crud.set_plan(run_id, plan, "planned")
-    await RunRecorder(run_id, _live(session_id))("plan_created", {"plan": plan, "by": auth.public_user(user)})
+    await RunRecorder(run_id, _live(session_id))("plan_created", {"plan": plan, "by": auth.public_user(user),
+                                                                  "local_only": req.local_only})
     return {"run_id": run_id, "plan": plan, "status": "planned"}
 
 
@@ -165,11 +171,14 @@ def _session_run(session_id: str, run_id: str) -> dict:
     return crud.get_run(run_id)["run"]
 
 
-async def _execute(session_id: str, run_id: str, plan: list, query: str):
+async def _execute(session_id: str, run_id: str, plan: list, query: str, local_only: bool = False):
     started = time.time()
     recorder = RunRecorder.resume(run_id, _live(session_id))
     try:
-        result = await execute_plan(plan, query, emit=recorder, takeover=hub.takeover(run_id))
+        async def stream(payload):   # live-only token stream to everyone in the session
+            await hub.broadcast(session_id, {"type": "stream", "run_id": run_id, **payload})
+        result = await execute_plan(plan, query, emit=recorder, takeover=hub.takeover(run_id), stream=stream,
+                                    control=hub.control(run_id), local_only=local_only)
         crud.finish_run(run_id, plan, result["status"], result["conflicts"], started)
     except Exception as e:
         crud.finish_run(run_id, plan, "failed", [], started)
@@ -183,7 +192,9 @@ async def start_run(session_id: str, run_id: str, user: User = Depends(auth.curr
     if run["status"] != "planned":
         raise HTTPException(status_code=409, detail=f"Run is already {run['status']}")
     crud.set_plan(run_id, run["plan"], "running")
-    task = asyncio.create_task(_execute(session_id, run_id, run["plan"], run["query"]))
+    events = crud.get_run(run_id)["events"]
+    local_only = any(e["type"] == "plan_created" and e["payload"].get("local_only") for e in events)
+    task = asyncio.create_task(_execute(session_id, run_id, run["plan"], run["query"], local_only))
     _tasks.add(task)
     task.add_done_callback(_tasks.discard)
     return {"run_id": run_id, "status": "running"}
@@ -225,6 +236,50 @@ async def release(session_id: str, run_id: str, node_id: str, user: User = Depen
 async def submit(session_id: str, run_id: str, node_id: str, req: SubmitRequest,
                  user: User = Depends(auth.current_user)):
     return await _takeover_action(session_id, run_id, node_id, user, "submit", req.output)
+
+
+# ---------------- mid-task control of a single node (pause / resume / redirect / reassign) ----------------
+
+class ControlRequest(BaseModel):
+    instruction: str | None = None
+    agent: str | None = None
+
+
+@router.post("/sessions/{session_id}/runs/{run_id}/nodes/{node_id}/{action}")
+async def control_node(session_id: str, run_id: str, node_id: str, action: str, req: ControlRequest,
+                       user: User = Depends(auth.current_user)):
+    from orchestration.control import ControlError
+    from registry.registry import REGISTRY
+    if action not in ("pause", "resume", "redirect", "reassign"):
+        raise HTTPException(status_code=404, detail=f"Unknown action '{action}'")
+    service.require_role(session_id, user, "editor")
+    run = _session_run(session_id, run_id)
+    node = next((n for n in run["plan"] if n["id"] == node_id), None)
+    if node is None:
+        raise HTTPException(status_code=404, detail=f"Node '{node_id}' is not in this run")
+    if req.agent and (req.agent not in REGISTRY or REGISTRY[req.agent].skill != node["agent"]):
+        raise HTTPException(status_code=422, detail=f"'{req.agent}' is not a registered {node['agent']} agent")
+    control = hub.control(run_id)
+    try:
+        if action == "pause":
+            control.pause(node_id)
+        elif action == "resume":
+            control.resume(node_id, req.instruction, req.agent)
+        elif action == "redirect":
+            control.redirect(node_id, req.instruction or "")
+        else:
+            if not req.agent:
+                raise HTTPException(status_code=422, detail="reassign needs an agent")
+            control.reassign(node_id, req.agent)
+    except ControlError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+    who = auth.public_user(user)
+    kind = {"pause": "node_paused", "resume": "node_resumed", "redirect": "node_redirected",
+            "reassign": "node_reassigned"}[action]
+    payload = {"node_id": node_id, "user": who, "instruction": req.instruction, "agent": req.agent}
+    await RunRecorder.resume(run_id, _live(session_id))(kind, payload)
+    audit.record(f"user:{user.id}", kind, f"{run_id}/{node_id}", {"instruction": req.instruction, "agent": req.agent})
+    return {"controls": control.snapshot()}
 
 
 # ---------------- catch-up digest ----------------

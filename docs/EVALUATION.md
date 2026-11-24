@@ -6,6 +6,19 @@ Sample sizes are given with every number. Runs that failed because of free-tier 
 **excluded and counted**, never scored as failures of the method. All LLMs used are free tiers or a
 local open-weight model, so "cost" is notional.
 
+## Mapping to the synopsis research questions
+
+The synopsis (Aug 2026) lists RQ1–RQ5; the final-phase plan renumbered some of them. Both are answered:
+
+| Synopsis question | Where it is answered |
+|---|---|
+| RQ1 benchmark-seeded reputation converges to accurate trust faster than usage-only | **Convergence** below (simulation): error 0.05 from the first task vs 0.30, usage-only needs ≈ 95 tasks |
+| RQ2 a lightweight classifier detects semantic conflicts with acceptable false positives | RQ2 below (64 labelled pairs, cloud and local) |
+| RQ3 parallel execution + adaptive routing reduce latency vs sequential | RQ3 below (indicative) and the budget governor (economy mode) |
+| RQ4 live mid-task human intervention improves quality vs pre/post review | User study (protocol ready); live pause / redirect / reassign implemented |
+| RQ5 the catch-up digest reduces time to regain context vs the raw transcript | User study, digest part (protocol ready) |
+| (plan) fork vs full re-run | RQ5 in the summary below |
+
 ## Summary
 
 | Research question | Result | Sample |
@@ -70,6 +83,23 @@ Thompson because exploration has little to gain.
 
 **Limits.** Simulation, not live runs (free tiers cannot support hundreds of runs per strategy); latency
 is not part of the simulated objective.
+
+## Convergence of trust (synopsis RQ1)
+
+`routing_sim_20261124T170149Z`: trust error = mean |trust − true quality| over the three research agents,
+30 seeds. To avoid a circular test, each seed's true quality differs from the benchmark score by random
+benchmark error (sd 0.10); the prior still uses the benchmark score.
+
+| Routing | Prior | Error after 1 / 10 / 25 / 50 / 100 tasks | Tasks until error < 0.10 |
+|---|---|---|---|
+| Thompson | benchmark-seeded | 0.053 / 0.042 / 0.036 / 0.032 / 0.028 | 1 |
+| Thompson | usage only | 0.302 / 0.227 / 0.157 / 0.114 / 0.098 | ≈ 95 (never in 11/30 seeds) |
+| greedy | benchmark-seeded | 0.053 / 0.045 / 0.041 / 0.039 / 0.038 | 1 |
+| greedy | usage only | 0.298 / 0.234 / 0.199 / 0.179 / 0.178 | never (30/30) |
+
+Benchmark-seeded priors give accurate trust from the first task; usage-only scoring needs about 95 tasks
+with Thompson sampling and never converges with greedy routing (it never tries the agents it starts out
+wrong about). This is the cold-start problem the synopsis describes, measured.
 
 ## RQ2 — conflict detection
 

@@ -1,7 +1,9 @@
 import asyncio
 import os
 import time
-from agents.base_agent import _only_provider, force_provider, run_agent
+from agents.base_agent import _only_provider, force_provider, run_agent, set_stream_sink
+from orchestration.live_stream import LiveStream
+from orchestration.control import Interrupted
 from config import LOCAL_PROVIDERS
 from registry.registry import REGISTRY, get_agents_for_skill, get_manifest
 from security import audit, task_tokens
@@ -74,6 +76,21 @@ async def _emit(emit, event_type, payload):
         print(f"[EMIT ERROR] {event_type}: {e}")
 
 
+async def _apply_auto_resolution(conflict, plan, emit):
+    """Low-stakes conflict decided by policy: logged, and the origin of the wrong figure gets one zero-quality
+    observation (a person's decision counts twice; see arbitration/resolution.py)."""
+    from arbitration.resolution import reputation_updates
+    sides = conflict["sides"]
+    await _emit(emit, "conflict_auto_resolved", {"conflict_id": conflict["id"], "label": conflict["label"],
+                                                 "value": conflict["resolution"]["value"],
+                                                 "reason": conflict["resolution"]["reason"]})
+    for agent, quality, reason in reputation_updates(sides[0], sides[1:], plan, loser_weight=1):
+        stats = update_score(agent, quality=quality)
+        await _emit(emit, "reputation_updated", {"agent": agent, "quality": quality,
+                                                 "reason": f"{reason} (decided by policy): {conflict['label']}",
+                                                 "source": "conflict_auto_resolution", "after": stats})
+
+
 async def _spend(budget, cost, emit):
     changed = budget.add(cost)
     if changed:
@@ -121,10 +138,32 @@ async def _human_node(node, state, meta, emit, takeover, started) -> bool:
 
 
 async def run_node(node, state, query, meta, emit=None, forced_agents=None, instructions=None, takeover=None,
-                   budget=None):
+                   budget=None, stream=None, control=None):
     node_id = node["id"]
     skill = node["agent"]
     started = time.time()
+    live = LiveStream(node_id, stream) if stream else None
+    set_stream_sink(live)   # this node's task only (contextvars are per task)
+    try:
+        await _run_node(node, state, query, meta, emit, forced_agents, instructions, takeover, budget, started, control)
+    finally:
+        if control:
+            control.finished(node["id"])
+        if live:
+            await live.drain()
+        set_stream_sink(None)
+
+
+async def _wait_if_paused(control, node_id, skill, emit):
+    if control and control.is_paused(node_id):
+        await _emit(emit, "node_waiting_paused", {"node_id": node_id, "skill": skill})
+        await control.gate(node_id)
+
+
+async def _run_node(node, state, query, meta, emit, forced_agents, instructions, takeover, budget, started,
+                    control=None):
+    node_id = node["id"]
+    skill = node["agent"]
     budget = budget or Budget()
     if budget.exhausted:
         meta[node_id] = {"status": "skipped", "agent": None, "attempts": 0, "duration_s": 0,
@@ -132,6 +171,7 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
         await _emit(emit, "node_skipped", {"node_id": node_id, "skill": skill, "depends_on": node["depends_on"],
                                            **meta[node_id]})
         return
+    await _wait_if_paused(control, node_id, skill, emit)
     await _emit(emit, "node_started", {"node_id": node_id, "skill": skill, "depends_on": node["depends_on"]})
     if await _human_node(node, state, meta, emit, takeover, started):
         return
@@ -157,9 +197,21 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
     ledger = start_ledger()  # every LLM call this node makes, including retries and fallbacks
     tried = []
     last_error = None
-    for attempt in range(1, MAX_ATTEMPTS + 1):
-        forced = (forced_agents or {}).get(node_id) or node.get("forced_agent")
-        if forced and attempt == 1 and forced in candidates:
+    attempt = 0
+    person_agent = None
+    while attempt < MAX_ATTEMPTS:
+        attempt += 1
+        await _wait_if_paused(control, node_id, skill, emit)
+        if control:   # a person may have redirected (new instruction) or reassigned (new agent) this node
+            directive = control.take_directive(node_id)
+            if directive["instruction"]:
+                prompt += f"\n\nInstruction from a person in the session: {directive['instruction']}"
+            if directive["agent"] in candidates:
+                person_agent = directive["agent"]
+        forced = person_agent or (forced_agents or {}).get(node_id) or node.get("forced_agent")
+        if person_agent and forced in candidates:
+            pool = [forced]
+        elif forced and attempt == 1 and forced in candidates:
             pool = [forced]
         else:
             pool = [c for c in candidates if c not in tried] or candidates
@@ -169,7 +221,9 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
                                                        "to": economy, **budget.snapshot()})
                 pool = economy
         chosen, why = route(pool)
-        if forced and attempt == 1 and pool == [forced]:
+        if person_agent and pool == [person_agent]:
+            why = {**why, "reason": f"{person_agent} was chosen by a person in the session (reassigned)"}
+        elif forced and attempt == 1 and pool == [forced]:
             why = {**why, "reason": f"{forced} was chosen by the user (fork override)"}
         print(f"[ROUTING] node={node_id} skill={skill} chose={chosen} attempt={attempt}")
         await _emit(emit, "agent_routed", {"node_id": node_id, "skill": skill, "attempt": attempt, **why})
@@ -177,8 +231,8 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
         call_started = time.time()
         try:
             limit = NODE_TIMEOUT_S * (3 if manifest.provider in LOCAL_PROVIDERS else 1)
-            state[node_id] = await asyncio.wait_for(
-                _call_agent(skill, prompt, manifest, getattr(emit, "run_id", "adhoc"), node_id), limit)
+            call = _call_agent(skill, prompt, manifest, getattr(emit, "run_id", "adhoc"), node_id)
+            state[node_id] = await asyncio.wait_for(control.run(node_id, call) if control else call, limit)
             latency = round(time.time() - call_started, 2)
             quality, reason = assess(skill, state[node_id])
             stats = update_score(chosen, quality=quality, latency_s=latency)
@@ -194,6 +248,11 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
             if skill == "fact_check":
                 await _feedback_to_drafts(node, state[node_id], meta, emit)
             return
+        except Interrupted as e:
+            # stopped by a person (pause / redirect / reassign): not a failure, the attempt does not count
+            attempt -= 1
+            await _emit(emit, "node_interrupted", {"node_id": node_id, "agent": chosen, "reason": e.reason})
+            continue
         except Exception as e:
             if isinstance(e, asyncio.TimeoutError):
                 e = TimeoutError(f"agent call timed out after {NODE_TIMEOUT_S:.0f}s")
@@ -219,7 +278,8 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
 
 
 async def execute_plan(plan, query, emit=None, initial_state=None, forced_agents=None, instructions=None,
-                       takeover=None, budget_usd=None, local_only=False, sequential=False):
+                       takeover=None, budget_usd=None, local_only=False, sequential=False, stream=None,
+                       control=None, auto_resolve=None):
     if local_only:
         force_provider("ollama")   # every LLM call of this run, including arbitration, stays on the laptop
     budget = Budget(budget_usd if budget_usd is not None else default_budget())
@@ -255,10 +315,11 @@ async def execute_plan(plan, query, emit=None, initial_state=None, forced_agents
 
         if sequential:   # evaluation baseline: one node at a time, same order
             for n in ready:
-                await run_node(n, state, query, meta, emit, forced_agents, instructions, takeover, budget)
+                await run_node(n, state, query, meta, emit, forced_agents, instructions, takeover, budget, stream,
+                               control)
         else:
-            await asyncio.gather(*(run_node(n, state, query, meta, emit, forced_agents, instructions, takeover, budget)
-                                   for n in ready))
+            await asyncio.gather(*(run_node(n, state, query, meta, emit, forced_agents, instructions, takeover, budget,
+                                            stream, control) for n in ready))
         remaining = [n for n in remaining if n["id"] not in meta]
 
     correction_ledger = start_ledger()
@@ -275,13 +336,15 @@ async def execute_plan(plan, query, emit=None, initial_state=None, forced_agents
         agents = {nid: meta.get(nid, {}).get("agent") for nid in state}
         try:
             conflicts = await arbitrate(dict(state), skills, agents,
-                                        emit=lambda t, p: _emit(emit, t, p))
+                                        emit=lambda t, p: _emit(emit, t, p), auto=auto_resolve)
         except Exception as e:
             print(f"[ARBITRATION ERROR] {type(e).__name__}: {e}")
             await _emit(emit, "arbitration_error", {"error": f"{type(e).__name__}: {str(e)[:200]}"})
         for c in conflicts:
             print(f"[CONFLICT] {c['explanation']}")
             await _emit(emit, "conflict_found", c)
+            if c["status"] == "auto_resolved":
+                await _apply_auto_resolution(c, plan, emit)
 
     all_ok = all(m["status"] == "done" for m in meta.values())
     status = "complete" if all_ok else ("partial" if state else "failed")

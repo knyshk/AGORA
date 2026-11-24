@@ -2,6 +2,7 @@ import os
 import time
 from langchain_openai import ChatOpenAI
 import contextvars
+import itertools
 
 from config import PROVIDER_ENDPOINTS, PROVIDER_DEFAULT_MODELS, FALLBACK_CHAIN, LOCAL_PROVIDERS
 from agents.usage import record_call
@@ -27,13 +28,23 @@ def force_provider(provider: str | None):
     _only_provider.set(provider)
 
 
+# Live streaming: when a sink is set (per node, by the executor), every LLM call streams its tokens to it.
+# Partial text is live-only: it is broadcast to the session but never stored in the event log.
+_stream_sink: contextvars.ContextVar = contextvars.ContextVar("agora_stream_sink", default=None)
+_call_ids = itertools.count(1)
+
+
+def set_stream_sink(sink):
+    _stream_sink.set(sink)
+
+
 def _make_llm(provider: str, model: str = None, timeout: int = 25):
     if provider in LOCAL_PROVIDERS:
         # reasoning_effort "none": the local model answers directly instead of writing thousands of hidden
         # "thinking" tokens first (measured: 99 s -> 1.5 s for the same one-sentence answer)
         return ChatOpenAI(base_url=PROVIDER_ENDPOINTS[provider], api_key="local",
                           model=model or PROVIDER_DEFAULT_MODELS.get(provider),
-                          timeout=max(timeout, LOCAL_TIMEOUT_S), max_retries=0,
+                          timeout=max(timeout, LOCAL_TIMEOUT_S), max_retries=0, stream_usage=True,
                           extra_body={"reasoning_effort": os.getenv("LOCAL_REASONING_EFFORT", "none")})
     api_key = os.getenv(f"{provider.upper()}_API_KEY")
     if not api_key:
@@ -45,6 +56,7 @@ def _make_llm(provider: str, model: str = None, timeout: int = 25):
         model=model or PROVIDER_DEFAULT_MODELS.get(provider),
         timeout=timeout,
         max_retries=0,
+        stream_usage=True,
     )
 
 def _is_rate_limit(e: Exception) -> bool:
@@ -75,7 +87,11 @@ async def run_agent(role: str, prompt: str,
             llm = _make_llm(attempt_provider, use_model)
             full_prompt = f"You are a {role} agent. {prompt}"
             started = time.time()
-            result = await llm.ainvoke(full_prompt)
+            sink = _stream_sink.get()
+            if sink is None:
+                result = await llm.ainvoke(full_prompt)
+            else:
+                result = await _streamed(llm, full_prompt, role, sink)
             record_call(attempt_provider, use_model or PROVIDER_DEFAULT_MODELS.get(attempt_provider), full_prompt,
                         result, started)
             if attempt_provider != chain[0]:
@@ -98,3 +114,19 @@ async def run_agent(role: str, prompt: str,
         f"All providers exhausted for role '{role}'. "
         f"Last error: {last_err}"
     ) from last_err
+
+async def _streamed(llm, prompt: str, role: str, sink):
+    """Stream one call: forward each text delta to the sink, return the combined message (with usage)."""
+    call_id = next(_call_ids)
+    combined = None
+    sink({"call": call_id, "role": role, "start": True})
+    try:
+        async for chunk in llm.astream(prompt):
+            combined = chunk if combined is None else combined + chunk
+            if chunk.content:
+                sink({"call": call_id, "role": role, "delta": chunk.content})
+    finally:
+        sink({"call": call_id, "role": role, "end": True})
+    if combined is None:
+        raise RuntimeError("empty streamed response")
+    return combined

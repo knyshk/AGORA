@@ -6,7 +6,8 @@ const GOLD = "#f5ab3d";
 const PANEL = "#241c14";
 const LINE = "rgba(245,171,61,0.25)";
 const TEXT = "#f1e8da";
-const STATUS_COLORS = { done: "#79d48b", running: GOLD, waiting: "#7fb2ff", failed: "#ff9187", skipped: "#8a8278", pending: "#8a8278" };
+const STATUS_COLORS = { done: "#79d48b", running: GOLD, waiting: "#7fb2ff", failed: "#ff9187", skipped: "#8a8278",
+                        pending: "#8a8278", paused: "#c59cff", restarting: GOLD };
 
 const card = { background: PANEL, border: `1px solid ${LINE}`, borderRadius: 12, padding: 16, marginBottom: 16, color: TEXT };
 const button = { background: GOLD, color: "#0e0c0a", border: "none", borderRadius: 8, padding: "7px 12px", fontWeight: 600, cursor: "pointer" };
@@ -32,6 +33,11 @@ function nodeStates(events) {
     if (e.type === "node_finished") Object.assign(s, { status: "done", output: p.output, agent: p.agent });
     if (e.type === "node_failed") Object.assign(s, { status: "failed", error: p.error, agent: p.agent });
     if (e.type === "node_skipped") s.status = "skipped";
+    if (e.type === "node_paused" && !["done", "failed", "skipped"].includes(s.status)) s.status = "paused";
+    if (e.type === "node_waiting_paused") s.status = "paused";
+    if (["node_resumed", "node_redirected", "node_reassigned"].includes(e.type) && s.status === "paused") s.status = "pending";
+    if (e.type === "node_interrupted") s.status = "restarting";
+    if (e.type === "agent_routed" && s.status === "restarting") s.status = "running";
   }
   return st;
 }
@@ -50,6 +56,18 @@ function describe(e) {
     case "node_finished": return `${p.node_id} finished by ${p.agent}`;
     case "node_failed": return `${p.node_id} failed: ${String(p.error).slice(0, 90)}`;
     case "node_skipped": return `${p.node_id} skipped`;
+    case "node_paused": return `${who} paused ${p.node_id}`;
+    case "node_resumed": return `${who} resumed ${p.node_id}${p.instruction ? ` with: "${p.instruction}"` : ""}`;
+    case "node_redirected": return `${who} redirected ${p.node_id}: "${p.instruction}"`;
+    case "node_reassigned": return `${who} reassigned ${p.node_id} to ${p.agent}`;
+    case "node_interrupted": return `${p.node_id}: ${p.agent} stopped (${p.reason}), restarting`;
+    case "node_waiting_paused": return `${p.node_id} is ready but paused, waiting for a person`;
+    case "self_correction_started": return `Self-correction: ${(p.flagged || []).length} flagged claim(s) sent back to ${p.draft_node}`;
+    case "self_correction_finished": return `Self-correction: supported claims ${p.supported_rate_before} → ${p.supported_rate_after} (${p.accepted ? "kept" : "rejected"})`;
+    case "node_revised": return `${p.node_id} revised after fact-check`;
+    case "conflict_auto_resolved": return `Conflict ${p.label} auto-resolved to ${p.value} (low-stakes)`;
+    case "budget_economy": return `Budget 80 % used: switching to cheaper agents`;
+    case "budget_exhausted": return `Budget used up: remaining nodes skipped`;
     case "conflict_found": return `Conflict: ${p.label}`;
     case "conflict_resolved": return `Conflict ${p.label} resolved as ${p.value}`;
     case "run_finished": return `Run finished: ${p.status}`;
@@ -103,8 +121,20 @@ export default function LiveSessions({ backendUrl }) {
   const [newMode, setNewMode] = useState("collaborative");
   const [joinToken, setJoinToken] = useState("");
   const [query, setQuery] = useState("Write a short report on Tesla revenue in 2023 with a chart");
+  const [localOnly, setLocalOnly] = useState(false);
   const [drafts, setDrafts] = useState({});
   const [digest, setDigest] = useState(null);
+  const [live, setLive] = useState({}); // run_id -> node_id -> {role, text} (live-only, not stored)
+  const [agentsBySkill, setAgentsBySkill] = useState({});
+  const [steer, setSteer] = useState({}); // node_id -> instruction text being typed
+
+  useEffect(() => {
+    axios.get(`${api}/reputation/scores`, { timeout: 8000 }).then((res) => {
+      const by = {};
+      Object.values(res.data).forEach((a) => { (by[a.skill] = by[a.skill] || []).push(a.name); });
+      setAgentsBySkill(by);
+    }).catch(() => {});
+  }, [api]);
   const [busy, setBusy] = useState(null);
   const [error, setError] = useState(null);
   const wsRef = useRef(null);
@@ -180,6 +210,15 @@ export default function LiveSessions({ backendUrl }) {
       if (msg.type === "presence") setOnline(msg.users);
       if (msg.type === "error") setError(msg.detail);
       if (msg.type === "members" || msg.type === "mode") refreshView(sessionId);
+      if (msg.type === "stream") {
+        setLive((prev) => {
+          const run = { ...(prev[msg.run_id] || {}) };
+          const cur = run[msg.node_id] || { role: msg.role, text: "" };
+          if (msg.start) run[msg.node_id] = { role: msg.role, text: "" };
+          else if (msg.delta) run[msg.node_id] = { role: cur.role, text: (cur.text + msg.delta).slice(-4000) };
+          return { ...prev, [msg.run_id]: run };
+        });
+      }
       if (msg.type === "event") {
         const e = msg.event;
         setEvents((prev) => {
@@ -223,7 +262,7 @@ export default function LiveSessions({ backendUrl }) {
   const upgrade = () => call("mode", () => axios.post(`${api}/sessions/${view.id}/mode`, { mode: "collaborative" }, { headers }))
     .then((res) => res && setView(res.data));
   const planRun = async () => {
-    const res = await call("plan", () => axios.post(`${api}/sessions/${view.id}/runs`, { query }, { headers, timeout: 90000 }));
+    const res = await call("plan", () => axios.post(`${api}/sessions/${view.id}/runs`, { query, local_only: localOnly }, { headers, timeout: 180000 }));
     if (res) { setSelectedRun(res.data.run_id); await refreshView(view.id); loadRunEvents(res.data.run_id); }
   };
   const startRun = () => call("start", () => axios.post(`${api}/sessions/${view.id}/runs/${run.id}/start`, {}, { headers }))
@@ -334,6 +373,10 @@ export default function LiveSessions({ backendUrl }) {
               {canEdit && (
                 <div style={{ display: "flex", gap: 8, margin: "10px 0" }}>
                   <input style={{ ...input, flex: 1 }} value={query} onChange={(e) => setQuery(e.target.value)} />
+                  <label style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}
+                         title="Plan and run on the laptop's local model: no cloud LLM, no rate limits">
+                    <input type="checkbox" checked={localOnly} onChange={(e) => setLocalOnly(e.target.checked)} />🖥 laptop
+                  </label>
                   <button style={button} onClick={planRun} disabled={busy === "plan" || !query.trim()}>
                     {busy === "plan" ? "Planning…" : "Plan run"}
                   </button>
@@ -371,6 +414,25 @@ export default function LiveSessions({ backendUrl }) {
                       {st.agent && <span style={{ opacity: 0.7 }}> · by {st.agent}</span>}
                       <span style={{ opacity: 0.6 }}> · depends on: {n.depends_on.join(", ") || "none"}</span>
                       {lock && !["done", "skipped", "failed"].includes(st.status) && <span style={{ color: "#7fb2ff" }}> · 🔒 {lock.user.name}</span>}
+                      {canEdit && run.status === "running" && !lock && !["done", "failed", "skipped"].includes(st.status) && (
+                        <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                          {st.status === "paused" ? (
+                            <button style={{ ...ghost, padding: "2px 8px" }}
+                                    onClick={() => nodeAction(n.id, "resume", { instruction: steer[n.id] || null })}>▶ Resume</button>
+                          ) : (
+                            <button style={{ ...ghost, padding: "2px 8px" }} onClick={() => nodeAction(n.id, "pause")}>⏸ Pause</button>
+                          )}
+                          <input style={{ ...input, padding: "3px 8px", fontSize: 12, minWidth: 200 }} placeholder="New instruction for this node"
+                                 value={steer[n.id] || ""} onChange={(e) => setSteer({ ...steer, [n.id]: e.target.value })} />
+                          <button style={{ ...ghost, padding: "2px 8px" }} disabled={!(steer[n.id] || "").trim()}
+                                  onClick={() => nodeAction(n.id, "redirect", { instruction: steer[n.id] })}>↪ Redirect</button>
+                          <select style={{ ...input, padding: "3px 6px", fontSize: 12 }} value=""
+                                  onChange={(e) => e.target.value && nodeAction(n.id, "reassign", { agent: e.target.value })}>
+                            <option value="">⇄ Reassign to…</option>
+                            {(agentsBySkill[n.agent] || []).filter((a) => a !== st.agent).map((a) => <option key={a} value={a}>{a}</option>)}
+                          </select>
+                        </div>
+                      )}
                       {canEdit && run.status === "planned" && (
                         <span style={{ marginLeft: 8 }}>
                           {!lock && <button style={{ ...ghost, padding: "2px 8px" }} onClick={() => nodeAction(n.id, "claim")}>Take over</button>}
@@ -402,6 +464,15 @@ export default function LiveSessions({ backendUrl }) {
                         </details>
                       )}
                       {st.error && <div style={{ color: "#ff9187", fontSize: 12 }}>{st.error}</div>}
+                      {st.status === "running" && live[run.id]?.[n.id]?.text && (
+                        <div style={{ marginTop: 6 }}>
+                          <div style={{ fontSize: 11, color: GOLD }}>✍ writing live · {live[run.id][n.id].role}</div>
+                          <div style={{ fontSize: 12, whiteSpace: "pre-wrap", maxHeight: 160, overflowY: "auto", opacity: 0.85,
+                                        borderLeft: `2px solid ${GOLD}`, paddingLeft: 8, marginTop: 4 }}>
+                            {live[run.id][n.id].text}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}

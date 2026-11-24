@@ -52,12 +52,12 @@ def ordered(means: dict) -> list:
     return sorted(means, key=lambda a: rank.get(a, len(rank)))
 
 
-def run_once(strategy, means, priors, steps, drift_at, rng):
+def run_once(strategy, means, priors, steps, drift_at, rng, track_error=False):
     agents = ordered(means)
     ev = {a: {"a": 0.0, "b": 0.0, "n": 0, "q": 0.0, "pw": PRIOR_STRENGTH} for a in agents}
     true = dict(means)
     best = agents[0]   # the drift scenario degrades the default (first-registered) agent
-    rewards, picks_best, picks_degraded = [], [], []
+    rewards, picks_best, picks_degraded, errors = [], [], [], []
     for step in range(steps):
         if drift_at is not None and step == drift_at:
             true[best] = DRIFT_TO
@@ -78,6 +78,10 @@ def run_once(strategy, means, priors, steps, drift_at, rng):
         rewards.append(q)
         picks_best.append(chosen == current_best)
         picks_degraded.append(chosen == best)
+        if track_error:   # how far each agent's trust (posterior mean) is from its true quality
+            errors.append(sum(abs(stats(a)["mean"] - true[a]) for a in agents) / len(agents))
+    if track_error:
+        return rewards, picks_best, picks_degraded, errors
     return rewards, picks_best, picks_degraded
 
 
@@ -127,13 +131,46 @@ def simulate(means, bench_priors, steps, seeds, drift_at):
     return out
 
 
+CHECKPOINTS = (1, 10, 25, 50, 100, 200)
+ERROR_TARGET = 0.10
+BENCH_ERROR_SD = 0.10   # a benchmark is imperfect: true quality = bench mean + N(0, 0.10) per seed
+
+
+def convergence(means, bench_priors, steps, seeds):
+    """Synopsis RQ1: do benchmark-seeded priors give accurate trust sooner than usage-only (cold) scoring?
+    Trust error = mean |posterior mean - true quality| over the agents, after each routed task.
+    To avoid a circular test, each seed's TRUE quality differs from the benchmark by random benchmark error,
+    while the benchmark prior still uses the benchmark mean."""
+    out = {}
+    for strategy in ("thompson", "greedy"):
+        out[strategy] = {}
+        for label, priors in (("benchmark_prior", bench_priors), ("usage_only", {a: COLD_PRIOR for a in means})):
+            curves, reached = [], []
+            for seed in range(seeds):
+                noise = random.Random(10_000 + seed)
+                true_means = {a: min(0.98, max(0.02, m + noise.gauss(0, BENCH_ERROR_SD))) for a, m in means.items()}
+                *_, errors = run_once(strategy, true_means, priors, steps, None, random.Random(seed), track_error=True)
+                curves.append(errors)
+                below = next((t + 1 for t, e in enumerate(errors) if e < ERROR_TARGET), None)
+                reached.append(below)
+            hit = [r for r in reached if r is not None]
+            out[strategy][label] = {
+                "error_at": {t: round(sum(c[t - 1] for c in curves) / seeds, 3) for t in CHECKPOINTS if t <= steps},
+                "tasks_to_error_below_0.10": round(sum(hit) / len(hit), 1) if hit else None,
+                "never_reached": len(reached) - len(hit)}
+    return out
+
+
 def report_md(meta, results):
     lines = [f"# Routing simulation (RQ1) — {meta['finished_at']}", "",
              f"Skill: {meta['skill']} · agents and measured means: {meta['means']} · {meta['steps']} tasks × "
              f"{meta['seeds']} seeds per strategy · drift at task {meta['drift_at']} to quality {DRIFT_TO}.",
              "Quality per task ~ Beta(mean·8, (1−mean)·8) around each agent's AGORA-Bench mean. "
              f"Routing uses the production router. Prior: {meta['prior_model']}.", ""]
+    conv = results.get("_convergence")
     for scenario, rows in results.items():
+        if scenario.startswith("_"):
+            continue
         lines += [f"## {scenario}", "", "| Strategy | Mean quality (95% CI) | Picks of current best | Recovery after drift (tasks) |",
                   "|---|---|---|---|"]
         for strategy, r in sorted(rows.items(), key=lambda kv: -kv[1]["mean_quality"]):
@@ -142,6 +179,18 @@ def report_md(meta, results):
                 f"{r['recovery_steps_mean']} (never: {r['never_recovered']})"
             lines.append(f"| {strategy} | {r['mean_quality']}{ci} | {round(r['picks_best_share'] * 100)}% | {rec} |")
         lines.append("")
+    if conv:
+        lines += ["## Convergence (synopsis RQ1)", "",
+                  "Trust error = mean |trust − true quality| over the agents; lower is better. True quality differs "
+                  f"from the benchmark by random benchmark error (sd {BENCH_ERROR_SD}), so the prior is not exact.", "",
+                  "| Strategy | Prior | Error after 1 / 10 / 25 / 50 / 100 tasks | Tasks until error < 0.10 |",
+                  "|---|---|---|---|"]
+        for strategy, rows in conv.items():
+            for label, r in rows.items():
+                errs = " / ".join(str(r["error_at"].get(t, "—")) for t in (1, 10, 25, 50, 100))
+                reach = r["tasks_to_error_below_0.10"] if r["tasks_to_error_below_0.10"] is not None else "never"
+                never = f" (never in {r['never_reached']} seeds)" if r["never_reached"] else ""
+                lines.append(f"| {strategy} | {label.replace('_', ' ')} | {errs} | {reach}{never} |")
     return "\n".join(lines)
 
 
@@ -174,6 +223,7 @@ def main():
     bench_priors = {a: priors.get(a, {}).get("prior", COLD_PRIOR) for a in means}
 
     results = simulate(means, bench_priors, args.steps, args.seeds, args.drift_at)
+    results["_convergence"] = convergence(means, bench_priors, args.steps, args.seeds)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     meta = {"finished_at": stamp, "skill": args.skill, "means": {a: round(m, 3) for a, m in means.items()},
             "priors": bench_priors, "steps": args.steps, "seeds": args.seeds, "drift_at": args.drift_at,

@@ -6,6 +6,8 @@ RunRecorder stores is broadcast unchanged, so live view, replay and the event lo
 """
 import asyncio
 
+from orchestration.control import RunControl
+
 TAKEOVER_TIMEOUT_S = 600
 
 
@@ -79,6 +81,7 @@ class Hub:
     def __init__(self):
         self.connections = {}   # session_id -> {websocket: user dict}
         self.takeovers = {}     # run_id -> Takeover
+        self.controls = {}      # run_id -> RunControl (pause / redirect / reassign while running)
 
     def presence(self, session_id: str) -> list:
         seen, out = set(), []
@@ -108,6 +111,9 @@ class Hub:
 
     def takeover(self, run_id: str) -> Takeover:
         return self.takeovers.setdefault(run_id, Takeover())
+
+    def control(self, run_id: str) -> RunControl:
+        return self.controls.setdefault(run_id, RunControl())
 
 
 hub = Hub()

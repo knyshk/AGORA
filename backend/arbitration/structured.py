@@ -18,6 +18,14 @@ from agents.base_agent import run_agent
 from arbitration.claims import extract_claims
 from reputation.scoring import get_stats
 
+import os
+
+# Low-stakes conflicts resolve automatically (synopsis §6.4 "Auto-apply"): an official source against
+# an uncited or derived one. Everything else waits for a person ("Let me decide").
+AUTO_RESOLVE = os.getenv("AUTO_RESOLVE", "1") == "1"
+AUTO_MIN_WINNER_AUTHORITY = 0.85
+AUTO_MAX_LOSER_AUTHORITY = 0.4
+
 REL_TOLERANCE = 1e-6  # float noise only; rounding is handled by each claim's written precision
 AUTHORITY_WEIGHT = 0.7
 TRUST_WEIGHT = 0.3
@@ -87,7 +95,7 @@ def build_side(claims: list, skills: dict) -> dict:
             "claims": [{k: c[k] for k in ("node_id", "agent", "quote", "sources")} for c in claims]}
 
 
-def build_conflict(cid: str, key: tuple, clusters: list, skills: dict) -> dict:
+def build_conflict(cid: str, key: tuple, clusters: list, skills: dict, auto: bool | None = None) -> dict:
     sides = sorted((build_side(cl, skills) for cl in clusters), key=lambda s: s["score"], reverse=True)
     top, runner = sides[0], sides[1]
     entity, attribute, period, _ = key
@@ -104,10 +112,16 @@ def build_conflict(cid: str, key: tuple, clusters: list, skills: dict) -> dict:
     else:
         gap = abs(top["absolute"] - runner["absolute"]) / max(abs(top["absolute"]), abs(runner["absolute"]), 1e-12)
         differ = f"The values differ by {gap:.1%}."
+    status, resolution = "open", None
+    if (AUTO_RESOLVE if auto is None else auto) and policy == "source authority" and top["authority"] >= AUTO_MIN_WINNER_AUTHORITY \
+            and all(s["authority"] <= AUTO_MAX_LOSER_AUTHORITY for s in sides[1:]):
+        status = "auto_resolved"
+        resolution = {"choice": 0, "value": top["value"], "by": "policy",
+                      "reason": f"low-stakes: {why}", "agreed_with_recommendation": True}
     return {
         "id": cid, "between": sorted({n for s in sides for n in s["nodes"]}),
         "entity": entity, "attribute": attribute, "period": period, "label": label,
-        "sides": sides, "recommended": 0, "policy": policy, "status": "open",
+        "sides": sides, "recommended": 0, "policy": policy, "status": status, "resolution": resolution,
         "explanation": f"{label}: {statements}. {differ}",
         "suggested_resolution": f"Use {top['value']} — {why}.",
     }
@@ -140,10 +154,10 @@ def candidate_groups(claims: list) -> list:
     return out
 
 
-def find_conflicts(claims: list, skills: dict) -> list:
+def find_conflicts(claims: list, skills: dict, auto: bool | None = None) -> list:
     """Numeric conflicts only (fully deterministic). Text candidates need confirm_text_conflict."""
     groups = [(k, cl) for k, cl in candidate_groups(claims) if k[3] != "text"]
-    return [build_conflict(f"c{i}", k, cl, skills) for i, (k, cl) in enumerate(groups, 1)]
+    return [build_conflict(f"c{i}", k, cl, skills, auto) for i, (k, cl) in enumerate(groups, 1)]
 
 
 ENTAILMENT_PROMPT = """Two statements about the same fact ({entity}, {attribute}{period}):
@@ -165,7 +179,7 @@ async def confirm_text_conflict(key: tuple, clusters: list) -> bool:
     return bool(m and json.loads(m.group(0)).get("contradict") is True)
 
 
-async def arbitrate(outputs: dict, skills: dict, agents: dict, emit=None) -> list:
+async def arbitrate(outputs: dict, skills: dict, agents: dict, emit=None, auto: bool | None = None) -> list:
     """outputs/skills/agents: node_id -> output text / skill / agent name."""
     nodes = list(outputs)
     results = await asyncio.gather(
@@ -183,7 +197,7 @@ async def arbitrate(outputs: dict, skills: dict, agents: dict, emit=None) -> lis
             await emit("claims_extracted", {"node_id": node, "count": len(res),
                                             "claims": [{k: c[k] for k in ("entity", "attribute", "period", "value",
                                                                           "scale", "unit", "quote")} for c in res]})
-    conflicts = find_conflicts(claims, skills)
+    conflicts = find_conflicts(claims, skills, auto)
     text_groups = [(k, cl) for k, cl in candidate_groups(claims) if k[3] == "text"]
     checks = await asyncio.gather(*(confirm_text_conflict(k, cl) for k, cl in text_groups), return_exceptions=True)
     for (key, clusters), ok in zip(text_groups, checks):
@@ -192,5 +206,5 @@ async def arbitrate(outputs: dict, skills: dict, agents: dict, emit=None) -> lis
                 await emit("arbitration_error", {"error": f"entailment check: {type(ok).__name__}: {str(ok)[:150]}"})
             continue
         if ok:
-            conflicts.append(build_conflict(f"c{len(conflicts) + 1}", key, clusters, skills))
+            conflicts.append(build_conflict(f"c{len(conflicts) + 1}", key, clusters, skills, auto))
     return conflicts

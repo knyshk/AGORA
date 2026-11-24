@@ -73,10 +73,11 @@ async def research_grounded(req: TaskRequest):
 
 
 async def _execute_and_record(run_id: str, plan: list, query: str, started: float, budget_usd=None,
-                              local_only=False):
+                              local_only=False, auto_resolve=None):
     recorder = RunRecorder(run_id)
     await recorder("plan_created", {"plan": plan, "local_only": local_only})
-    result = await execute_plan(plan, query, emit=recorder, budget_usd=budget_usd, local_only=local_only)
+    result = await execute_plan(plan, query, emit=recorder, budget_usd=budget_usd, local_only=local_only,
+                                auto_resolve=auto_resolve)
     crud.finish_run(run_id, plan, result["status"], result["conflicts"], started)
     return {"run_id": run_id, "plan": plan, "result": result["outputs"],
             "conflicts": result["conflicts"], "node_status": result["node_status"],
@@ -106,7 +107,8 @@ async def conflict_demo():
     started = time.time()
     query = "Report Tesla's total revenue in 2023"
     run_id = crud.create_run(f"Conflict demo: {query}")
-    return await _execute_and_record(run_id, conflict_demo_plan(), query, started)
+    # the demo shows the human decision live, so automatic resolution is off for this run
+    return await _execute_and_record(run_id, conflict_demo_plan(), query, started, auto_resolve=False)
 
 
 @app.get("/runs")

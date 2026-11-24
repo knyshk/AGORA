@@ -63,7 +63,8 @@ def test_conflict_found_with_source_authority_policy():
     conflicts = structured.find_conflicts(claims, {"n1": "research", "n2": "research", "n3": "drafting"})
     assert len(conflicts) == 1
     c = conflicts[0]
-    assert c["between"] == ["n1", "n2", "n3"] and c["status"] == "open"
+    assert c["between"] == ["n1", "n2", "n3"] and c["status"] == "auto_resolved"   # official vs uncited: low-stakes
+    assert c["resolution"]["by"] == "policy" and c["resolution"]["value"] == "$96.77 billion"
     assert c["policy"] == "source authority"
     assert c["sides"][0]["nodes"] == ["n1"] and c["sides"][0]["value"] == "$96.77 billion"
     assert c["sides"][1]["nodes"] == ["n2", "n3"]
@@ -240,3 +241,41 @@ def test_resolve_endpoint_updates_run_reputation_and_can_rerun():
     data = crud.get_run(run_id)
     assert data["run"]["status"] == "complete" and data["run"]["conflicts"][0]["status"] == "resolved"
     assert {e["type"] for e in data["events"]} >= {"conflict_resolved", "reputation_updated"}
+
+
+def test_auto_resolution_only_for_clear_cases_and_can_be_switched_off():
+    web = {"id": 2, "title": "Blog", "url": "https://example.com/post"}
+    claims = [claim("n1", 96.77, sources=[SEC]), claim("n2", 97.69, sources=[web])]
+    (c,) = structured.find_conflicts(claims, {"n1": "research", "n2": "research"})
+    assert c["status"] == "open"            # web source (0.5) is not low-stakes enough to decide alone
+    claims = [claim("n1", 96.77, sources=[SEC]), claim("n2", 97.69)]
+    (c,) = structured.find_conflicts(claims, {"n1": "research", "n2": "research"}, auto=False)
+    assert c["status"] == "open" and c["resolution"] is None
+
+
+def test_a_person_can_override_an_automatic_decision():
+    conflicts = _conflict()
+    assert conflicts[0]["status"] == "auto_resolved"
+    _, c, winner, _ = resolution.resolve(conflicts, "c1", 1, "the analyst figure is newer")
+    assert c["status"] == "resolved" and c["resolution"]["by"] == "person"
+    assert c["resolution"]["overrode_policy"] == "$96.77 billion" and winner["value"] == "$97.69 billion"
+
+
+async def test_auto_resolved_conflict_does_not_stop_the_run_and_penalises_once():
+    from orchestration import executor
+    plan = [{"id": "n1", "agent": "research", "depends_on": []}, {"id": "n2", "agent": "research", "depends_on": []}]
+    auto = _conflict()                       # SEC vs uncited -> auto_resolved
+    events = []
+
+    async def emit(t, p):
+        events.append((t, p))
+
+    with patch.object(executor, "_dispatch", new=AsyncMock(return_value="x")), \
+         patch.object(executor, "route", side_effect=lambda c: (c[0], {"reason": "x"})), \
+         patch.object(executor, "update_score", return_value={"mean": 0.7}) as upd, \
+         patch.object(executor, "arbitrate", new=AsyncMock(return_value=auto)):
+        result = await executor.execute_plan(plan, "q", emit=emit)
+    assert result["status"] == "complete"                          # no human gate for a low-stakes conflict
+    assert any(t == "conflict_auto_resolved" for t, _ in events)
+    zero = [c for c in upd.call_args_list if c.args[0] == "research-v2" and c.kwargs.get("quality") == 0.0]
+    assert len(zero) == 1                                          # one observation (a person's decision counts twice)

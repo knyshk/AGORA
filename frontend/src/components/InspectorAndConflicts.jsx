@@ -305,6 +305,7 @@ export default function InspectorAndConflicts({
             {reviewError && <div style={{ color: "#ff9187", marginBottom: 12 }}>Review failed: {reviewError}</div>}
             {conflicts.map((conflict, idx) => {
               const resolved = conflict.status === "resolved";
+              const auto = conflict.status === "auto_resolved";
               const sides = conflict.sides || [];
               const fork = forks[conflict.id];
               return (
@@ -323,6 +324,8 @@ export default function InspectorAndConflicts({
                     <div className="arbitration-status-tag">
                       {resolved ? (
                         <span className="tag-ratified">✓ Resolved by reviewer: {conflict.resolution?.value}</span>
+                      ) : auto ? (
+                        <span className="tag-ratified">⚙ Auto-resolved (low-stakes): {conflict.resolution?.value} · you can override</span>
                       ) : (
                         <span>Awaiting human review · policy: {conflict.policy}</span>
                       )}
@@ -355,7 +358,9 @@ export default function InspectorAndConflicts({
                         {!resolved && (
                           <button className="btn-ratify" disabled={!runId || busy === conflict.id}
                                   onClick={() => resolveConflict(conflict, i)}>
-                            {busy === conflict.id ? "Saving decision…" : `Accept ${side.value}`}
+                            {busy === conflict.id ? "Saving decision…"
+                              : auto ? (i === conflict.recommended ? `Confirm ${side.value}` : `Override: accept ${side.value}`)
+                              : `Accept ${side.value}`}
                           </button>
                         )}
                       </div>
@@ -373,6 +378,13 @@ export default function InspectorAndConflicts({
                   </div>
 
                   <div className="conflict-ratify-bar">
+                    {!resolved && !auto && (
+                      <button className="btn-ratify" style={{ marginRight: 12 }} disabled={!runId || busy === conflict.id}
+                              onClick={() => resolveConflict(conflict, conflict.recommended ?? 0)}
+                              title="Apply the recommended side now; or choose a side above (Let me decide)">
+                        ⚡ Auto-apply recommendation
+                      </button>
+                    )}
                     {!resolved ? (
                       <label className="ratify-caption" style={{ cursor: "pointer" }}>
                         <input type="checkbox" checked={!!rerun[conflict.id]}
