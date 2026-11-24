@@ -2,7 +2,8 @@ import asyncio
 import time
 from agents.base_agent import run_agent
 from registry.registry import get_agents_for_skill, get_manifest
-from reputation.scoring import pick_best_agent, update_score
+from reputation.scoring import route, update_score
+from reputation.quality import assess, draft_feedback
 from arbitration.engine import detect_conflict
 from agents.research_tools import grounded_research
 from agents.chart_tools import build_chart, strip_chart_blocks
@@ -40,6 +41,27 @@ async def _emit(emit, event_type, payload):
         print(f"[EMIT ERROR] {event_type}: {e}")
 
 
+async def _feedback_to_drafts(node, fact_check_output, meta, emit):
+    """Fact-check verdicts are graded evidence about the drafting agent that wrote the claims."""
+    feedback = draft_feedback(fact_check_output)
+    if feedback is None:
+        return
+    quality, reason = feedback
+    for dep in node["depends_on"]:
+        agent = meta.get(dep, {}).get("agent")
+        if not agent or agent == "reused":
+            continue
+        try:
+            if get_manifest(agent).skill != "drafting":
+                continue
+        except KeyError:
+            continue
+        stats = update_score(agent, quality=quality)
+        await _emit(emit, "reputation_updated", {"node_id": dep, "agent": agent, "skill": "drafting",
+                                                 "quality": quality, "reason": reason,
+                                                 "source": "fact_check_feedback", "after": stats})
+
+
 async def run_node(node, state, query, meta, emit=None, forced_agents=None, instructions=None):
     node_id = node["id"]
     skill = node["agent"]
@@ -68,16 +90,28 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
             pool = [forced]
         else:
             pool = [c for c in candidates if c not in tried] or candidates
-        chosen = pick_best_agent(pool)
+        chosen, why = route(pool)
+        if forced and attempt == 1 and pool == [forced]:
+            why = {**why, "reason": f"{forced} was chosen by the user (fork override)"}
         print(f"[ROUTING] node={node_id} skill={skill} chose={chosen} attempt={attempt}")
+        await _emit(emit, "agent_routed", {"node_id": node_id, "skill": skill, "attempt": attempt, **why})
         manifest = get_manifest(chosen)
+        call_started = time.time()
         try:
             state[node_id] = await _call_agent(skill, prompt, manifest)
-            update_score(chosen, success=True)
+            latency = round(time.time() - call_started, 2)
+            quality, reason = assess(skill, state[node_id])
+            stats = update_score(chosen, quality=quality, latency_s=latency)
+            await _emit(emit, "reputation_updated", {"node_id": node_id, "agent": chosen, "skill": skill,
+                                                     "quality": quality, "reason": reason,
+                                                     "source": "output_check", "after": stats})
             meta[node_id] = {"status": "done", "agent": chosen, "attempts": attempt,
-                             "duration_s": round(time.time() - started, 2), "error": None}
+                             "duration_s": round(time.time() - started, 2), "error": None,
+                             "quality": quality, "quality_reason": reason}
             await _emit(emit, "node_finished", {"node_id": node_id, "skill": skill,
                                                 "output": state[node_id], **meta[node_id]})
+            if skill == "fact_check":
+                await _feedback_to_drafts(node, state[node_id], meta, emit)
             return
         except Exception as e:
             last_error = e
@@ -85,7 +119,10 @@ async def run_node(node, state, query, meta, emit=None, forced_agents=None, inst
             if is_infra_error(e):
                 print(f"[INFRA ERROR] {chosen}: {e} (not counted against reputation)")
             else:
-                update_score(chosen, success=False)
+                stats = update_score(chosen, quality=0.0)
+                await _emit(emit, "reputation_updated", {"node_id": node_id, "agent": chosen, "skill": skill,
+                                                         "quality": 0.0, "reason": f"error: {str(e)[:120]}",
+                                                         "source": "failure", "after": stats})
             if attempt < MAX_ATTEMPTS:
                 await asyncio.sleep(BACKOFF_SECONDS * attempt)
 

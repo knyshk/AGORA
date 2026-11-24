@@ -21,8 +21,8 @@ async def _fake_fact_check(prompt, provider=None, model=None):
 
 @pytest.fixture(autouse=True)
 def no_redis_no_sleep():
-    with patch.object(executor, "update_score"), \
-         patch.object(executor, "pick_best_agent", side_effect=lambda c: c[0]), \
+    with patch.object(executor, "update_score", return_value={"mean": 0.7}), \
+         patch.object(executor, "route", side_effect=lambda c: (c[0], {"mode": "test", "reason": "first"})), \
          patch.object(executor, "BACKOFF_SECONDS", 0), \
          patch.object(executor, "grounded_research", new=_fake_grounded), \
          patch.object(executor, "build_chart", new=_fake_chart), \
@@ -101,3 +101,33 @@ async def test_forced_agent_is_used():
     with patch.object(executor, "run_agent", side_effect=fake):
         await executor.execute_plan([PLAN[0]], "q", forced_agents={"n1": "research-v2"})
     assert used == ["gemini-3.5-flash-lite"]
+
+async def test_quality_is_graded_and_fact_check_feeds_back_to_drafting_agent():
+    plan = [
+        {"id": "n1", "agent": "research", "depends_on": []},
+        {"id": "n2", "agent": "drafting", "depends_on": ["n1"]},
+        {"id": "n3", "agent": "fact_check", "depends_on": ["n2"]},
+    ]
+    outputs = {
+        "research": "Answer [1].\n\n---\nSources\n[1] a - http://a",
+        "drafting": "Draft [1].\nCitation check: passed. 1 figure(s)",
+        "fact_check": "**Fact check: 4 cited claim(s)** — 2 supported, 0 unsupported, 2 contradicted, 0 unverifiable.",
+    }
+    events = []
+
+    async def fake(role, prompt, provider=None, model=None):
+        return outputs[role]
+
+    async def emit(t, p):
+        events.append((t, p))
+
+    with patch.object(executor, "run_agent", side_effect=fake), \
+         patch.object(executor, "update_score", return_value={"mean": 0.7}) as upd:
+        result = await executor.execute_plan(plan, "q", emit=emit)
+
+    assert result["node_status"]["n1"]["quality"] == 1.0
+    grades = [p for t, p in events if t == "reputation_updated"]
+    feedback = [g for g in grades if g["source"] == "fact_check_feedback"]
+    assert len(feedback) == 1 and feedback[0]["agent"] == "drafting-v1" and feedback[0]["quality"] == 0.5
+    assert upd.call_args_list[-1].kwargs["quality"] == 0.5
+    assert sum(1 for t, _ in events if t == "agent_routed") == 3

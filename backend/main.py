@@ -10,7 +10,8 @@ from orchestration.validation import PlanError
 from db.database import init_db
 from db.recorder import RunRecorder
 from db import crud
-from registry.registry import REGISTRY
+from registry.registry import REGISTRY, get_agents_for_skill
+from reputation.scoring import get_stats, route
 from orchestration.fork import reusable_outputs
 from agents.research_tools import grounded_research
 
@@ -151,24 +152,36 @@ async def fork_run(run_id: str, req: ForkRequest):
 
 @app.get("/reputation/scores")
 def get_reputation_scores():
-    import json, os, redis
-    from registry.registry import REGISTRY
-    from reputation.scoring import get_score
-    redis_url = os.getenv("REDIS_URL", "redis://redis:6379")
-    r = redis.from_url(redis_url)
+    """Beta posterior per agent: mean trust, 95% interval, graded runs, average quality, latency."""
     data = {}
     for name, manifest in REGISTRY.items():
-        raw = r.hget("scores", name)
-        score_data = json.loads(raw.decode("utf-8")) if raw else {"prior": 0.7, "successes": 0, "total": 0}
-        current_score = get_score(name) if raw else 0.7
-        data[name] = {
-            "name": name,
-            "skill": manifest.skill,
-            "provider": manifest.provider or "default",
-            "model": manifest.model or "default",
-            "prior": score_data.get("prior", 0.7),
-            "successes": score_data.get("successes", 0),
-            "total": score_data.get("total", 0),
-            "score": round(float(current_score), 3),
-        }
+        st = get_stats(name)
+        data[name] = {"name": name, "skill": manifest.skill, "strategy": manifest.strategy,
+                      "provider": manifest.provider or "default", "model": manifest.model or "default",
+                      "score": st["mean"], **st}
     return data
+
+
+@app.get("/reputation/route")
+def explain_route(skill: str, mode: str | None = None):
+    """Who would be picked for this skill right now, and why."""
+    candidates = get_agents_for_skill(skill)
+    if not candidates:
+        raise HTTPException(status_code=404, detail=f"No agents for skill '{skill}'")
+    chosen, why = route(candidates, mode=mode)
+    return why
+
+
+@app.get("/reputation/history")
+def reputation_history(agent: str | None = None, limit: int = 200):
+    """Every graded outcome (stored in the run event log), newest first."""
+    return crud.events_of_type("reputation_updated", agent=agent, limit=limit)
+
+
+@app.get("/runs/{run_id}/routing")
+def run_routing(run_id: str):
+    """Why each node in this run was given to the agent it got."""
+    if crud.get_run(run_id) is None:
+        raise HTTPException(status_code=404, detail="Run not found")
+    return {"routing": crud.events_of_type("agent_routed", run_id=run_id),
+            "grades": crud.events_of_type("reputation_updated", run_id=run_id)}

@@ -86,3 +86,14 @@ def state_at(run_id: str, seq: int):
         elif e["type"] == "node_skipped":
             status[p["node_id"]] = "skipped"
     return {"seq": seq, "plan": data["run"]["plan"], "node_status": status, "outputs": outputs}
+
+def events_of_type(event_type: str, run_id: str = None, agent: str = None, limit: int = 500) -> list:
+    """Events of one type, newest first (e.g. routing decisions or reputation updates)."""
+    with SessionLocal() as s:
+        q = select(RunEvent).where(RunEvent.type == event_type)
+        if run_id:
+            q = q.where(RunEvent.run_id == run_id)
+        rows = s.scalars(q.order_by(RunEvent.id.desc()).limit(limit * (5 if agent else 1))).all()
+        out = [{"run_id": e.run_id, "seq": e.seq, "created_at": e.created_at.isoformat(), **e.payload}
+               for e in rows if not agent or e.payload.get("agent") == agent]
+        return out[:limit]

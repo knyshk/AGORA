@@ -1,6 +1,6 @@
-import redis
-import json
+"""Reset all graded reputation evidence (priors are kept).
+Run inside Docker:  docker compose exec backend python reset_score.py"""
+from reputation.scoring import reset_scores
 
-r = redis.from_url("redis://localhost:6379")
-r.hset("scores", "chart-v1", json.dumps({"prior": 0.7, "successes": 0, "total": 0}))
-print("chart-v1 score reset")
+reset_scores()
+print("reputation evidence reset; priors kept")
