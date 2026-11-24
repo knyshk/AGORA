@@ -43,6 +43,8 @@ def test_normalisation():
 @pytest.mark.parametrize("a,b,same", [
     (claim("x", 96.77), claim("y", 97.69), False),                       # digits swapped
     (claim("x", 96.77), claim("y", 97, ), True),                         # "about $97 billion" is a rounding
+    (claim("x", 96.77), claim("y", 97.0), True),                         # ...even when the model returns 97.0
+    (claim("x", 211.92), claim("y", 212.0), True),
     (claim("x", 96.77), claim("y", 96.8), True),                         # rounding to one decimal
     (claim("x", 176.19), claim("y", 176191, scale="million"), True),     # same value, other unit
     (claim("x", 383.29), claim("y", 383.29, scale="million"), False),    # million vs billion
@@ -100,11 +102,48 @@ async def test_text_claims_attach_cited_sources():
     assert c["attribute"] == "revenue" and c["sources"][0]["url"].startswith("https://data.sec.gov")
 
 
-async def test_fact_check_and_number_free_nodes_cost_no_llm_call():
+async def test_fact_check_and_empty_nodes_cost_no_llm_call():
     with patch.object(cl, "run_agent", new=AsyncMock()) as llm:
         assert await cl.extract_claims("n4", "fact_check", "f", "Tesla $96.77 billion [1]") == []
-        assert await cl.extract_claims("n2", "drafting", "d", "No figures here [1].") == []
+        assert await cl.extract_claims("n2", "drafting", "d", "   ") == []
     assert llm.await_count == 0
+
+
+def test_counts_share_one_unit_and_changes_are_signed():
+    a = claim("x", 140473, scale="", attribute="number of employees", unit="people")
+    b = claim("y", 127855, scale="", attribute="employees", unit="employees")
+    assert structured.group_key(a) == structured.group_key(b)
+    fell = claim("x", -2.8, scale="", attribute="net sales change", unit="%")
+    rose = claim("y", 2.8, scale="", attribute="net sales change", unit="%")
+    assert len(structured.find_conflicts([fell, rose], {})) == 1
+
+
+def text_claim(node, value, entity="Australia", attribute="capital", quote=None):
+    return cl.make_text_claim(node, "a", entity, attribute, "", value, quote or f"The {attribute} is {value}.", [])
+
+
+async def test_text_conflicts_are_confirmed_by_entailment_only_inside_a_group():
+    claims = [text_claim("a", "Canberra"), text_claim("b", "Sydney"),
+              text_claim("a", "Elon Musk", "Tesla", "chief executive"),
+              text_claim("b", "Elon Musk", "Tesla", "chief executive"),          # same value: no check
+              text_claim("a", "Canberra", "Australia", "seat of government"),
+              text_claim("b", "Canberra, ACT", "Australia", "seat of government")]
+    assert structured.find_conflicts(claims, {}) == []                           # numeric pass ignores text
+    replies = {"Sydney": '{"contradict": true}', "ACT": '{"contradict": false}'}
+
+    async def judge(role, prompt, **kw):
+        return next(v for k, v in replies.items() if k in prompt)
+
+    with patch.object(cl, "run_agent", new=AsyncMock(return_value=json.dumps(
+            [{k: c[k] for k in ("entity_display", "attribute")} for c in claims]))), \
+         patch.object(structured, "extract_claims",
+                      new=AsyncMock(side_effect=lambda n, *a: [c for c in claims if c["node_id"] == n])), \
+         patch.object(structured, "run_agent", side_effect=judge) as llm:
+        conflicts = await structured.arbitrate({"a": "x", "b": "y"}, {}, {})
+    assert llm.call_count == 2
+    assert [c["label"] for c in conflicts] == ["Australia capital"]
+    assert conflicts[0]["sides"][0]["value"] in ("Canberra", "Sydney")
+    assert "different values" in conflicts[0]["explanation"]
 
 
 async def test_arbitrate_end_to_end_and_extraction_failure_is_logged():

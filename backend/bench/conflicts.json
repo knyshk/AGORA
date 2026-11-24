@@ -1,0 +1,455 @@
+{
+ "name": "AGORA conflict set",
+ "version": 1,
+ "description": "64 labelled text pairs: 32 real factual conflicts (incl. digit swaps, wrong year, unit errors, multi-claim, and non-numeric/date/direction cases) and 32 hard negatives (rounding, unit conversion, paraphrase, different period/entity/metric, verifier quotes). Facts are from SEC filings and Wikipedia; wrong values were planted by hand.",
+ "pairs": [
+  {
+   "id": "P01",
+   "label": true,
+   "category": "digit_swap",
+   "a": "Tesla's total revenue in 2023 was $96.77 billion.",
+   "b": "Tesla reported 2023 total revenue of $97.69 billion."
+  },
+  {
+   "id": "P02",
+   "label": true,
+   "category": "digit_swap",
+   "a": "Apple's net sales in fiscal 2023 were $383.29 billion.",
+   "b": "In fiscal 2023 Apple's net sales came to $338.29 billion."
+  },
+  {
+   "id": "P03",
+   "label": true,
+   "category": "digit_swap",
+   "a": "Microsoft's fiscal 2023 revenue was $211.92 billion.",
+   "b": "Microsoft recorded revenue of $219.12 billion in fiscal 2023."
+  },
+  {
+   "id": "P04",
+   "label": true,
+   "category": "digit_swap",
+   "a": "Mount Everest is 8,848.86 metres high.",
+   "b": "Mount Everest stands 8,884.86 metres tall."
+  },
+  {
+   "id": "P05",
+   "label": true,
+   "category": "different_value",
+   "a": "Ford's revenue in 2023 was $176.19 billion.",
+   "b": "Ford generated $165.9 billion of revenue in 2023."
+  },
+  {
+   "id": "P06",
+   "label": true,
+   "category": "different_value",
+   "a": "General Motors reported 2023 revenue of $171.84 billion.",
+   "b": "GM's 2023 revenue was $157.0 billion."
+  },
+  {
+   "id": "P07",
+   "label": true,
+   "category": "different_value",
+   "a": "K2 is 8,611 metres high.",
+   "b": "K2 rises to 8,516 metres."
+  },
+  {
+   "id": "P08",
+   "label": true,
+   "category": "different_value",
+   "a": "The Eiffel Tower is 330 metres tall.",
+   "b": "The Eiffel Tower is 300 metres tall."
+  },
+  {
+   "id": "P09",
+   "label": true,
+   "category": "different_value",
+   "a": "Nvidia's revenue for fiscal 2024 was $60.92 billion.",
+   "b": "Nvidia earned $26.97 billion in revenue in fiscal 2024."
+  },
+  {
+   "id": "P10",
+   "label": true,
+   "category": "different_value",
+   "a": "Tesla had 140,473 employees at the end of 2023.",
+   "b": "At the end of 2023 Tesla employed 127,855 people."
+  },
+  {
+   "id": "P11",
+   "label": true,
+   "category": "wrong_year",
+   "a": "Ford's 2023 revenue was $176.19 billion.",
+   "b": "Ford's revenue for 2023 was $158.06 billion."
+  },
+  {
+   "id": "P12",
+   "label": true,
+   "category": "wrong_year",
+   "a": "Tesla's revenue in 2023 was $96.77 billion.",
+   "b": "Tesla's 2023 revenue totalled $81.46 billion."
+  },
+  {
+   "id": "P13",
+   "label": true,
+   "category": "wrong_year",
+   "a": "Apple's fiscal 2023 net sales were $383.29 billion.",
+   "b": "Apple's net sales for fiscal 2023 were $394.33 billion."
+  },
+  {
+   "id": "P14",
+   "label": true,
+   "category": "wrong_year",
+   "a": "Amazon's net sales in 2023 were $574.79 billion.",
+   "b": "Amazon reported 2023 net sales of $513.98 billion."
+  },
+  {
+   "id": "P15",
+   "label": true,
+   "category": "unit_error",
+   "a": "Apple's fiscal 2023 net sales were $383.29 billion.",
+   "b": "Apple's fiscal 2023 net sales were $383.29 million."
+  },
+  {
+   "id": "P16",
+   "label": true,
+   "category": "unit_error",
+   "a": "Ford's net income in 2023 was $4.35 billion.",
+   "b": "Ford's 2023 net income was $4.35 million."
+  },
+  {
+   "id": "P17",
+   "label": true,
+   "category": "unit_error",
+   "a": "Tesla delivered 1.81 million vehicles in 2023.",
+   "b": "Tesla delivered 1.81 thousand vehicles in 2023."
+  },
+  {
+   "id": "P18",
+   "label": true,
+   "category": "unit_error",
+   "a": "Microsoft's fiscal 2023 revenue was $211.92 billion.",
+   "b": "Microsoft's fiscal 2023 revenue was $211.92 trillion."
+  },
+  {
+   "id": "P19",
+   "label": true,
+   "category": "percentage",
+   "a": "Tesla's gross margin in 2023 was 18.2%.",
+   "b": "Tesla's 2023 gross margin was 25.6%."
+  },
+  {
+   "id": "P20",
+   "label": true,
+   "category": "percentage",
+   "a": "The US unemployment rate averaged 3.6% in 2023.",
+   "b": "In 2023 the US unemployment rate averaged 4.6%."
+  },
+  {
+   "id": "P21",
+   "label": true,
+   "category": "direction",
+   "a": "Apple's net sales fell 2.8% in fiscal 2023.",
+   "b": "Apple's net sales rose 2.8% in fiscal 2023."
+  },
+  {
+   "id": "P22",
+   "label": true,
+   "category": "date",
+   "a": "Python was first released in 1991.",
+   "b": "Python was first released in 1989."
+  },
+  {
+   "id": "P23",
+   "label": true,
+   "category": "date",
+   "a": "Mount Everest was first summited in 1953.",
+   "b": "Mount Everest was first summited in 1963."
+  },
+  {
+   "id": "P24",
+   "label": true,
+   "category": "multi_claim",
+   "a": "In 2023 Tesla's revenue was $96.77 billion and Ford's was $176.19 billion.",
+   "b": "In 2023 Tesla earned $96.77 billion in revenue while Ford earned $167.19 billion."
+  },
+  {
+   "id": "P25",
+   "label": true,
+   "category": "multi_claim",
+   "a": "In fiscal 2023 Apple's net sales were $383.29 billion and Microsoft's revenue was $211.92 billion.",
+   "b": "Fiscal 2023: Apple net sales $383.29 billion; Microsoft revenue $221.92 billion."
+  },
+  {
+   "id": "P26",
+   "label": true,
+   "category": "multi_claim",
+   "a": "Mount Everest is 8,848.86 m high and K2 is 8,611 m high.",
+   "b": "Everest reaches 8,848.86 m, while K2 reaches 8,661 m."
+  },
+  {
+   "id": "P27",
+   "label": true,
+   "category": "multi_claim",
+   "a": "GM's revenue was $156.74 billion in 2022 and $171.84 billion in 2023.",
+   "b": "GM's revenue: 2022 $156.74 billion, 2023 $161.84 billion."
+  },
+  {
+   "id": "P28",
+   "label": true,
+   "category": "multi_claim",
+   "a": "Tesla's 2023 revenue was $96.77 billion and its net income was $15.00 billion.",
+   "b": "Tesla made $96.77 billion of revenue in 2023 and a net income of $12.6 billion."
+  },
+  {
+   "id": "P29",
+   "label": true,
+   "category": "non_numeric",
+   "a": "The capital of Australia is Canberra.",
+   "b": "The capital of Australia is Sydney."
+  },
+  {
+   "id": "P30",
+   "label": true,
+   "category": "non_numeric",
+   "a": "Tesla's chief executive is Elon Musk.",
+   "b": "Tesla's chief executive is Tim Cook."
+  },
+  {
+   "id": "P31",
+   "label": true,
+   "category": "non_numeric",
+   "a": "Python was created by Guido van Rossum.",
+   "b": "Python was created by James Gosling."
+  },
+  {
+   "id": "P32",
+   "label": true,
+   "category": "non_numeric",
+   "a": "The Eiffel Tower is located in Paris.",
+   "b": "The Eiffel Tower is located in Lyon."
+  },
+  {
+   "id": "N01",
+   "label": false,
+   "category": "rounding",
+   "a": "Tesla's 2023 revenue was $96.77 billion.",
+   "b": "Tesla's revenue in 2023 was about $97 billion."
+  },
+  {
+   "id": "N02",
+   "label": false,
+   "category": "rounding",
+   "a": "Apple's fiscal 2023 net sales were $383.29 billion.",
+   "b": "Apple's fiscal 2023 net sales were $383.3 billion."
+  },
+  {
+   "id": "N03",
+   "label": false,
+   "category": "rounding",
+   "a": "Mount Everest is 8,848.86 metres high.",
+   "b": "Mount Everest is 8,849 metres high."
+  },
+  {
+   "id": "N04",
+   "label": false,
+   "category": "rounding",
+   "a": "Ford's 2023 revenue was $176.19 billion.",
+   "b": "Ford's revenue was roughly $176 billion in 2023."
+  },
+  {
+   "id": "N05",
+   "label": false,
+   "category": "rounding",
+   "a": "Microsoft's fiscal 2023 revenue was $211.92 billion.",
+   "b": "Microsoft's fiscal 2023 revenue was about $212 billion."
+  },
+  {
+   "id": "N06",
+   "label": false,
+   "category": "rounding",
+   "a": "GM's 2023 revenue was $171.84 billion.",
+   "b": "GM had revenue of $171.8 billion in 2023."
+  },
+  {
+   "id": "N07",
+   "label": false,
+   "category": "unit_conversion",
+   "a": "Ford's 2023 revenue was $176.19 billion.",
+   "b": "Ford's 2023 revenue was $176,191 million."
+  },
+  {
+   "id": "N08",
+   "label": false,
+   "category": "unit_conversion",
+   "a": "Apple's fiscal 2023 net sales were $383.29 billion.",
+   "b": "Apple's net sales for fiscal 2023 were $383,285 million."
+  },
+  {
+   "id": "N09",
+   "label": false,
+   "category": "unit_conversion",
+   "a": "Mount Everest is 8,848.86 metres high.",
+   "b": "Mount Everest is 8.85 km high."
+  },
+  {
+   "id": "N10",
+   "label": false,
+   "category": "unit_conversion",
+   "a": "Tesla's 2023 revenue was $96.77 billion.",
+   "b": "Tesla's 2023 revenue was $96,773 million."
+  },
+  {
+   "id": "N11",
+   "label": false,
+   "category": "unit_conversion",
+   "a": "Microsoft's fiscal 2023 revenue was $211,915 million.",
+   "b": "Microsoft's fiscal 2023 revenue was $211.9 billion."
+  },
+  {
+   "id": "N12",
+   "label": false,
+   "category": "paraphrase",
+   "a": "Tesla's total revenue for 2023 was $96.77 billion.",
+   "b": "In 2023, Tesla generated revenues of $96.77bn."
+  },
+  {
+   "id": "N13",
+   "label": false,
+   "category": "paraphrase",
+   "a": "Apple's net sales in fiscal 2023 were $383.29 billion.",
+   "b": "Apple's fiscal-year 2023 revenue: $383.29 billion."
+  },
+  {
+   "id": "N14",
+   "label": false,
+   "category": "paraphrase",
+   "a": "K2 rises 8,611 metres above sea level.",
+   "b": "K2's height is 8,611 m."
+  },
+  {
+   "id": "N15",
+   "label": false,
+   "category": "paraphrase",
+   "a": "GM reported 2023 revenue of $171.84 billion.",
+   "b": "General Motors' 2023 total revenues reached $171.84 billion."
+  },
+  {
+   "id": "N16",
+   "label": false,
+   "category": "paraphrase",
+   "a": "The Eiffel Tower is 330 metres tall.",
+   "b": "The Eiffel Tower stands 330 m tall."
+  },
+  {
+   "id": "N17",
+   "label": false,
+   "category": "different_period",
+   "a": "Tesla's 2022 revenue was $81.46 billion.",
+   "b": "Tesla's 2023 revenue was $96.77 billion."
+  },
+  {
+   "id": "N18",
+   "label": false,
+   "category": "different_period",
+   "a": "Ford's revenue was $158.06 billion in 2022.",
+   "b": "Ford's revenue was $176.19 billion in 2023."
+  },
+  {
+   "id": "N19",
+   "label": false,
+   "category": "different_period",
+   "a": "Apple's fiscal 2022 net sales were $394.33 billion.",
+   "b": "Apple's fiscal 2023 net sales were $383.29 billion."
+  },
+  {
+   "id": "N20",
+   "label": false,
+   "category": "different_period",
+   "a": "A 1955 survey measured Mount Everest at 8,848 metres.",
+   "b": "A 2020 survey measured Mount Everest at 8,848.86 metres."
+  },
+  {
+   "id": "N21",
+   "label": false,
+   "category": "different_entity",
+   "a": "Tesla's 2023 revenue was $96.77 billion.",
+   "b": "Ford's 2023 revenue was $176.19 billion."
+  },
+  {
+   "id": "N22",
+   "label": false,
+   "category": "different_entity",
+   "a": "Mount Everest is 8,848.86 metres high.",
+   "b": "K2 is 8,611 metres high."
+  },
+  {
+   "id": "N23",
+   "label": false,
+   "category": "different_entity",
+   "a": "Apple's fiscal 2023 net sales were $383.29 billion.",
+   "b": "Microsoft's fiscal 2023 revenue was $211.92 billion."
+  },
+  {
+   "id": "N24",
+   "label": false,
+   "category": "different_entity",
+   "a": "GM's 2023 revenue was $171.84 billion.",
+   "b": "Ford's 2023 revenue was $176.19 billion."
+  },
+  {
+   "id": "N25",
+   "label": false,
+   "category": "different_metric",
+   "a": "Tesla's 2023 revenue was $96.77 billion.",
+   "b": "Tesla's 2023 net income was $15.00 billion."
+  },
+  {
+   "id": "N26",
+   "label": false,
+   "category": "different_metric",
+   "a": "Tesla's gross margin in 2023 was 18.2%.",
+   "b": "Tesla's operating margin in 2023 was 8.2%."
+  },
+  {
+   "id": "N27",
+   "label": false,
+   "category": "different_metric",
+   "a": "Apple's fiscal 2023 net sales were $383.29 billion.",
+   "b": "Apple's fiscal 2023 net income was $97.0 billion."
+  },
+  {
+   "id": "N28",
+   "label": false,
+   "category": "different_metric",
+   "a": "Tesla's 2023 revenue was $96.77 billion.",
+   "b": "Tesla delivered 1.81 million vehicles in 2023."
+  },
+  {
+   "id": "N29",
+   "label": false,
+   "category": "agreement_text",
+   "a": "The capital of Australia is Canberra.",
+   "b": "Canberra is Australia's capital city."
+  },
+  {
+   "id": "N30",
+   "label": false,
+   "category": "agreement_text",
+   "a": "Python was created by Guido van Rossum.",
+   "b": "Guido van Rossum designed the Python language."
+  },
+  {
+   "id": "N31",
+   "label": false,
+   "category": "verifier_quote",
+   "a": "Tesla's 2023 revenue was $96.77 billion [1].",
+   "b": "Fact check: the claim that Tesla's 2023 revenue was $96.77 billion is supported by the SEC filing."
+  },
+  {
+   "id": "N32",
+   "label": false,
+   "category": "summary_repeat",
+   "a": "Ford earned $176.19 billion in revenue in 2023.",
+   "b": "Ford's 2023 revenue ($176.19 billion) was higher than GM's ($171.84 billion)."
+  }
+ ]
+}

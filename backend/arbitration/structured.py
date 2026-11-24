@@ -11,8 +11,10 @@
 Cost: one LLM call per text node instead of one per pair of nodes.
 """
 import asyncio
+import json
 import re
 
+from agents.base_agent import run_agent
 from arbitration.claims import extract_claims
 from reputation.scoring import get_stats
 
@@ -62,6 +64,8 @@ def group_key(c: dict) -> tuple:
 
 
 def fmt_value(c: dict) -> str:
+    if c["kind"] == "text":
+        return c["text_value"]
     unit = c["unit"]
     money = unit.upper() in ("USD", "$")
     scale = f" {c['scale']}" if c["scale"] else ""
@@ -95,33 +99,70 @@ def build_conflict(cid: str, key: tuple, clusters: list, skills: dict) -> dict:
         policy = "trust-weighted vote"
         why = f"similar source authority; higher combined authority x agent trust ({top['score']} vs {runner['score']})"
     statements = "; ".join(f"node {'/'.join(s['nodes'])} says {s['value']} ({s['authority_reason']})" for s in sides)
-    gap = abs(top["absolute"] - runner["absolute"]) / max(abs(top["absolute"]), abs(runner["absolute"]), 1e-12)
+    if top["absolute"] is None or runner["absolute"] is None:
+        differ = "The statements give different values."
+    else:
+        gap = abs(top["absolute"] - runner["absolute"]) / max(abs(top["absolute"]), abs(runner["absolute"]), 1e-12)
+        differ = f"The values differ by {gap:.1%}."
     return {
         "id": cid, "between": sorted({n for s in sides for n in s["nodes"]}),
         "entity": entity, "attribute": attribute, "period": period, "label": label,
         "sides": sides, "recommended": 0, "policy": policy, "status": "open",
-        "explanation": f"{label}: {statements}. The values differ by {gap:.1%}.",
+        "explanation": f"{label}: {statements}. {differ}",
         "suggested_resolution": f"Use {top['value']} — {why}.",
     }
 
 
-def find_conflicts(claims: list, skills: dict) -> list:
+def text_cluster(claims: list) -> list:
+    clusters = {}
+    for c in claims:
+        clusters.setdefault(c["text_norm"], []).append(c)
+    return list(clusters.values())
+
+
+def candidate_groups(claims: list) -> list:
+    """(key, clusters) for every group where at least two nodes state different values."""
     groups = {}
     for c in claims:
         if c["entity"] and c["attribute"]:
             groups.setdefault(group_key(c), []).append(c)
-    conflicts = []
+    out = []
     for key, items in groups.items():
         if len({c["node_id"] for c in items}) < 2:
             continue  # disagreement inside one node is not an inter-agent conflict
-        clusters = cluster(items)
+        clusters = text_cluster(items) if key[3] == "text" else cluster(items)
         if len(clusters) < 2:
             continue
         nodes_per_cluster = [{c["node_id"] for c in cl} for cl in clusters]
         if len(set().union(*nodes_per_cluster)) < 2:
             continue
-        conflicts.append(build_conflict(f"c{len(conflicts) + 1}", key, clusters, skills))
-    return conflicts
+        out.append((key, clusters))
+    return out
+
+
+def find_conflicts(claims: list, skills: dict) -> list:
+    """Numeric conflicts only (fully deterministic). Text candidates need confirm_text_conflict."""
+    groups = [(k, cl) for k, cl in candidate_groups(claims) if k[3] != "text"]
+    return [build_conflict(f"c{i}", k, cl, skills) for i, (k, cl) in enumerate(groups, 1)]
+
+
+ENTAILMENT_PROMPT = """Two statements about the same fact ({entity}, {attribute}{period}):
+A: {a}
+B: {b}
+Do they CONTRADICT each other (cannot both be true)? Different wording, extra detail or a more specific
+version of the same fact is NOT a contradiction.
+Return ONLY JSON: {{"contradict": true}} or {{"contradict": false}}"""
+
+
+async def confirm_text_conflict(key: tuple, clusters: list) -> bool:
+    """LLM entailment check, used ONLY inside a group whose text values differ."""
+    entity, attribute, period, _ = key
+    a, b = clusters[0][0], clusters[1][0]
+    raw = await run_agent("arbitrator", ENTAILMENT_PROMPT.format(
+        entity=a["entity_display"], attribute=attribute, period=f", {period}" if period else "",
+        a=a["quote"] or a["text_value"], b=b["quote"] or b["text_value"]))
+    m = re.search(r"\{.*\}", raw, flags=re.S)
+    return bool(m and json.loads(m.group(0)).get("contradict") is True)
 
 
 async def arbitrate(outputs: dict, skills: dict, agents: dict, emit=None) -> list:
@@ -142,4 +183,14 @@ async def arbitrate(outputs: dict, skills: dict, agents: dict, emit=None) -> lis
             await emit("claims_extracted", {"node_id": node, "count": len(res),
                                             "claims": [{k: c[k] for k in ("entity", "attribute", "period", "value",
                                                                           "scale", "unit", "quote")} for c in res]})
-    return find_conflicts(claims, skills)
+    conflicts = find_conflicts(claims, skills)
+    text_groups = [(k, cl) for k, cl in candidate_groups(claims) if k[3] == "text"]
+    checks = await asyncio.gather(*(confirm_text_conflict(k, cl) for k, cl in text_groups), return_exceptions=True)
+    for (key, clusters), ok in zip(text_groups, checks):
+        if isinstance(ok, Exception):
+            if emit:
+                await emit("arbitration_error", {"error": f"entailment check: {type(ok).__name__}: {str(ok)[:150]}"})
+            continue
+        if ok:
+            conflicts.append(build_conflict(f"c{len(conflicts) + 1}", key, clusters, skills))
+    return conflicts

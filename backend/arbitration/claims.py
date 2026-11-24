@@ -27,7 +27,8 @@ ATTRIBUTE_SYNONYMS = {
     "operating income": ["operating income", "operating profit"],
     "gross margin": ["gross margin", "gross profit margin"],
     "height": ["height", "elevation", "altitude"],
-    "employees": ["employees", "headcount", "workforce", "staff"],
+    "employees": ["employees", "headcount", "workforce", "staff", "number of employees", "employee count",
+                  "employed", "people employed", "employment"],
     "deliveries": ["deliveries", "vehicle deliveries", "vehicles delivered"],
 }
 _ATTR = {syn: canon for canon, syns in ATTRIBUTE_SYNONYMS.items() for syn in syns}
@@ -36,16 +37,20 @@ ENTITY_ALIASES = {"general motors": "gm", "ford motor": "ford", "alphabet": "goo
                   "toyota motor": "toyota", "mt everest": "mount everest", "everest": "mount everest"}
 _ENTITY_NOISE = r"\b(inc|incorporated|corp|corporation|co|company|ltd|limited|plc|llc|group|holdings|the)\b\.?"
 
-PROMPT = """Extract every numeric factual claim from the text below as JSON.
+PROMPT = """Extract every checkable factual claim from the text below as JSON.
 For each claim give:
-- "entity": the company, place or thing (short common name, e.g. "Tesla", "Ford", "GM", "Apple", "Mount Everest")
-- "attribute": the metric in lowercase (e.g. "revenue", "net income", "gross margin", "height")
+- "entity": the company, place, person or thing (short common name, e.g. "Tesla", "Ford", "GM", "Apple", "Mount Everest")
+- "attribute": what is stated about it, in lowercase (e.g. "revenue", "net income", "height", "capital",
+  "chief executive", "creator", "location", "first release year", "net sales change")
 - "period": the year or fiscal year it refers to as written (e.g. "2023", "fiscal 2023"), or "" if none
-- "value": the number exactly as written, as a JSON number (no commas)
+- "value": the number exactly as written, as a JSON number (no commas), or null for a non-numeric fact.
+  Increases and decreases are signed: "fell 2.8%" -> -2.8, "rose 2.8%" -> 2.8.
+  When a year IS the fact (e.g. "first released in 1991"), the value is the year and period is "".
+- "text_value": for non-numeric facts, the stated value (e.g. "Canberra", "Elon Musk", "Paris"); otherwise ""
 - "scale": "", "thousand", "million", "billion" or "trillion" as written
-- "unit": "USD", "%", "m", "people", "vehicles", ... as written
+- "unit": "USD", "%", "m", "km", "people", "vehicles", ... as written ("" for non-numeric facts)
 - "quote": the exact words of the sentence containing it (max 30 words)
-Skip numbers that are only years, citation markers like [1], or list numbering.
+Skip years that only say WHEN something happened, citation markers like [1], and list numbering.
 Return ONLY a JSON list (max {max_claims} items), [] if there are none.
 
 Text:
@@ -78,12 +83,34 @@ def unit_kind(unit: str) -> str:
         return "percent"
     if u in ("m", "metre", "metres", "meter", "meters", "km", "ft", "feet"):
         return "length"
+    if u in ("people", "persons", "employees", "staff", "workers", "vehicles", "cars", "units"):
+        return "count"
     return u or "number"
 
 
 def decimals(value) -> int:
-    s = f"{value}"
+    """Digits after the decimal point as written. A whole number counts as 0 even when the model
+    returns it as a float (97.0 for "about $97 billion")."""
+    if isinstance(value, float) and value.is_integer():
+        return 0
+    s = f"{value}".rstrip("0") if isinstance(value, float) else f"{value}"
     return len(s.split(".")[1]) if "." in s and "e" not in s else 0
+
+
+def normalize_text_value(text: str) -> str:
+    t = re.sub(r"[^a-z0-9 ]", " ", (text or "").lower())
+    t = re.sub(r"\b(the|a|an|city of|mr|ms|dr)\b", " ", t)
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def make_text_claim(node_id, agent, entity, attribute, period, text_value, quote, sources):
+    if not normalize_text_value(text_value):
+        raise ValueError("empty text value")
+    return {"node_id": node_id, "agent": agent, "entity": normalize_entity(entity), "entity_display": str(entity),
+            "attribute": normalize_attribute(attribute), "period": normalize_period(period),
+            "value": None, "text_value": str(text_value), "text_norm": normalize_text_value(text_value),
+            "scale": "", "unit": "", "kind": "text", "absolute": None, "precision": None,
+            "quote": str(quote or "")[:240], "sources": sources}
 
 
 def make_claim(node_id, agent, entity, attribute, period, value, scale, unit, quote, sources):
@@ -150,15 +177,19 @@ async def text_claims(node_id: str, agent: str, output: str) -> list:
     text = normalize_citations(strip_chart_blocks(output))
     node_sources = parse_sources(text)
     body = SOURCE_LINE.sub("", text.split("\n---\n")[0])
-    if not re.search(r"\d", CITATION.sub("", body)):
+    if not CITATION.sub("", body).strip():
         return []
     raw = await run_agent("arbitrator", PROMPT.format(max_claims=MAX_CLAIMS_PER_NODE, text=body[:6000]))
     claims = []
     for c in parse_claims_json(raw):
+        sources = _sources_for(str(c.get("quote", "")), node_sources)
         try:
-            claims.append(make_claim(node_id, agent, c.get("entity"), c.get("attribute"), c.get("period"),
-                                     c.get("value"), c.get("scale"), c.get("unit"), c.get("quote"),
-                                     _sources_for(str(c.get("quote", "")), node_sources)))
+            if c.get("value") is None or c.get("value") == "":
+                claims.append(make_text_claim(node_id, agent, c.get("entity"), c.get("attribute"), c.get("period"),
+                                              c.get("text_value"), c.get("quote"), sources))
+            else:
+                claims.append(make_claim(node_id, agent, c.get("entity"), c.get("attribute"), c.get("period"),
+                                         c.get("value"), c.get("scale"), c.get("unit"), c.get("quote"), sources))
         except (TypeError, ValueError):
             continue
     # a claim without its own citation inherits the node's sources only if the node cites exactly one
