@@ -2,6 +2,8 @@ from unittest.mock import patch, AsyncMock
 from agents import research_tools as rt
 import pytest
 
+REAL_SEC_REVENUE = rt._sec_revenue  # saved before the autouse fixture mocks it
+
 
 @pytest.fixture(autouse=True)
 def no_network():
@@ -133,3 +135,30 @@ async def test_corrective_second_pass_runs_when_answer_has_gaps():
 
 def test_normalize_citations_converts_fullwidth_brackets():
     assert rt.normalize_citations("fact【4】") == "fact[4]"
+
+async def test_sec_revenue_uses_concept_with_newest_fiscal_year():
+    def rows(end_year):
+        return {"units": {"USD": [
+            {"form": "10-K", "start": f"{y - 1}-10-01", "end": f"{y}-09-30", "val": y * 1e9, "filed": f"{y}-11-01"}
+            for y in (end_year - 1, end_year)]}}
+
+    class Resp:
+        def __init__(self, url):
+            self.status_code = 200
+            self._data = rows(2018) if url.endswith("/Revenues.json") else rows(2023)
+
+        def json(self):
+            return self._data
+
+    class Client:
+        def __init__(self, *a, **k): pass
+        async def __aenter__(self): return self
+        async def __aexit__(self, *a): return False
+        async def get(self, url): return Resp(url)
+
+    rt.SEC_CACHE["AAPL"] = (320193, "Apple Inc.")
+    with patch.object(rt.httpx, "AsyncClient", Client):
+        src = await REAL_SEC_REVENUE("AAPL")
+    assert "RevenueFromContractWithCustomer" in src["url"]
+    assert "2023-09-30" in src["snippet"]
+    del rt.SEC_CACHE["AAPL"]

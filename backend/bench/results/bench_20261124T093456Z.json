@@ -1,0 +1,1325 @@
+{
+ "meta": {
+  "finished_at": "20261124T093456Z",
+  "n_tasks": 20,
+  "judge": true,
+  "filters": {
+   "skill": null,
+   "agent": null,
+   "tasks": null,
+   "tier": "hard"
+  }
+ },
+ "summary": {
+  "chart-v1": {
+   "skill": "chart",
+   "model": "openai/gpt-oss-120b",
+   "strategy": "spec",
+   "n_scored": 5,
+   "n_infra_errors": 0,
+   "mean": 0.933,
+   "ci95": [
+    0.803,
+    1
+   ],
+   "mean_latency_s": 1.39
+  },
+  "chart-v2": {
+   "skill": "chart",
+   "model": "openai/gpt-oss-20b",
+   "strategy": "spec",
+   "n_scored": 5,
+   "n_infra_errors": 0,
+   "mean": 0.867,
+   "ci95": [
+    0.707,
+    1
+   ],
+   "mean_latency_s": 1.04
+  },
+  "drafting-v1": {
+   "skill": "drafting",
+   "model": "openai/gpt-oss-120b",
+   "strategy": "cited",
+   "n_scored": 5,
+   "n_infra_errors": 0,
+   "mean": 1.0,
+   "ci95": [
+    1.0,
+    1
+   ],
+   "mean_latency_s": 2.94
+  },
+  "drafting-v2": {
+   "skill": "drafting",
+   "model": "qwen/qwen3.8-27b",
+   "strategy": "cited",
+   "n_scored": 5,
+   "n_infra_errors": 0,
+   "mean": 0.965,
+   "ci95": [
+    0.896,
+    1
+   ],
+   "mean_latency_s": 3.17
+  },
+  "fact_check-v1": {
+   "skill": "fact_check",
+   "model": "openai/gpt-oss-120b",
+   "strategy": "verify",
+   "n_scored": 5,
+   "n_infra_errors": 0,
+   "mean": 1.0,
+   "ci95": [
+    1.0,
+    1
+   ],
+   "mean_latency_s": 1.01
+  },
+  "fact_check-v2": {
+   "skill": "fact_check",
+   "model": "gemini-3.1-flash-lite",
+   "strategy": "verify",
+   "n_scored": 5,
+   "n_infra_errors": 0,
+   "mean": 1.0,
+   "ci95": [
+    1.0,
+    1
+   ],
+   "mean_latency_s": 14.32
+  },
+  "research-v1": {
+   "skill": "research",
+   "model": "openai/gpt-oss-120b",
+   "strategy": "grounded",
+   "n_scored": 5,
+   "n_infra_errors": 0,
+   "mean": 0.924,
+   "ci95": [
+    0.776,
+    1
+   ],
+   "mean_latency_s": 13.56
+  },
+  "research-v2": {
+   "skill": "research",
+   "model": "gemini-3.5-flash-lite",
+   "strategy": "plain",
+   "n_scored": 5,
+   "n_infra_errors": 0,
+   "mean": 0.458,
+   "ci95": [
+    0.365,
+    0.551
+   ],
+   "mean_latency_s": 1.71
+  }
+ },
+ "records": [
+  {
+   "task": "R6",
+   "skill": "research",
+   "agent": "research-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "grounded",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "1/1 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "3 distinct citation(s), need 1"
+    },
+    "has_sources": {
+     "score": 1.0,
+     "detail": "source list present"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The agent correctly provided Nvidia's total revenue of $60.9 billion (or $60.92 billion) for the fiscal year ended January 2024, accompanied by proper sources."
+   },
+   "latency_s": 6.81,
+   "error": null,
+   "infra_error": false,
+   "output": "NVIDIA Corporation reported **total revenue of $60.9 billion for fiscal year 2024**, which ended on January 28 2024 [7]. The same figure appears in the company’s 10‑K filing as **$60.92 billion** for the fiscal year ended 2024‑01‑28 [1]. This represents a **126 % increase** over the prior fiscal year [7][10].\n\n---\nSources\n[1] SEC EDGAR 10-K data: NVIDIA CORP (NVDA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001045810/us-gaap/Revenues.json\n[2] NVIDIA (NVDA) Revenue 2005-2026 - Stock Analysis - https://stockanalysis.com/stocks/nvda/revenue/\n[3] NVIDIA Corporation - Financial Reports - https://investor.nvidia.com/financial-info/financial-reports/default.aspx\n[4] NVIDIA Announces Financial Results for Fourth Quarter and ... - https://nvidianews.nvidia.com/_gallery/download_pdf/65d669a33d63329bbf62672a/\n[5] nvda-20240128 - SEC.govNVIDIA Revenue 2017-2026 | NVDA - MacrotrendsNVIDIA Announces Financial Results for Fourth Quarter and ... - https://www.sec.gov/Archives/edgar/data/1045810/000104581024000029/nvda-20240128.htm\n[6] Nvidia is now reporting a full year of results in a single ...Top Storiesand Fiscal 2024 NVIDIA Announces Financial Results for Fourth ...NVIDIA Corporation - NVIDIA Announces Financial Results for ...Document - SEC.govNVIDIA Announces Financial Results for Fourth Quarter and ...nvda-20240128 - SEC.gov - https://finance.yahoo.com/news/nvidia-is-now-reporting-a-full-year-of-results-in-a-single-quarter-morning-brief-125840661.html?fr=sycsrp_catchall\n[7] NVIDIA Corporation - NVIDIA Announces Financial Results for ... - https://investor.nvidia.com/news/press-release-details/2024/NVIDIA-Announces-Financial-Results-for-Fourth-Quarter-and-Fiscal-2024/\n[8] NVIDIA Corporation - Financial Info - Annual Reports and Proxies - https://investor.nvidia.com/financial-info/annual-reports-and-proxies/default.aspx\n[9] NVIDIA Corporation Annual Report 2024 - https://stocklight.com/stocks/us/nasdaq-nvda/nvidia/annual-reports/nasdaq-nvda-2024-10K-24660316.pdf\n[10] NVIDIA Announces Financial Results for Fourth Quarter and ... - https://nvidianews.nvidia.com/news/nvidia-announces-financial-results-for-fourth-quarter-and-fiscal-2024\n[11] Deloitte (Wikipedia) - https://en.wikipedia.org/wiki/Deloitte"
+  },
+  {
+   "task": "R7",
+   "skill": "research",
+   "agent": "research-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "grounded",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "2/2 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "2 distinct citation(s), need 1"
+    },
+    "has_sources": {
+     "score": 1.0,
+     "detail": "source list present"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The output successfully provides both Tesla's 2023 total revenue and 2023 net income, along with corresponding sources for each."
+   },
+   "latency_s": 25.79,
+   "error": null,
+   "infra_error": false,
+   "output": "**Tesla Inc. – 2023 Financial Highlights**\n\n- **Total Revenue (FY 2023):** **$96.77 billion**[1]  \n- **Net Income (FY 2023):** **$15.00 billion**[3]\n\nThese figures are taken from Tesla’s Form 10‑K filing for the fiscal year ended December 31 2023 (revenue) and from Macrotrends’ compilation of Tesla’s annual net income (net income).\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] Tesla Releases Fourth Quarter and Full Year 2023 Financial ... - https://ir.tesla.com/press-release/tesla-releases-fourth-quarter-and-full-year-2023-financial-results\n[3] Tesla Net Income 2016-2026 | TSLA - Macrotrends - https://www.macrotrends.net/stocks/charts/TSLA/tesla/net-income\n[4] Tesla, Inc. - https://ir.tesla.com/_flysystem/s3/sec/000156459023005959/tsla-8k_20230419-gen.pdf\n[5] Tesla Net Profit Margin 2017-2026 | TSLA - Macrotrends - https://www.macrotrends.net/stocks/charts/TSLA/tesla/net-profit-margin\n[6] Tesla Autopilot (Wikipedia) - https://en.wikipedia.org/wiki/Tesla_Autopilot\n[7] CrowdStrike (Wikipedia) - https://en.wikipedia.org/wiki/CrowdStrike\n[8] Lam Research (Wikipedia) - https://en.wikipedia.org/wiki/Lam_Research\n[9] Tesla, Inc. - https://ir.tesla.com/_flysystem/s3/sec/000162828024002390/tsla-20231231-gen.pdf\n[10] Tesla Q1 2023 Earnings Results & Report - MarketBeatAnnual Report 2023 - SEC.govtsla-20231231Tesla, Inc. Financial Disclosures & SEC Filings — TradingViewTesla (TSLA) Q4 and FY 2023 earnings results: Total revenue ... - https://www.marketbeat.com/earnings/reports/2023-4-19-tesla-inc-stock/\n[11] Annual Report 2023 - SEC.gov - https://www.sec.gov/Archives/edgar/data/1318605/000110465924053372/tm2412112d4_ars.pdf"
+  },
+  {
+   "task": "R8",
+   "skill": "research",
+   "agent": "research-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "grounded",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "1/1 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "1 distinct citation(s), need 1"
+    },
+    "has_sources": {
+     "score": 1.0,
+     "detail": "source list present"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The agent accurately provides Toyota's net revenue of 45.095 trillion yen for the fiscal year ended March 2024 and includes a valid source."
+   },
+   "latency_s": 10.02,
+   "error": null,
+   "infra_error": false,
+   "output": "Toyota Motor Corporation reported **net revenues of 45.095 trillion yen** for the fiscal year that ended on 31 March 2024, representing a 21.4 % increase over the prior year[8]. This figure corresponds to the consolidated revenue on a worldwide basis for the April 2023 through March 2024 period.\n\n---\nSources\n[1] FINANCIAL SUMMARY FY2023 - https://global.toyota/pages/global_toyota/ir/financial-results/2023_4q_summary_en.pdf\n[2] FY2023 Financial Results - https://global.toyota/pages/global_toyota/ir/financial-results/2023_4q_presentation_2_en.pdf\n[3] FY2023 FINANCIAL SUMMARY - SEC.gov - https://www.sec.gov/Archives/edgar/data/1094517/000119312523139964/d467324dex991.htm\n[4] FY2023 Third Quarter Financial Summary - SEC.gov - https://www.sec.gov/Archives/edgar/data/1094517/000119312523029116/d395450dex991.htm\n[5] FINANCIAL SUMMARY FY2024 - トヨタ自動車株式会社 ... - https://global.toyota/pages/global_toyota/ir/financial-results/2024_4q_summary_en.pdf\n[6] FY2024 FINANCIAL SUMMARY - SEC.gov - https://www.sec.gov/Archives/edgar/data/1094517/000119312524133537/d735266dex991.htm\n[7] TMC's FY2024 Financial Results Press Briefing | Corporate ... - https://global.toyota/en/newsroom/corporate/40759288.html\n[8] TMC Announces April Through March 2024 Financial Results - https://pressroom.toyota.com/tmc-announces-april-through-march-2024-financial-results/\n[9] Grab Holdings (Wikipedia) - https://en.wikipedia.org/wiki/Grab_Holdings\n[10] Deloitte (Wikipedia) - https://en.wikipedia.org/wiki/Deloitte"
+  },
+  {
+   "task": "R9",
+   "skill": "research",
+   "agent": "research-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "grounded",
+   "score": 0.622,
+   "deterministic": 0.889,
+   "checks": {
+    "contains_numbers": {
+     "score": 0.667,
+     "detail": "2/3 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "3 distinct citation(s), need 2"
+    },
+    "has_sources": {
+     "score": 1.0,
+     "detail": "source list present"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 1,
+    "score": 0.0,
+    "reason": "The agent failed to provide Apple's fiscal 2023 revenue, claiming it was not found in the sources."
+   },
+   "latency_s": 17.44,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fiscal‑year 2023 total revenue**\n\n- **Apple (AAPL)** – The sources provide only quarterly figures (e.g., $89.5 billion for Q4) and do not list Apple’s full‑year 2023 revenue. **Not found in sources**[12].  \n\n- **Microsoft (MSFT)** – Reported total revenue of **$211.92 billion** for the fiscal year ended June 30 2023[6].  \n\n- **Alphabet (GOOGL)** – Reported total revenue of **$307.39 billion** for the fiscal year ended December 31 2023[3].  \n\nAll amounts are expressed in U.S. dollars and reflect the companies’ US GAAP‑reported figures.\n\n---\nSources\n[1] SEC EDGAR 10-K data: Apple Inc. (AAPL) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000320193/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: MICROSOFT CORP (MSFT) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000789019/us-gaap/Revenues.json\n[3] SEC EDGAR 10-K data: Alphabet Inc. (GOOGL) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001652044/us-gaap/Revenues.json\n[4] Microsoft 2023 Annual Report - https://www.microsoft.com/investor/reports/ar23/index.html\n[5] FY23 Q3 - Press Releases - Investor Relations - Microsoft - https://www.microsoft.com/en-us/investor/earnings/fy-2023-q3/press-release-webcast\n[6] Microsoft (MSFT) Revenue 2005-2026 - Stock Analysis - https://stockanalysis.com/stocks/msft/revenue/\n[7] Form 10-K for Microsoft Corp filed 07/27/2023 - https://microsoft.gcs-web.com/static-files/e2931fdb-9823-4130-b2a8-f6b8db0b15a9\n[8] Microsoft (Wikipedia) - https://en.wikipedia.org/wiki/Microsoft\n[9] List of largest technology companies by revenue (Wikipedia) - https://en.wikipedia.org/wiki/List_of_largest_technology_companies_by_revenue\n[10] Microsoft Teams (Wikipedia) - https://en.wikipedia.org/wiki/Microsoft_Teams\n[11] 23-11-02 Apple reports fourth quarter results - https://www.apple.com/newsroom/pdfs/fy2023-q4/FY23_Q4_Consolidated_Financial_Statements.pdf\n[12] Apple reports fourth quarter results - Apple - https://www.apple.com/newsroom/2023/11/apple-reports-fourth-quarter-results/"
+  },
+  {
+   "task": "R10",
+   "skill": "research",
+   "agent": "research-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "grounded",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "1/1 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "3 distinct citation(s), need 1"
+    },
+    "has_sources": {
+     "score": 1.0,
+     "detail": "source list present"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The agent correctly provides Amazon's total net sales for 2023 (approx. $574.8 billion) along with explicit sources."
+   },
+   "latency_s": 7.76,
+   "error": null,
+   "infra_error": false,
+   "output": "**Amazon – Total Net Sales for FY 2023**\n\n- **Net sales (total revenue) reported for the fiscal year ending 31 December 2023:** **≈ $574.8 billion**. This figure appears in several filings and press reports: the SEC‑filed 10‑K lists $574.78 billion [1]; a Retail‑Insight press release rounds it to $574.8 billion [2]; Stock‑Analysis data shows $574.79 billion [5].\n\n- **Year‑over‑year change:** The 2023 net‑sales figure represents a **12 % increase** compared with 2022’s $514.0 billion [2].\n\n- **Segment breakdown (from the same 2023 report):**  \n  - North America: $352.8 billion (↑ 12 %)  \n  - International: $131.2 billion (↑ 11 %)  \n\nThese segment totals together with other business lines (e.g., AWS) sum to the overall $574.8 billion total [2].\n\n**Takeaway:** Amazon’s total net sales for FY 2023 were roughly **$575 billion**, marking a solid double‑digit growth pace over the prior year.\n\n---\nSources\n[1] SEC EDGAR 10-K data: AMAZON COM INC (AMZN) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001018724/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json\n[2] Amazon reports 12% net sales rise in 2023 - https://www.retail-insight-network.com/news/amazon-net-sales-rise-2023/\n[3] Amazon Net Sales 1996-2026 - Marketplace Pulse - https://www.marketplacepulse.com/stats/amazon-net-sales\n[4] Amazon.com Announces Fourth Quarter Results - https://ir.aboutamazon.com/news-release/news-release-details/2024/Amazon-com-Announces-Fourth-Quarter-Results/default.aspx\n[5] Amazon.com (AMZN) Revenue 2005-2026 - Stock Analysis - https://stockanalysis.com/stocks/amzn/revenue/\n[6] Amazon (company) (Wikipedia) - https://en.wikipedia.org/wiki/Amazon_(company)\n[7] Amazon MGM Studios (Wikipedia) - https://en.wikipedia.org/wiki/Amazon_MGM_Studios\n[8] List of largest technology companies by revenue (Wikipedia) - https://en.wikipedia.org/wiki/List_of_largest_technology_companies_by_revenue"
+  },
+  {
+   "task": "R6",
+   "skill": "research",
+   "agent": "research-v2",
+   "model": "gemini-3.5-flash-lite",
+   "provider": "gemini",
+   "strategy": "plain",
+   "score": 0.533,
+   "deterministic": 0.333,
+   "checks": {
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "1/1 expected figures present"
+    },
+    "min_citations": {
+     "score": 0.0,
+     "detail": "0 distinct citation(s), need 1"
+    },
+    "has_sources": {
+     "score": 0.0,
+     "detail": "no source list"
+    }
+   },
+   "judge": {
+    "provider": "groq",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The response provides Nvidia's FY2024 revenue ending January 2024 and cites the SEC Form 10‑K as a source."
+   },
+   "latency_s": 1.43,
+   "error": null,
+   "infra_error": false,
+   "output": "According to NVIDIA Corporation’s Annual Report (Form 10-K) filed with the SEC for the fiscal year ended January 28, 2024 (Fiscal Year 2024), the total revenue was **$60,922 million** (or **$60.922 billion**). \n\nThis represented a 126% increase compared to revenue of $26,974 million for fiscal year 2023."
+  },
+  {
+   "task": "R7",
+   "skill": "research",
+   "agent": "research-v2",
+   "model": "gemini-3.5-flash-lite",
+   "provider": "gemini",
+   "strategy": "plain",
+   "score": 0.308,
+   "deterministic": 0.333,
+   "checks": {
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "2/2 expected figures present"
+    },
+    "min_citations": {
+     "score": 0.0,
+     "detail": "0 distinct citation(s), need 1"
+    },
+    "has_sources": {
+     "score": 0.0,
+     "detail": "no source list"
+    }
+   },
+   "judge": {
+    "provider": "groq",
+    "score_1_5": 2,
+    "score": 0.25,
+    "reason": "Provides both figures and a source, but the net income amount is incorrect, indicating invented data."
+   },
+   "latency_s": 1.82,
+   "error": null,
+   "infra_error": false,
+   "output": "According to Tesla, Inc.'s 2023 Annual Report (Form 10-K) filed with the SEC, the financial figures for the fiscal year ended December 31, 2023, are as follows:\n\n*   **Total Revenue:** **$96.77 billion** ($96,773 million), representing an increase of approximately 19% compared to 2022.\n*   **Net Income:** **$14.97 billion** ($14,997 million GAAP net income, or $15.0 billion), which includes a one-time non-cash tax benefit of $5.9 billion related to the release of valuation allowances on certain deferred tax assets. (Standard/Adjusted Net Income without this tax event was lower, but GAAP net income stands at ~$15.0 billion)."
+  },
+  {
+   "task": "R8",
+   "skill": "research",
+   "agent": "research-v2",
+   "model": "gemini-3.5-flash-lite",
+   "provider": "gemini",
+   "strategy": "plain",
+   "score": 0.383,
+   "deterministic": 0.333,
+   "checks": {
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "1/1 expected figures present"
+    },
+    "min_citations": {
+     "score": 0.0,
+     "detail": "0 distinct citation(s), need 1"
+    },
+    "has_sources": {
+     "score": 0.0,
+     "detail": "no source list"
+    }
+   },
+   "judge": {
+    "provider": "groq",
+    "score_1_5": 3,
+    "score": 0.5,
+    "reason": "Provides the revenue figure but does not include a source, which is required."
+   },
+   "latency_s": 1.24,
+   "error": null,
+   "infra_error": false,
+   "output": "For the fiscal year ended March 31, 2024 (FY2024), Toyota Motor Corporation reported a total revenue (net revenues) of **45,095,325 million yen** (approximately **¥45.1 trillion** or about **$299 billion USD** based on exchange rates at the time). \n\nThis represented a significant increase of **21.4%** compared to the previous fiscal year (FY2023), driven by strong vehicle sales volume, favorable foreign exchange rates, and pricing actions."
+  },
+  {
+   "task": "R9",
+   "skill": "research",
+   "agent": "research-v2",
+   "model": "gemini-3.5-flash-lite",
+   "provider": "gemini",
+   "strategy": "plain",
+   "score": 0.533,
+   "deterministic": 0.333,
+   "checks": {
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "3/3 expected figures present"
+    },
+    "min_citations": {
+     "score": 0.0,
+     "detail": "0 distinct citation(s), need 2"
+    },
+    "has_sources": {
+     "score": 0.0,
+     "detail": "no source list"
+    }
+   },
+   "judge": {
+    "provider": "groq",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "Provides all three FY2023 revenues with a clear source for each (SEC Form 10-K) and the figures are accurate."
+   },
+   "latency_s": 2.43,
+   "error": null,
+   "infra_error": false,
+   "output": "As a research agent, I have gathered the total revenue for Apple, Microsoft, and Alphabet for their respective fiscal years 2023. \n\nHere is the breakdown for each company:\n\n### 1. Apple Inc. (AAPL)\n* **Fiscal Year 2023:** Ended September 30, 2023\n* **Total Revenue:** **$383.285 billion**\n* *Context:* This represented a slight decrease of about 2.8% compared to fiscal year 2022 ($394.33 billion), primarily driven by lower iPhone and Mac sales early in the fiscal year, though services revenue hit an all-time high.\n\n### 2. Microsoft Corporation (MSFT)\n* **Fiscal Year 2023:** Ended June 30, 2023\n* **Total Revenue:** **$211.915 billion**\n* *Context:* This represented an increase of about 7% compared to fiscal year 2022 ($198.27 billion), driven largely by growth in Microsoft Cloud, Azure, and Office products, despite a cooling PC market affecting Windows OEM revenue.\n\n### 3. Alphabet Inc. (GOOGL)\n* **Fiscal Year 2023:** Ended December 31, 2023\n* **Total Revenue:** **$307.394 billion**\n* *Context:* This represented an increase of about 9% compared to fiscal year 2022 ($282.84 billion), recovered strongly by advertising revenue growth and continued expansion in Google Cloud.\n\n---\n\n### Summary Table (FY 2023)\n\n| Company | Fiscal Year End | Total Revenue (USD) |\n| :--- | :--- | :--- |\n| **Apple** | September 30, 2023 | $383.29 billion |\n| **Alphabet** | December 31, 2023 | $307.39 billion |\n| **Microsoft** | June 30, 2023 | $211.92 billion |\n| **Total Combined** | — | **$902.60 billion** |\n\n*(Data source: Respective SEC Form 10-K filings for fiscal year 2023).*"
+  },
+  {
+   "task": "R10",
+   "skill": "research",
+   "agent": "research-v2",
+   "model": "gemini-3.5-flash-lite",
+   "provider": "gemini",
+   "strategy": "plain",
+   "score": 0.533,
+   "deterministic": 0.333,
+   "checks": {
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "1/1 expected figures present"
+    },
+    "min_citations": {
+     "score": 0.0,
+     "detail": "0 distinct citation(s), need 1"
+    },
+    "has_sources": {
+     "score": 0.0,
+     "detail": "no source list"
+    }
+   },
+   "judge": {
+    "provider": "groq",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The response provides the exact 2023 net sales figure and cites the Amazon 2023 Annual Report (Form 10-K) as the source."
+   },
+   "latency_s": 1.62,
+   "error": null,
+   "infra_error": false,
+   "output": "According to Amazon's 2023 Annual Report (Form 10-K) filed with the SEC, Amazon's total net sales in **2023** were **$574.785 billion** (or approximately **$574.8 billion**), representing an increase of 12% compared to $513.983 billion in 2022."
+  },
+  {
+   "task": "D6",
+   "skill": "drafting",
+   "agent": "drafting-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "cited",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "citation_check_passed": {
+     "score": 1.0,
+     "detail": "citation check passed"
+    },
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "3/3 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "3 distinct citation(s), need 3"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "67 words (limit 450)"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The agent correctly mentions both survey figures for Everest with their respective citations, includes K2's height, and invents no information."
+   },
+   "latency_s": 3.39,
+   "error": null,
+   "infra_error": false,
+   "output": "### Height Summary  \n\n- Mount Everest was measured at **8,848.86 metres** in the 2020 joint China‑Nepal survey [1].  \n- The 1955 Survey of India recorded Everest’s height as **8,848 metres** [2].  \n- K2 is recorded at **8,611 metres** [3].  \n\n### Comparison  \n\nEverest’s height of **8,848.86 m** [1] (or **8,848 m** [2]) exceeds K2’s height of **8,611 m** [3]; consequently, Everest is the higher of the two peaks.\n\n---\nSources\n[1] Mount Everest (Wikipedia) - https://en.wikipedia.org/wiki/Mount_Everest\n[2] Survey of India 1955 Everest measurement - https://example.org/everest-1955-survey\n[3] K2 (Wikipedia) - https://en.wikipedia.org/wiki/K2\n\nCitation check: passed. 6 figure(s), all cited and found in the research; 3 source(s) cited."
+  },
+  {
+   "task": "D7",
+   "skill": "drafting",
+   "agent": "drafting-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "cited",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "citation_check_passed": {
+     "score": 1.0,
+     "detail": "citation check passed"
+    },
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "3/3 expected figures present"
+    },
+    "mentions_any": {
+     "score": 1.0,
+     "detail": "mentions 'not available'"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "93 words (limit 450)"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The agent explicitly and clearly stated that 2024 revenue data was not available in the provided research for all three companies without inventing any figures."
+   },
+   "latency_s": 1.51,
+   "error": null,
+   "infra_error": false,
+   "output": "## Revenue Summary (2022‑2024)\n\n### Tesla, Inc.\n- **2022:** Total revenue of **$81.46 billion** [1].  \n- **2023:** Total revenue of **$96.77 billion** [1].  \n- **2024:** Revenue data **not available** in the provided research.\n\n### Ford Motor Co.\n- **2022:** Total revenue of **$158.06 billion** [2].  \n- **2023:** Total revenue of **$176.19 billion** [2].  \n- **2024:** Revenue data **not available** in the provided research.\n\n### General Motors Co.\n- **2022:** Total revenue of **$156.74 billion** [3].  \n- **2023:** Total revenue of **$171.84 billion** [3].  \n- **2024:** Revenue data **not available** in the provided research.\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n[3] SEC EDGAR 10-K data: General Motors Co (GM) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001467858/us-gaap/Revenues.json\n\nCitation check: passed. 6 figure(s), all cited and found in the research; 3 source(s) cited."
+  },
+  {
+   "task": "D8",
+   "skill": "drafting",
+   "agent": "drafting-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "cited",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "citation_check_passed": {
+     "score": 1.0,
+     "detail": "citation check passed"
+    },
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "3/3 expected figures present"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "32 words (limit 90)"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The agent's summary is under 80 words, accurately reflects the 2023 revenue data provided in the context, and properly includes the required citations."
+   },
+   "latency_s": 1.51,
+   "error": null,
+   "infra_error": false,
+   "output": "## 2023 Revenue Summary\n- Tesla generated $96.77 billion in 2023 revenue [1].  \n- Ford recorded $176.19 billion in 2023 revenue [2].  \n- General Motors posted $171.84 billion in 2023 revenue [3].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n[3] SEC EDGAR 10-K data: General Motors Co (GM) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001467858/us-gaap/Revenues.json\n\nCitation check: passed. 3 figure(s), all cited and found in the research; 3 source(s) cited."
+  },
+  {
+   "task": "D9",
+   "skill": "drafting",
+   "agent": "drafting-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "cited",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "citation_check_passed": {
+     "score": 1.0,
+     "detail": "citation check passed"
+    },
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "2/2 expected figures present"
+    },
+    "forbidden_numbers": {
+     "score": 1.0,
+     "detail": "no forbidden figures"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "72 words (limit 450)"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The agent accurately provided both years' revenues from the research without stating a self-calculated growth figure as a fact."
+   },
+   "latency_s": 2.94,
+   "error": null,
+   "infra_error": false,
+   "output": "### Tesla Revenue Growth (2022‑2023)\n\n- **2022 Revenue:** Tesla reported total revenue of **$81.46 billion** in 2022 [1].  \n- **2023 Revenue:** Tesla reported total revenue of **$96.77 billion** in 2023 [1].\n\n**Growth Assessment**  \n- The research does not provide a direct dollar‑amount figure for the increase between 2022 and 2023 [1].  \n- Based on the reported values, Tesla’s revenue was higher in 2023 than in 2022, indicating a positive year‑over‑year change [1].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n\nCitation check: passed. 3 figure(s), all cited and found in the research; 1 source(s) cited."
+  },
+  {
+   "task": "D10",
+   "skill": "drafting",
+   "agent": "drafting-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "cited",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "citation_check_passed": {
+     "score": 1.0,
+     "detail": "citation check passed"
+    },
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "4/4 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "3 distinct citation(s), need 3"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "223 words (limit 450)"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The agent provided an accurate, well-cited financial profile comparing Tesla and Ford using only the provided research figures without inventing any data."
+   },
+   "latency_s": 5.36,
+   "error": null,
+   "infra_error": false,
+   "output": "## Tesla – 2023 Financial Profile  \n\n- **Revenue:** Tesla reported total revenue of **$96.77 billion** in 2023 and **$81.46 billion** in 2022 [1].  \n- **Net income:** The company posted net income of **$15.00 billion** for 2023 [2].  \n- **Gross margin:** Tesla’s gross margin was **18.2 %** in 2023, down from **25.6 %** in 2022 [2].  \n- **Vehicle deliveries:** **1.81 million** vehicles were delivered during 2023 [2].  \n- **Employees:** Tesla employed **140,473** people at year‑end 2023 [2].\n\n## Ford – 2023 Financial Profile  \n\n- **Revenue:** Ford recorded total revenue of **$176,191 million** (approximately **$176.19 billion**) in 2023 [3].  \n- **Net income:** Ford’s net income for 2023 was **$4.35 billion** [3].  \n- **Other metrics:** Data on gross margin, vehicle deliveries, and employee count for 2023 are not available in the provided research.\n\n## Comparative Overview  \n\n- **Revenue scale:** Ford’s 2023 revenue (**$176.19 billion**) was higher than Tesla’s (**$96.77 billion**) [1, 3].  \n- **Profitability:** Tesla’s net income (**$15.00 billion**) exceeded Ford’s net income (**$4.35 billion**) in 2023 [2, 3].  \n- **Margin performance:** Only Tesla’s gross margin is disclosed (18.2 % in 2023) [2]; Ford’s margin figure is not provided.  \n- **Operational volume:** Tesla delivered **1.81 million** vehicles in 2023 [2]; Ford’s vehicle delivery figure is not included.  \n- **Workforce size:** Tesla had **140,473** employees at the end of 2023 [2]; Ford’s employee count is not available.\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] Tesla 2023 results summary - https://example.org/tesla-2023-results\n[3] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n\nCitation check: passed. 18 figure(s), all cited and found in the research; 3 source(s) cited."
+  },
+  {
+   "task": "D6",
+   "skill": "drafting",
+   "agent": "drafting-v2",
+   "model": "qwen/qwen3.8-27b",
+   "provider": "groq",
+   "strategy": "cited",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "citation_check_passed": {
+     "score": 1.0,
+     "detail": "citation check passed"
+    },
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "3/3 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "3 distinct citation(s), need 3"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "107 words (limit 450)"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The agent correctly mentions both Everest surveys with their respective figures cited, includes K2, and invents no outside facts."
+   },
+   "latency_s": 2.42,
+   "error": null,
+   "infra_error": false,
+   "output": "### Height Comparison: Mount Everest and K2\n\nMount Everest is the highest mountain on Earth, with its elevation recorded at 8,848.86 metres according to a joint survey conducted by China and Nepal in 2020 [1]. An earlier measurement from the 1955 survey by the Survey of India placed the height at 8,848 metres [2].\n\nIn comparison, K2 stands at a height of 8,611 metres [3]. These figures indicate that Mount Everest is higher than K2 [1, 3].\n\n*   **Mount Everest:** 8,848.86 metres [1].\n*   **K2:** 8,611 metres [3].\n\nNo other altitude figures for K2 or additional historical surveys for Everest are available in the provided research context.\n\n---\nSources\n[1] Mount Everest (Wikipedia) - https://en.wikipedia.org/wiki/Mount_Everest\n[2] Survey of India 1955 Everest measurement - https://example.org/everest-1955-survey\n[3] K2 (Wikipedia) - https://en.wikipedia.org/wiki/K2\n\nCitation check: passed. 5 figure(s), all cited and found in the research; 3 source(s) cited."
+  },
+  {
+   "task": "D7",
+   "skill": "drafting",
+   "agent": "drafting-v2",
+   "model": "qwen/qwen3.8-27b",
+   "provider": "groq",
+   "strategy": "cited",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "citation_check_passed": {
+     "score": 1.0,
+     "detail": "citation check passed"
+    },
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "3/3 expected figures present"
+    },
+    "mentions_any": {
+     "score": 1.0,
+     "detail": "mentions 'not available'"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "205 words (limit 450)"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The report explicitly states that 2024 figures are not available in the provided research context, successfully avoiding any fabrication."
+   },
+   "latency_s": 2.66,
+   "error": null,
+   "infra_error": false,
+   "output": "# Automotive Revenue Report: Tesla, Ford, and GM\n\n## 2022 and 2023 Revenue Performance\nThis report outlines the total revenue generated by three major automotive manufacturers, Tesla, Ford, and General Motors, for the fiscal years 2022 and 2023.\n\n**Tesla** reported total revenue of $96.77 billion in 2023, an increase from $81.46 billion in 2022 [1].\n\n**Ford** reported total revenue of $176.19 billion in 2023, up from $158.06 billion in 2022 [2].\n\n**General Motors** reported total revenue of $171.84 billion in 2023, compared to $156.74 billion in 2022 [3].\n\n## 2024 Data Availability\nInformation regarding the total revenue for Tesla, Ford, and General Motors for the year 2024 is not available in the provided research context [1, 2, 3].\n\n## Summary Comparison\nIn both 2022 and 2023, Ford and General Motors reported significantly higher total revenue figures than Tesla [1, 2, 3]. Specifically, in 2023, Ford’s total revenue of $176.19 billion exceeded General Motors’ total revenue of $171.84 billion, while Tesla’s total revenue of $96.77 billion was the lowest among the three [1, 2, 3]. In 2022, General Motors’ total revenue of $156.74 billion was slightly below Ford’s total revenue of $158.06 billion, with Tesla’s total revenue of $81.46 billion being the lowest [1, 2, 3].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n[3] SEC EDGAR 10-K data: General Motors Co (GM) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001467858/us-gaap/Revenues.json\n\nCitation check: passed. 18 figure(s), all cited and found in the research; 3 source(s) cited."
+  },
+  {
+   "task": "D8",
+   "skill": "drafting",
+   "agent": "drafting-v2",
+   "model": "qwen/qwen3.8-27b",
+   "provider": "groq",
+   "strategy": "cited",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "citation_check_passed": {
+     "score": 1.0,
+     "detail": "citation check passed"
+    },
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "3/3 expected figures present"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "67 words (limit 90)"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The output is accurate, fully cited, includes the sources, and is under 80 words (counting the main text excluding the reference list, or even including it depending on strictness, but well within standard limits)."
+   },
+   "latency_s": 3.66,
+   "error": null,
+   "infra_error": false,
+   "output": "# 2023 Automotive Revenue Summary\n\nIn 2023, Ford Motor Co reported total revenue of $176.19 billion [2]. General Motors Co reported total revenue of $171.84 billion [3]. Tesla, Inc. reported total revenue of $96.77 billion [1].\n\n*   Ford and GM maintained comparable revenue levels, with Ford reporting higher figures than GM [2, 3].\n*   Tesla’s revenue was substantially lower than the other two companies [1, 2, 3].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n[3] SEC EDGAR 10-K data: General Motors Co (GM) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001467858/us-gaap/Revenues.json\n\nCitation check: passed. 4 figure(s), all cited and found in the research; 3 source(s) cited."
+  },
+  {
+   "task": "D9",
+   "skill": "drafting",
+   "agent": "drafting-v2",
+   "model": "qwen/qwen3.8-27b",
+   "provider": "groq",
+   "strategy": "cited",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "citation_check_passed": {
+     "score": 1.0,
+     "detail": "citation check passed"
+    },
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "2/2 expected figures present"
+    },
+    "forbidden_numbers": {
+     "score": 1.0,
+     "detail": "no forbidden figures"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "190 words (limit 450)"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The report correctly provides both years' revenues from the research without presenting a self-calculated growth figure as a fact."
+   },
+   "latency_s": 2.43,
+   "error": null,
+   "infra_error": false,
+   "output": "# Tesla Revenue Growth: 2022 to 2023\n\n## Revenue Overview\nTesla’s total revenue increased from $81.46 billion in 2022 to $96.77 billion in 2023 [1].\n\n## Growth Analysis\nThe magnitude of the revenue increase is available as the difference between the 2023 and 2022 figures reported in the research context [1]. The research provided does not contain specific percentage growth calculations, analyst projections, or forecasting data for this period.\n\n## Contextual Comparison\nWhile the primary focus is on Tesla, the provided research context includes revenue data for other major automakers for the same timeframe [2, 3].\n*   Ford Motor Company reported total revenue of $158.06 billion in 2022 and $176.19 billion in 2023 [2].\n*   General Motors reported total revenue of $156.74 billion in 2022 and $171.84 billion in 2023 [3].\n\n## Data Limitations\nSpecific breakdowns of Tesla’s revenue by segment (e.g., automotive vs. energy generation) are not available in the provided research context [1]. Additionally, detailed financial ratios, profit margins, or per-share metrics are not included in the supplied sources. All figures remain strictly limited to the total revenue entries cited from SEC EDGAR 10-K data [1, 2, 3].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n[3] SEC EDGAR 10-K data: General Motors Co (GM) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001467858/us-gaap/Revenues.json\n\nCitation check: passed. 6 figure(s), all cited and found in the research; 3 source(s) cited."
+  },
+  {
+   "task": "D10",
+   "skill": "drafting",
+   "agent": "drafting-v2",
+   "model": "qwen/qwen3.8-27b",
+   "provider": "groq",
+   "strategy": "cited",
+   "score": 0.825,
+   "deterministic": 0.75,
+   "checks": {
+    "citation_check_passed": {
+     "score": 0.0,
+     "detail": "citation check not passed"
+    },
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "4/4 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "3 distinct citation(s), need 3"
+    },
+    "max_words": {
+     "score": 1.0,
+     "detail": "268 words (limit 450)"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The agent provided an accurate, well-cited financial profile using only the provided research figures without inventing any data."
+   },
+   "latency_s": 4.68,
+   "error": null,
+   "infra_error": false,
+   "output": "# Financial Profile: Tesla vs. Ford (2023)\n\nThis report outlines the key financial metrics for Tesla and Ford in 2023, focusing on revenue, profitability, and operational scale.\n\n## Revenue Performance\nIn 2023, Ford generated higher total revenue than Tesla [1, 3]. Ford reported total revenue of $176,191 million in 2023 [3]. In contrast, Tesla reported total revenue of $96.77 billion in 2023 [1]. Tesla’s revenue increased from $81.46 billion in 2022 to $96.77 billion in 2023 [1].\n\n## Profitability\nTesla's gross margin was 18.2% in 2023, compared to 25.6% in 2022 [2]. Regarding net income, Tesla reported $15.00 billion in 2023 [2]. Ford’s net income for the same year was $4.35 billion [3].\n\n## Operational Scale\nTesla delivered 1.81 million vehicles in 2023 [2]. At year end, Tesla had 140,473 employees [2]. Employee and delivery figures for Ford in 2023 are not available in the provided research context.\n\n## Summary of 2023 Metrics\n\n| Metric | Tesla | Ford |\n| :--- | :--- | :--- |\n| **Total Revenue** | $96.77 billion [1] | $176,191 million [3] |\n| **Net Income** | $15.00 billion [2] | $4.35 billion [3] |\n| **Gross Margin** | 18.2% [2] | Not Available |\n| **Vehicles Delivered** | 1.81 million [2] | Not Available |\n| **Employees (Year End)** | 140,473 [2] | Not Available |\n\nTesla reported higher net income and defined operational metrics such as vehicle deliveries and employee counts, while Ford reported higher total revenue [1, 2, 3]. Detailed gross margin data for Ford and operational volume data for Ford were not present in the source materials [3].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] Tesla 2023 results summary - https://example.org/tesla-2023-results\n[3] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n\nCitation check: NOT fully passed. these sentences contain figures but no citation: This report outlines the key financial metrics for Tesla and Ford in 2023, focusing on revenue, profitability, and operational scale.."
+  },
+  {
+   "task": "C6",
+   "skill": "chart",
+   "agent": "chart-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "spec",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "5 point(s), max 5"
+    },
+    "chart_mark": {
+     "score": 1.0,
+     "detail": "chart type line, expected line"
+    }
+   },
+   "judge": null,
+   "latency_s": 1.48,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: Tesla Revenue Over Time (2019-2023)** (line)\n\n| Year | Series | Value (USD billions) |\n|---|---|---|\n| 2019 | Tesla | 24.58 |\n| 2020 | Tesla | 31.54 |\n| 2021 | Tesla | 53.82 |\n| 2022 | Tesla | 81.46 |\n| 2023 | Tesla | 96.77 |\n\nAll 5 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"Tesla Revenue Over Time (2019-2023)\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"2019\",\n    \"series\": \"Tesla\",\n    \"value\": 24.58\n   },\n   {\n    \"category\": \"2020\",\n    \"series\": \"Tesla\",\n    \"value\": 31.54\n   },\n   {\n    \"category\": \"2021\",\n    \"series\": \"Tesla\",\n    \"value\": 53.82\n   },\n   {\n    \"category\": \"2022\",\n    \"series\": \"Tesla\",\n    \"value\": 81.46\n   },\n   {\n    \"category\": \"2023\",\n    \"series\": \"Tesla\",\n    \"value\": 96.77\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"ordinal\",\n   \"title\": \"Year\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Revenue (USD billions)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Year\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Revenue (USD billions)\",\n    \"format\": \",.2f\"\n   }\n  ],\n  \"color\": {\n   \"field\": \"series\",\n   \"type\": \"nominal\",\n   \"title\": \"Series\"\n  }\n },\n \"mark\": {\n  \"type\": \"line\",\n  \"point\": true\n }\n}\n```"
+  },
+  {
+   "task": "C7",
+   "skill": "chart",
+   "agent": "chart-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "spec",
+   "score": 0.667,
+   "deterministic": 0.667,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "2 point(s), max 2"
+    },
+    "chart_consistent_scale": {
+     "score": 0.0,
+     "detail": "values [96.77, 176191.0] do not share one unit"
+    }
+   },
+   "judge": null,
+   "latency_s": 1.84,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: Tesla and Ford Revenue in 2023** (bar)\n\n| Company | Series | Value (USD) |\n|---|---|---|\n| Tesla | - | 96.77 |\n| Ford | - | 176,191 |\n\nAll 2 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"Tesla and Ford Revenue in 2023\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"Tesla\",\n    \"series\": \"Revenue\",\n    \"value\": 96.77\n   },\n   {\n    \"category\": \"Ford\",\n    \"series\": \"Revenue\",\n    \"value\": 176191\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"nominal\",\n   \"title\": \"Company\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Revenue (USD)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Company\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Revenue (USD)\",\n    \"format\": \",.2f\"\n   }\n  ]\n },\n \"mark\": {\n  \"type\": \"bar\"\n }\n}\n```"
+  },
+  {
+   "task": "C8",
+   "skill": "chart",
+   "agent": "chart-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "spec",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "2 point(s), max 2"
+    }
+   },
+   "judge": null,
+   "latency_s": 0.91,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: Tesla Gross Margin** (bar)\n\n| Year | Series | Value (%) |\n|---|---|---|\n| 2022 | - | 25.6 |\n| 2023 | - | 18.2 |\n\nAll 2 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"Tesla Gross Margin\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"2022\",\n    \"series\": \"Gross Margin\",\n    \"value\": 25.6\n   },\n   {\n    \"category\": \"2023\",\n    \"series\": \"Gross Margin\",\n    \"value\": 18.2\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"nominal\",\n   \"title\": \"Year\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Gross Margin (%)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Year\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Gross Margin (%)\",\n    \"format\": \",.2f\"\n   }\n  ]\n },\n \"mark\": {\n  \"type\": \"bar\"\n }\n}\n```"
+  },
+  {
+   "task": "C9",
+   "skill": "chart",
+   "agent": "chart-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "spec",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "6 point(s), max 6"
+    },
+    "chart_mark": {
+     "score": 1.0,
+     "detail": "chart type grouped_bar, expected grouped_bar"
+    }
+   },
+   "judge": null,
+   "latency_s": 1.69,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: Revenue of Tesla, Ford, and GM for 2022 and 2023** (grouped bar)\n\n| Company | Series | Value (USD billions) |\n|---|---|---|\n| Tesla | 2022 | 81.46 |\n| Tesla | 2023 | 96.77 |\n| Ford | 2022 | 158.06 |\n| Ford | 2023 | 176.19 |\n| General Motors | 2022 | 156.74 |\n| General Motors | 2023 | 171.84 |\n\nAll 6 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"Revenue of Tesla, Ford, and GM for 2022 and 2023\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"Tesla\",\n    \"series\": \"2022\",\n    \"value\": 81.46\n   },\n   {\n    \"category\": \"Tesla\",\n    \"series\": \"2023\",\n    \"value\": 96.77\n   },\n   {\n    \"category\": \"Ford\",\n    \"series\": \"2022\",\n    \"value\": 158.06\n   },\n   {\n    \"category\": \"Ford\",\n    \"series\": \"2023\",\n    \"value\": 176.19\n   },\n   {\n    \"category\": \"General Motors\",\n    \"series\": \"2022\",\n    \"value\": 156.74\n   },\n   {\n    \"category\": \"General Motors\",\n    \"series\": \"2023\",\n    \"value\": 171.84\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"nominal\",\n   \"title\": \"Company\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Revenue (USD billions)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Company\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Revenue (USD billions)\",\n    \"format\": \",.2f\"\n   }\n  ],\n  \"color\": {\n   \"field\": \"series\",\n   \"type\": \"nominal\",\n   \"title\": \"Series\"\n  },\n  \"xOffset\": {\n   \"field\": \"series\"\n  }\n },\n \"mark\": {\n  \"type\": \"bar\"\n }\n}\n```"
+  },
+  {
+   "task": "C10",
+   "skill": "chart",
+   "agent": "chart-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "spec",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "2 point(s), max 2"
+    },
+    "chart_consistent_scale": {
+     "score": 1.0,
+     "detail": "consistent unit (scale x1)"
+    }
+   },
+   "judge": null,
+   "latency_s": 1.01,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: Net Income 2023** (bar)\n\n| Company | Series | Value (USD billions) |\n|---|---|---|\n| Tesla | - | 15.0 |\n| Ford | - | 4.35 |\n\nAll 2 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"Net Income 2023\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"Tesla\",\n    \"series\": \"Net Income\",\n    \"value\": 15.0\n   },\n   {\n    \"category\": \"Ford\",\n    \"series\": \"Net Income\",\n    \"value\": 4.35\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"nominal\",\n   \"title\": \"Company\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Net Income (USD billions)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Company\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Net Income (USD billions)\",\n    \"format\": \",.2f\"\n   }\n  ]\n },\n \"mark\": {\n  \"type\": \"bar\"\n }\n}\n```"
+  },
+  {
+   "task": "C6",
+   "skill": "chart",
+   "agent": "chart-v2",
+   "model": "openai/gpt-oss-20b",
+   "provider": "groq",
+   "strategy": "spec",
+   "score": 0.667,
+   "deterministic": 0.667,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "5 point(s), max 5"
+    },
+    "chart_mark": {
+     "score": 0.0,
+     "detail": "chart type bar, expected line"
+    }
+   },
+   "judge": null,
+   "latency_s": 0.79,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: Tesla Revenue by Year** (bar)\n\n| Year | Series | Value (USD billions) |\n|---|---|---|\n| 2019 | - | 24.58 |\n| 2020 | - | 31.54 |\n| 2021 | - | 53.82 |\n| 2022 | - | 81.46 |\n| 2023 | - | 96.77 |\n\nAll 5 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"Tesla Revenue by Year\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"2019\",\n    \"series\": \"Revenue\",\n    \"value\": 24.58\n   },\n   {\n    \"category\": \"2020\",\n    \"series\": \"Revenue\",\n    \"value\": 31.54\n   },\n   {\n    \"category\": \"2021\",\n    \"series\": \"Revenue\",\n    \"value\": 53.82\n   },\n   {\n    \"category\": \"2022\",\n    \"series\": \"Revenue\",\n    \"value\": 81.46\n   },\n   {\n    \"category\": \"2023\",\n    \"series\": \"Revenue\",\n    \"value\": 96.77\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"nominal\",\n   \"title\": \"Year\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Revenue (USD billions)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Year\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Revenue (USD billions)\",\n    \"format\": \",.2f\"\n   }\n  ]\n },\n \"mark\": {\n  \"type\": \"bar\"\n }\n}\n```"
+  },
+  {
+   "task": "C7",
+   "skill": "chart",
+   "agent": "chart-v2",
+   "model": "openai/gpt-oss-20b",
+   "provider": "groq",
+   "strategy": "spec",
+   "score": 0.667,
+   "deterministic": 0.667,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "2 point(s), max 2"
+    },
+    "chart_consistent_scale": {
+     "score": 0.0,
+     "detail": "values [96.77, 176191.0] do not share one unit"
+    }
+   },
+   "judge": null,
+   "latency_s": 1.92,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: Tesla and Ford revenue in 2023** (bar)\n\n| Company | Series | Value (USD) |\n|---|---|---|\n| Tesla | - | 96.77 |\n| Ford | - | 176,191 |\n\nAll 2 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"Tesla and Ford revenue in 2023\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"Tesla\",\n    \"series\": \"Revenue\",\n    \"value\": 96.77\n   },\n   {\n    \"category\": \"Ford\",\n    \"series\": \"Revenue\",\n    \"value\": 176191\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"nominal\",\n   \"title\": \"Company\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Revenue (USD)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Company\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Revenue (USD)\",\n    \"format\": \",.2f\"\n   }\n  ]\n },\n \"mark\": {\n  \"type\": \"bar\"\n }\n}\n```"
+  },
+  {
+   "task": "C8",
+   "skill": "chart",
+   "agent": "chart-v2",
+   "model": "openai/gpt-oss-20b",
+   "provider": "groq",
+   "strategy": "spec",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "2 point(s), max 2"
+    }
+   },
+   "judge": null,
+   "latency_s": 0.79,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: Tesla Gross Margin** (bar)\n\n| Year | Series | Value (percent) |\n|---|---|---|\n| 2023 | - | 18.2 |\n| 2022 | - | 25.6 |\n\nAll 2 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"Tesla Gross Margin\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"2023\",\n    \"series\": \"Gross Margin (%)\",\n    \"value\": 18.2\n   },\n   {\n    \"category\": \"2022\",\n    \"series\": \"Gross Margin (%)\",\n    \"value\": 25.6\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"nominal\",\n   \"title\": \"Year\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Gross Margin (%) (percent)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Year\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Gross Margin (%) (percent)\",\n    \"format\": \",.2f\"\n   }\n  ]\n },\n \"mark\": {\n  \"type\": \"bar\"\n }\n}\n```"
+  },
+  {
+   "task": "C9",
+   "skill": "chart",
+   "agent": "chart-v2",
+   "model": "openai/gpt-oss-20b",
+   "provider": "groq",
+   "strategy": "spec",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "6 point(s), max 6"
+    },
+    "chart_mark": {
+     "score": 1.0,
+     "detail": "chart type grouped_bar, expected grouped_bar"
+    }
+   },
+   "judge": null,
+   "latency_s": 0.89,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: Revenue of Tesla, Ford, GM (2022-2023)** (grouped bar)\n\n| Company | Series | Value (USD billions) |\n|---|---|---|\n| Tesla | 2022 | 81.46 |\n| Tesla | 2023 | 96.77 |\n| Ford | 2022 | 158.06 |\n| Ford | 2023 | 176.19 |\n| GM | 2022 | 156.74 |\n| GM | 2023 | 171.84 |\n\nAll 6 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"Revenue of Tesla, Ford, GM (2022-2023)\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"Tesla\",\n    \"series\": \"2022\",\n    \"value\": 81.46\n   },\n   {\n    \"category\": \"Tesla\",\n    \"series\": \"2023\",\n    \"value\": 96.77\n   },\n   {\n    \"category\": \"Ford\",\n    \"series\": \"2022\",\n    \"value\": 158.06\n   },\n   {\n    \"category\": \"Ford\",\n    \"series\": \"2023\",\n    \"value\": 176.19\n   },\n   {\n    \"category\": \"GM\",\n    \"series\": \"2022\",\n    \"value\": 156.74\n   },\n   {\n    \"category\": \"GM\",\n    \"series\": \"2023\",\n    \"value\": 171.84\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"nominal\",\n   \"title\": \"Company\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Revenue (USD billions)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Company\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Revenue (USD billions)\",\n    \"format\": \",.2f\"\n   }\n  ],\n  \"color\": {\n   \"field\": \"series\",\n   \"type\": \"nominal\",\n   \"title\": \"Series\"\n  },\n  \"xOffset\": {\n   \"field\": \"series\"\n  }\n },\n \"mark\": {\n  \"type\": \"bar\"\n }\n}\n```"
+  },
+  {
+   "task": "C10",
+   "skill": "chart",
+   "agent": "chart-v2",
+   "model": "openai/gpt-oss-20b",
+   "provider": "groq",
+   "strategy": "spec",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "chart_points": {
+     "score": 1.0,
+     "detail": "recall 1.00, precision 1.00, extra points []"
+    },
+    "chart_max_points": {
+     "score": 1.0,
+     "detail": "2 point(s), max 2"
+    },
+    "chart_consistent_scale": {
+     "score": 1.0,
+     "detail": "consistent unit (scale x1)"
+    }
+   },
+   "judge": null,
+   "latency_s": 0.8,
+   "error": null,
+   "infra_error": false,
+   "output": "**Chart: 2023 Net Income of Tesla and Ford** (bar)\n\n| Company | Series | Value (USD billions) |\n|---|---|---|\n| Tesla | - | 15.0 |\n| Ford | - | 4.35 |\n\nAll 2 values were checked against the numbers in the research context.\n\n```vega-lite\n{\n \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n \"title\": \"2023 Net Income of Tesla and Ford\",\n \"width\": \"container\",\n \"height\": 260,\n \"data\": {\n  \"values\": [\n   {\n    \"category\": \"Tesla\",\n    \"series\": \"Net Income\",\n    \"value\": 15.0\n   },\n   {\n    \"category\": \"Ford\",\n    \"series\": \"Net Income\",\n    \"value\": 4.35\n   }\n  ]\n },\n \"encoding\": {\n  \"x\": {\n   \"field\": \"category\",\n   \"type\": \"nominal\",\n   \"title\": \"Company\",\n   \"sort\": null\n  },\n  \"y\": {\n   \"field\": \"value\",\n   \"type\": \"quantitative\",\n   \"title\": \"Net Income (USD billions)\"\n  },\n  \"tooltip\": [\n   {\n    \"field\": \"category\",\n    \"title\": \"Company\"\n   },\n   {\n    \"field\": \"series\",\n    \"title\": \"Series\"\n   },\n   {\n    \"field\": \"value\",\n    \"title\": \"Net Income (USD billions)\",\n    \"format\": \",.2f\"\n   }\n  ]\n },\n \"mark\": {\n  \"type\": \"bar\"\n }\n}\n```"
+  },
+  {
+   "task": "F6",
+   "skill": "fact_check",
+   "agent": "fact_check-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "verify",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "verdicts": {
+     "score": 1.0,
+     "detail": "verdicts ['contradicted', 'supported'] vs expected ['contradicted', 'supported']"
+    }
+   },
+   "judge": null,
+   "latency_s": 1.19,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fact check: 2 cited claim(s)** — 1 supported, 0 unsupported, 1 contradicted, 0 unverifiable. Each claim was checked against the source it cites.\n\n| # | Claim | Verdict | Evidence |\n|---|---|---|---|\n| 1 | Tesla's revenue was $97.69 billion in 2023 [1]. | ❌ contradicted | \"fiscal year ended 2023-12-31: $96.77 billion\" [1] — Evidence gives $96.77B, not $97.69B |\n| 2 | Ford's revenue was $176.19 billion in 2023 [2]. | ✅ supported | \"fiscal year ended 2023-12-31: $176.19 billion\" [2] — Evidence matches the claimed amount |\n\nClaims needing attention: #1."
+  },
+  {
+   "task": "F7",
+   "skill": "fact_check",
+   "agent": "fact_check-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "verify",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "verdicts": {
+     "score": 1.0,
+     "detail": "verdicts ['contradicted', 'supported'] vs expected ['contradicted', 'supported']"
+    }
+   },
+   "judge": null,
+   "latency_s": 1.11,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fact check: 2 cited claim(s)** — 1 supported, 0 unsupported, 1 contradicted, 0 unverifiable. Each claim was checked against the source it cites.\n\n| # | Claim | Verdict | Evidence |\n|---|---|---|---|\n| 1 | Ford's revenue was $158.06 billion in 2023 [1]. | ❌ contradicted | \"fiscal year ended 2023-12-31: $176.19 billion\" [1] — 2023 revenue differs from claimed $158.06B |\n| 2 | GM's revenue was $171.84 billion in 2023 [2]. | ✅ supported | \"fiscal year ended 2023-12-31: $171.84 billion\" [2] — Matches claimed 2023 revenue |\n\nClaims needing attention: #1."
+  },
+  {
+   "task": "F8",
+   "skill": "fact_check",
+   "agent": "fact_check-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "verify",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "verdicts": {
+     "score": 1.0,
+     "detail": "verdicts ['contradicted', 'supported'] vs expected ['contradicted', 'supported']"
+    }
+   },
+   "judge": null,
+   "latency_s": 1.05,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fact check: 2 cited claim(s)** — 1 supported, 0 unsupported, 1 contradicted, 0 unverifiable. Each claim was checked against the source it cites.\n\n| # | Claim | Verdict | Evidence |\n|---|---|---|---|\n| 1 | Apple's fiscal 2023 net sales were $383.29 million [1]. | ❌ contradicted | \"fiscal year ended 2023-09-30: $383.29 billion\" [1] — Evidence states billions, not millions. |\n| 2 | Microsoft's fiscal 2023 revenue was $211.92 billion [2]. | ✅ supported | \"fiscal year ended 2023-06-30: $211.92 billion\" [2] — Exact match with evidence. |\n\nClaims needing attention: #1."
+  },
+  {
+   "task": "F9",
+   "skill": "fact_check",
+   "agent": "fact_check-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "verify",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "verdicts": {
+     "score": 1.0,
+     "detail": "verdicts ['supported', 'supported'] vs expected ['supported', 'supported']"
+    }
+   },
+   "judge": null,
+   "latency_s": 1.06,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fact check: 2 cited claim(s)** — 2 supported, 0 unsupported, 0 contradicted, 0 unverifiable. Each claim was checked against the source it cites.\n\n| # | Claim | Verdict | Evidence |\n|---|---|---|---|\n| 1 | Microsoft's fiscal 2023 revenue was about $212 billion [2]. | ✅ supported | \"fiscal year ended 2023-06-30: $211.92 billion\" [2] — rounded to about $212B |\n| 2 | Apple's net sales were lower in fiscal 2023 than in fiscal 2022 [1]. | ✅ supported | \"$383.29 billion; ... $394.33 billion\" [1] — 2023 amount is lower than 2022 |"
+  },
+  {
+   "task": "F10",
+   "skill": "fact_check",
+   "agent": "fact_check-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "verify",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "verdicts": {
+     "score": 1.0,
+     "detail": "verdicts ['supported', 'unsupported'] vs expected ['supported', 'unsupported']"
+    }
+   },
+   "judge": null,
+   "latency_s": 0.62,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fact check: 2 cited claim(s)** — 1 supported, 1 unsupported, 0 contradicted, 0 unverifiable. Each claim was checked against the source it cites.\n\n| # | Claim | Verdict | Evidence |\n|---|---|---|---|\n| 1 | Mount Everest is 8,848.86 metres high [1]. | ✅ supported | \"height of 8,848.86 m\" [1] — Exact height matches claim |\n| 2 | K2 is 8,611 metres high [1]. | ⚠️ unsupported | [1] — Evidence contains no information about K2 |\n\nClaims needing attention: #2."
+  },
+  {
+   "task": "F6",
+   "skill": "fact_check",
+   "agent": "fact_check-v2",
+   "model": "gemini-3.1-flash-lite",
+   "provider": "gemini",
+   "strategy": "verify",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "verdicts": {
+     "score": 1.0,
+     "detail": "verdicts ['contradicted', 'supported'] vs expected ['contradicted', 'supported']"
+    }
+   },
+   "judge": null,
+   "latency_s": 4.95,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fact check: 2 cited claim(s)** — 1 supported, 0 unsupported, 1 contradicted, 0 unverifiable. Each claim was checked against the source it cites.\n\n| # | Claim | Verdict | Evidence |\n|---|---|---|---|\n| 1 | Tesla's revenue was $97.69 billion in 2023 [1]. | ❌ contradicted | \"fiscal year ended 2023-12-31: $96.77 billion\" [1] — evidence shows $96.77B, not $97.69B |\n| 2 | Ford's revenue was $176.19 billion in 2023 [2]. | ✅ supported | \"fiscal year ended 2023-12-31: $176.19 billion\" [2] — evidence matches claim |\n\nClaims needing attention: #1."
+  },
+  {
+   "task": "F7",
+   "skill": "fact_check",
+   "agent": "fact_check-v2",
+   "model": "gemini-3.1-flash-lite",
+   "provider": "gemini",
+   "strategy": "verify",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "verdicts": {
+     "score": 1.0,
+     "detail": "verdicts ['contradicted', 'supported'] vs expected ['contradicted', 'supported']"
+    }
+   },
+   "judge": null,
+   "latency_s": 26.25,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fact check: 2 cited claim(s)** — 1 supported, 0 unsupported, 1 contradicted, 0 unverifiable. Each claim was checked against the source it cites.\n\n| # | Claim | Verdict | Evidence |\n|---|---|---|---|\n| 1 | Ford's revenue was $158.06 billion in 2023 [1]. | ❌ contradicted | \"fiscal year ended 2023-12-31: $176.19 billion\" [1] — Evidence gives 2023 revenue $176.19B, not $158.06B |\n| 2 | GM's revenue was $171.84 billion in 2023 [2]. | ✅ supported | \"fiscal year ended 2023-12-31: $171.84 billion\" [2] — Evidence matches claimed 2023 revenue |\n\nClaims needing attention: #1."
+  },
+  {
+   "task": "F8",
+   "skill": "fact_check",
+   "agent": "fact_check-v2",
+   "model": "gemini-3.1-flash-lite",
+   "provider": "gemini",
+   "strategy": "verify",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "verdicts": {
+     "score": 1.0,
+     "detail": "verdicts ['contradicted', 'supported'] vs expected ['contradicted', 'supported']"
+    }
+   },
+   "judge": null,
+   "latency_s": 11.4,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fact check: 2 cited claim(s)** — 1 supported, 0 unsupported, 1 contradicted, 0 unverifiable. Each claim was checked against the source it cites.\n\n| # | Claim | Verdict | Evidence |\n|---|---|---|---|\n| 1 | Apple's fiscal 2023 net sales were $383.29 million [1]. | ❌ contradicted | \"$383.29 billion\" [1] — The evidence specifies billion, not million. |\n| 2 | Microsoft's fiscal 2023 revenue was $211.92 billion [2]. | ✅ supported | \"$211.92 billion\" [2] — The claim matches the evidence provided. |\n\nClaims needing attention: #1."
+  },
+  {
+   "task": "F9",
+   "skill": "fact_check",
+   "agent": "fact_check-v2",
+   "model": "gemini-3.1-flash-lite",
+   "provider": "gemini",
+   "strategy": "verify",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "verdicts": {
+     "score": 1.0,
+     "detail": "verdicts ['supported', 'supported'] vs expected ['supported', 'supported']"
+    }
+   },
+   "judge": null,
+   "latency_s": 26.2,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fact check: 2 cited claim(s)** — 2 supported, 0 unsupported, 0 contradicted, 0 unverifiable. Each claim was checked against the source it cites.\n\n| # | Claim | Verdict | Evidence |\n|---|---|---|---|\n| 1 | Microsoft's fiscal 2023 revenue was about $212 billion [2]. | ✅ supported | \"fiscal year ended 2023-06-30: $211.92 billion\" [2] — ~$212B matches claim |\n| 2 | Apple's net sales were lower in fiscal 2023 than in fiscal 2022 [1]. | ✅ supported | \"fiscal year ended 2023-09-30: $383.29 billion; fiscal year ended 2022-09-24: $394.33 billion\" [1] — 2023 amount lower than 2022 |"
+  },
+  {
+   "task": "F10",
+   "skill": "fact_check",
+   "agent": "fact_check-v2",
+   "model": "gemini-3.1-flash-lite",
+   "provider": "gemini",
+   "strategy": "verify",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "verdicts": {
+     "score": 1.0,
+     "detail": "verdicts ['supported', 'unsupported'] vs expected ['supported', 'unsupported']"
+    }
+   },
+   "judge": null,
+   "latency_s": 2.82,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fact check: 2 cited claim(s)** — 1 supported, 1 unsupported, 0 contradicted, 0 unverifiable. Each claim was checked against the source it cites.\n\n| # | Claim | Verdict | Evidence |\n|---|---|---|---|\n| 1 | Mount Everest is 8,848.86 metres high [1]. | ✅ supported | \"In 2020 China and Nepal announced a height of 8,848.86 m.\" [1] — The evidence explicitly confirms this height. |\n| 2 | K2 is 8,611 metres high [1]. | ⚠️ unsupported | [1] — The provided evidence does not mention the height of K2. |\n\nClaims needing attention: #2."
+  }
+ ]
+}

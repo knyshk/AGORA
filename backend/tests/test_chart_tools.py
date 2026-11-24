@@ -114,3 +114,31 @@ async def test_build_chart_ignores_upstream_chart_json():
     with patch.object(ct, "run_agent", new=AsyncMock(return_value=raw)):
         with pytest.raises(ChartError):
             await ct.build_chart(upstream)
+
+
+MIXED = "Tesla revenue was $96.77 billion in 2023 [1]. Ford revenue was $176,191 million in 2023 [2]. Everest is 8,848.86 m high."
+
+
+def test_context_quantities_apply_unit_words_but_not_metres():
+    from agents.grounding import context_quantities
+    q = context_quantities(MIXED + " Apple made $383.3B.")
+    assert pytest.approx(96.77e9) in q and pytest.approx(176.191e9) in q and pytest.approx(383.3e9) in q
+    assert pytest.approx(8848.86) in q
+
+
+def test_shared_unit_detects_mixed_units():
+    from agents.grounding import shared_unit
+    assert shared_unit([96.77, 176.19], MIXED)[0] == 1e9
+    assert shared_unit([96770, 176191], MIXED)[0] == 1e6
+    assert shared_unit([96.77, 176191], MIXED)[0] is None
+    assert shared_unit([8848.86], MIXED)[0] == 1.0
+
+
+async def test_build_chart_rejects_mixed_units_then_accepts_conversion():
+    mixed = {**GOOD, "data": [{"category": "Tesla", "value": 96.77}, {"category": "Ford", "value": 176191}]}
+    fixed = {**GOOD, "data": [{"category": "Tesla", "value": 96.77}, {"category": "Ford", "value": 176.19}]}
+    with patch.object(ct, "run_agent", new=AsyncMock(side_effect=[json.dumps(mixed), json.dumps(fixed)])) as llm:
+        out = await ct.build_chart(MIXED)
+    retry = llm.await_args_list[1].args[1]
+    assert "mix units" in retry and "millions" in retry and "billions" in retry
+    assert [v["value"] for v in _spec_from(out)["data"]["values"]] == [96.77, 176.19]

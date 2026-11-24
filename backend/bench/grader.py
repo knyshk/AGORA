@@ -84,6 +84,50 @@ def check_chart_points(output, expected):
     return recall * precision, f"recall {recall:.2f}, precision {precision:.2f}, extra points {extra}"
 
 
+def chart_spec(output):
+    m = re.search(r"```vega-lite\s*(.*?)```", output, flags=re.S)
+    try:
+        return json.loads(m.group(1)) if m else None
+    except ValueError:
+        return None
+
+
+def check_chart_mark(output, expected):
+    spec = chart_spec(output)
+    if not spec:
+        return 0.0, "no chart spec"
+    mark = spec.get("mark", {}).get("type")
+    kind = "line" if mark == "line" else ("grouped_bar" if "xOffset" in spec.get("encoding", {}) else "bar")
+    return float(kind == expected), f"chart type {kind}, expected {expected}"
+
+
+def check_chart_consistent_scale(output, expected):
+    """All values must use ONE unit: a single scale factor must map every expected value to the chart."""
+    values = chart_values(output)
+    if not values:
+        return 0.0, "no chart spec"
+    for e0 in expected:
+        for v0 in values:
+            if not e0:
+                continue
+            scale = v0 / e0
+            if all(any(abs(v - e * scale) <= 0.01 * abs(e * scale) for v in values) for e in expected):
+                return 1.0, f"consistent unit (scale x{scale:g})"
+    return 0.0, f"values {values} do not share one unit"
+
+
+def check_mentions_any(output, phrases):
+    low = output.lower()
+    hit = next((p for p in phrases if p in low), None)
+    return float(hit is not None), f"mentions '{hit}'" if hit else "none of the expected phrases"
+
+
+def check_forbidden_numbers(output, forbidden):
+    nums = context_numbers(_body(output))
+    found = [f for f in forbidden if any(abs(n - f) <= 0.005 * abs(f) for n in nums)]
+    return (0.0 if found else 1.0), f"forbidden figures present: {found}" if found else "no forbidden figures"
+
+
 def check_chart_max_points(output, n):
     values = chart_values(output) or []
     return float(0 < len(values) <= n), f"{len(values)} point(s), max {n}"
@@ -111,6 +155,8 @@ CHECKS = {
     "has_sources": check_has_sources, "citation_check_passed": check_citation_check_passed,
     "max_words": check_max_words, "mentions": check_mentions, "chart_points": check_chart_points,
     "chart_max_points": check_chart_max_points, "verdicts": check_verdicts,
+    "chart_mark": check_chart_mark, "chart_consistent_scale": check_chart_consistent_scale,
+    "mentions_any": check_mentions_any, "forbidden_numbers": check_forbidden_numbers,
 }
 
 

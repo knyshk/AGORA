@@ -1,7 +1,7 @@
 {
  "name": "AGORA-Bench",
- "version": 1,
- "description": "20 tasks, 5 per skill. Research tasks are live (web + SEC); drafting, chart and fact-check tasks use frozen inputs so every agent is graded on identical data.",
+ "version": 2,
+ "description": "40 tasks, 10 per skill, in two tiers: core (basic) and hard (failure modes: mixed units, distractors, near-miss numbers, wrong year, wrong citation, missing data, no SEC data). Research tasks are live; others use frozen inputs.",
  "tasks": [
   {
    "id": "R1",
@@ -14,7 +14,8 @@
     "min_citations": 1,
     "has_sources": true
    },
-   "rubric": "Does the answer state Tesla's 2023 total revenue and cite a source for it?"
+   "rubric": "Does the answer state Tesla's 2023 total revenue and cite a source for it?",
+   "tier": "core"
   },
   {
    "id": "R2",
@@ -27,7 +28,8 @@
     "min_citations": 1,
     "has_sources": true
    },
-   "rubric": "Does the answer state Apple's fiscal 2023 net sales and cite a source?"
+   "rubric": "Does the answer state Apple's fiscal 2023 net sales and cite a source?",
+   "tier": "core"
   },
   {
    "id": "R3",
@@ -40,7 +42,8 @@
     "min_citations": 1,
     "has_sources": true
    },
-   "rubric": "Does the answer state Microsoft's fiscal 2023 revenue and cite a source?"
+   "rubric": "Does the answer state Microsoft's fiscal 2023 revenue and cite a source?",
+   "tier": "core"
   },
   {
    "id": "R4",
@@ -54,7 +57,8 @@
     "min_citations": 2,
     "has_sources": true
    },
-   "rubric": "Does the answer give both Ford's and GM's 2023 revenue, each with a source?"
+   "rubric": "Does the answer give both Ford's and GM's 2023 revenue, each with a source?",
+   "tier": "core"
   },
   {
    "id": "R5",
@@ -68,7 +72,8 @@
     "min_citations": 1,
     "has_sources": true
    },
-   "rubric": "Does the answer give Tesla's revenue for both 2022 and 2023 with sources?"
+   "rubric": "Does the answer give Tesla's revenue for both 2022 and 2023 with sources?",
+   "tier": "core"
   },
   {
    "id": "D1",
@@ -85,7 +90,8 @@
     "min_citations": 3,
     "max_words": 450
    },
-   "rubric": "Is this a clear, accurate comparison of the three companies' revenue that only uses the given research?"
+   "rubric": "Is this a clear, accurate comparison of the three companies' revenue that only uses the given research?",
+   "tier": "core"
   },
   {
    "id": "D2",
@@ -101,7 +107,8 @@
     "min_citations": 2,
     "max_words": 450
    },
-   "rubric": "Is this a clear, accurate comparison of Apple and Microsoft revenue that only uses the given research?"
+   "rubric": "Is this a clear, accurate comparison of Apple and Microsoft revenue that only uses the given research?",
+   "tier": "core"
   },
   {
    "id": "D3",
@@ -117,7 +124,8 @@
      "2008"
     ]
    },
-   "rubric": "Is this a clear, accurate short history that only uses the given research and invents nothing?"
+   "rubric": "Is this a clear, accurate short history that only uses the given research and invents nothing?",
+   "tier": "core"
   },
   {
    "id": "D4",
@@ -135,7 +143,8 @@
      "1889"
     ]
    },
-   "rubric": "Is this a clear, accurate description that only uses the given research and invents nothing?"
+   "rubric": "Is this a clear, accurate description that only uses the given research and invents nothing?",
+   "tier": "core"
   },
   {
    "id": "D5",
@@ -151,7 +160,8 @@
     "min_citations": 2,
     "max_words": 450
    },
-   "rubric": "Is this a clear, accurate comparison that only uses the given research and invents nothing?"
+   "rubric": "Is this a clear, accurate comparison that only uses the given research and invents nothing?",
+   "tier": "core"
   },
   {
    "id": "C1",
@@ -164,7 +174,8 @@
      96.77
     ],
     "chart_max_points": 2
-   }
+   },
+   "tier": "core"
   },
   {
    "id": "C2",
@@ -178,7 +189,8 @@
      171.84
     ],
     "chart_max_points": 3
-   }
+   },
+   "tier": "core"
   },
   {
    "id": "C3",
@@ -193,7 +205,8 @@
      198270
     ],
     "chart_max_points": 4
-   }
+   },
+   "tier": "core"
   },
   {
    "id": "C4",
@@ -206,7 +219,8 @@
      8611
     ],
     "chart_max_points": 2
-   }
+   },
+   "tier": "core"
   },
   {
    "id": "C5",
@@ -221,7 +235,8 @@
     ],
     "chart_max_points": 3
    },
-   "note": "Stellantis is not in the research: the agent must not invent it"
+   "note": "Stellantis is not in the research: the agent must not invent it",
+   "tier": "core"
   },
   {
    "id": "F1",
@@ -237,7 +252,8 @@
      "supported",
      "contradicted"
     ]
-   }
+   },
+   "tier": "core"
   },
   {
    "id": "F2",
@@ -252,7 +268,8 @@
      "supported",
      "contradicted"
     ]
-   }
+   },
+   "tier": "core"
   },
   {
    "id": "F3",
@@ -267,7 +284,8 @@
      "supported",
      "unsupported"
     ]
-   }
+   },
+   "tier": "core"
   },
   {
    "id": "F4",
@@ -284,7 +302,8 @@
      "supported",
      "unsupported"
     ]
-   }
+   },
+   "tier": "core"
   },
   {
    "id": "F5",
@@ -301,7 +320,364 @@
      "contradicted",
      "supported"
     ]
-   }
+   },
+   "tier": "core"
+  },
+  {
+   "id": "R6",
+   "skill": "research",
+   "task": "Nvidia total revenue for fiscal year 2024 (ended January 2024)",
+   "checks": {
+    "contains_numbers": [
+     60.92
+    ],
+    "min_citations": 1,
+    "has_sources": true
+   },
+   "rubric": "Does the answer give Nvidia's revenue for the fiscal year that ended in January 2024 (not calendar 2024) with a source?",
+   "tier": "hard"
+  },
+  {
+   "id": "R7",
+   "skill": "research",
+   "task": "Tesla total revenue and net income in 2023",
+   "checks": {
+    "contains_numbers": [
+     96.77,
+     15.0
+    ],
+    "min_citations": 1,
+    "has_sources": true
+   },
+   "rubric": "Does the answer give both Tesla's 2023 revenue and its 2023 net income, each with a source?",
+   "tier": "hard"
+  },
+  {
+   "id": "R8",
+   "skill": "research",
+   "task": "Toyota total revenue for the fiscal year ended March 2024",
+   "checks": {
+    "contains_numbers": [
+     45.1
+    ],
+    "min_citations": 1,
+    "has_sources": true
+   },
+   "rubric": "Does the answer give Toyota's revenue for the fiscal year ended March 2024 (about 45 trillion yen) with a source?",
+   "note": "Toyota is not an SEC 10-K filer: web sources only",
+   "tier": "hard"
+  },
+  {
+   "id": "R9",
+   "skill": "research",
+   "task": "Apple, Microsoft and Alphabet total revenue for fiscal year 2023",
+   "checks": {
+    "contains_numbers": [
+     383.29,
+     211.92,
+     307.39
+    ],
+    "min_citations": 2,
+    "has_sources": true
+   },
+   "rubric": "Does the answer give all three companies' fiscal 2023 revenue, each with a source?",
+   "tier": "hard"
+  },
+  {
+   "id": "R10",
+   "skill": "research",
+   "task": "Amazon total net sales in 2023",
+   "checks": {
+    "contains_numbers": [
+     574.79
+    ],
+    "min_citations": 1,
+    "has_sources": true
+   },
+   "rubric": "Does the answer give Amazon's 2023 net sales with a source?",
+   "tier": "hard"
+  },
+  {
+   "id": "D6",
+   "skill": "drafting",
+   "task": "Write a short note on the height of Mount Everest compared with K2",
+   "context": "The 2020 survey by China and Nepal measured Mount Everest at 8,848.86 metres [1]. An earlier 1955 survey by the Survey of India gave a height of 8,848 metres [2]. K2 is 8,611 metres high [3].\n\n---\nSources\n[1] Mount Everest (Wikipedia) - https://en.wikipedia.org/wiki/Mount_Everest\n[2] Survey of India 1955 Everest measurement - https://example.org/everest-1955-survey\n[3] K2 (Wikipedia) - https://en.wikipedia.org/wiki/K2",
+   "checks": {
+    "citation_check_passed": true,
+    "contains_numbers": [
+     8848.86,
+     8848,
+     8611
+    ],
+    "min_citations": 3,
+    "max_words": 450
+   },
+   "rubric": "Does the note mention that the two surveys give different Everest heights, with each figure cited, and invent nothing?",
+   "tier": "hard"
+  },
+  {
+   "id": "D7",
+   "skill": "drafting",
+   "task": "Write a short report on Tesla, Ford and GM revenue in 2022, 2023 and 2024",
+   "context": "Tesla reported total revenue of $81.46 billion in 2022 and $96.77 billion in 2023 [1]. Ford reported total revenue of $158.06 billion in 2022 and $176.19 billion in 2023 [2]. General Motors reported total revenue of $156.74 billion in 2022 and $171.84 billion in 2023 [3].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n[3] SEC EDGAR 10-K data: General Motors Co (GM) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001467858/us-gaap/Revenues.json",
+   "checks": {
+    "citation_check_passed": true,
+    "contains_numbers": [
+     96.77,
+     176.19,
+     171.84
+    ],
+    "mentions_any": [
+     "not available",
+     "not provided",
+     "not included",
+     "not in the research",
+     "no data",
+     "not contain",
+     "does not include",
+     "not reported",
+     "unavailable"
+    ],
+    "max_words": 450
+   },
+   "rubric": "Does the report say clearly that 2024 figures are not in the research instead of inventing them?",
+   "tier": "hard"
+  },
+  {
+   "id": "D8",
+   "skill": "drafting",
+   "task": "In under 80 words, summarise Tesla, Ford and GM revenue in 2023",
+   "context": "Tesla reported total revenue of $81.46 billion in 2022 and $96.77 billion in 2023 [1]. Ford reported total revenue of $158.06 billion in 2022 and $176.19 billion in 2023 [2]. General Motors reported total revenue of $156.74 billion in 2022 and $171.84 billion in 2023 [3].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n[3] SEC EDGAR 10-K data: General Motors Co (GM) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001467858/us-gaap/Revenues.json",
+   "checks": {
+    "citation_check_passed": true,
+    "contains_numbers": [
+     96.77,
+     176.19,
+     171.84
+    ],
+    "max_words": 90
+   },
+   "rubric": "Is the summary under 80 words, accurate and cited?",
+   "tier": "hard"
+  },
+  {
+   "id": "D9",
+   "skill": "drafting",
+   "task": "Write how much Tesla's revenue grew from 2022 to 2023",
+   "context": "Tesla reported total revenue of $81.46 billion in 2022 and $96.77 billion in 2023 [1]. Ford reported total revenue of $158.06 billion in 2022 and $176.19 billion in 2023 [2]. General Motors reported total revenue of $156.74 billion in 2022 and $171.84 billion in 2023 [3].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n[3] SEC EDGAR 10-K data: General Motors Co (GM) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001467858/us-gaap/Revenues.json",
+   "checks": {
+    "citation_check_passed": true,
+    "contains_numbers": [
+     81.46,
+     96.77
+    ],
+    "forbidden_numbers": [
+     15.31,
+     18.8,
+     18.79
+    ],
+    "max_words": 450
+   },
+   "rubric": "Does the report give both years' revenue from the research without presenting a self-calculated growth figure as a fact?",
+   "note": "tests the rule: never calculate new figures",
+   "tier": "hard"
+  },
+  {
+   "id": "D10",
+   "skill": "drafting",
+   "task": "Write a short financial profile of Tesla in 2023 compared with Ford",
+   "context": "Tesla reported total revenue of $96.77 billion in 2023 and $81.46 billion in 2022 [1]. Tesla's net income was $15.00 billion in 2023 [2]. Tesla delivered 1.81 million vehicles in 2023 and had 140,473 employees at year end [2]. Tesla's gross margin was 18.2% in 2023 and 25.6% in 2022 [2]. Ford reported total revenue of $176,191 million in 2023 [3]. Ford's net income was $4.35 billion in 2023 [3].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] Tesla 2023 results summary - https://example.org/tesla-2023-results\n[3] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json",
+   "checks": {
+    "citation_check_passed": true,
+    "contains_numbers": [
+     96.77,
+     15.0,
+     176.19,
+     4.35
+    ],
+    "min_citations": 3,
+    "max_words": 450
+   },
+   "rubric": "Is this an accurate, well-cited profile that uses the research figures correctly (revenue vs net income vs margin) and invents nothing?",
+   "tier": "hard"
+  },
+  {
+   "id": "C6",
+   "skill": "chart",
+   "task": "Chart Tesla's revenue over time from 2019 to 2023",
+   "context": "Tesla total revenue by year: $24.58 billion in 2019, $31.54 billion in 2020, $53.82 billion in 2021, $81.46 billion in 2022 and $96.77 billion in 2023 [1].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json",
+   "checks": {
+    "chart_points": [
+     24.58,
+     31.54,
+     53.82,
+     81.46,
+     96.77
+    ],
+    "chart_max_points": 5,
+    "chart_mark": "line"
+   },
+   "tier": "hard"
+  },
+  {
+   "id": "C7",
+   "skill": "chart",
+   "task": "Chart Tesla and Ford revenue in 2023",
+   "context": "Tesla reported total revenue of $96.77 billion in 2023 and $81.46 billion in 2022 [1]. Tesla's net income was $15.00 billion in 2023 [2]. Tesla delivered 1.81 million vehicles in 2023 and had 140,473 employees at year end [2]. Tesla's gross margin was 18.2% in 2023 and 25.6% in 2022 [2]. Ford reported total revenue of $176,191 million in 2023 [3]. Ford's net income was $4.35 billion in 2023 [3].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] Tesla 2023 results summary - https://example.org/tesla-2023-results\n[3] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json",
+   "checks": {
+    "chart_points": [
+     96.77,
+     176.19
+    ],
+    "chart_max_points": 2,
+    "chart_consistent_scale": [
+     96.77,
+     176.19
+    ]
+   },
+   "note": "distractor numbers (net income, deliveries, employees, margins); Ford is in millions, Tesla in billions",
+   "tier": "hard"
+  },
+  {
+   "id": "C8",
+   "skill": "chart",
+   "task": "Chart Tesla's gross margin in 2022 and 2023",
+   "context": "Tesla reported total revenue of $96.77 billion in 2023 and $81.46 billion in 2022 [1]. Tesla's net income was $15.00 billion in 2023 [2]. Tesla delivered 1.81 million vehicles in 2023 and had 140,473 employees at year end [2]. Tesla's gross margin was 18.2% in 2023 and 25.6% in 2022 [2]. Ford reported total revenue of $176,191 million in 2023 [3]. Ford's net income was $4.35 billion in 2023 [3].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] Tesla 2023 results summary - https://example.org/tesla-2023-results\n[3] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json",
+   "checks": {
+    "chart_points": [
+     25.6,
+     18.2
+    ],
+    "chart_max_points": 2
+   },
+   "tier": "hard"
+  },
+  {
+   "id": "C9",
+   "skill": "chart",
+   "task": "Chart revenue of Tesla, Ford and GM for 2022 and 2023 side by side",
+   "context": "Tesla reported total revenue of $81.46 billion in 2022 and $96.77 billion in 2023 [1]. Ford reported total revenue of $158.06 billion in 2022 and $176.19 billion in 2023 [2]. General Motors reported total revenue of $156.74 billion in 2022 and $171.84 billion in 2023 [3].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n[3] SEC EDGAR 10-K data: General Motors Co (GM) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001467858/us-gaap/Revenues.json",
+   "checks": {
+    "chart_points": [
+     81.46,
+     96.77,
+     158.06,
+     176.19,
+     156.74,
+     171.84
+    ],
+    "chart_max_points": 6,
+    "chart_mark": "grouped_bar"
+   },
+   "tier": "hard"
+  },
+  {
+   "id": "C10",
+   "skill": "chart",
+   "task": "Chart Tesla's net income and Ford's net income in 2023",
+   "context": "Tesla reported total revenue of $96.77 billion in 2023 and $81.46 billion in 2022 [1]. Tesla's net income was $15.00 billion in 2023 [2]. Tesla delivered 1.81 million vehicles in 2023 and had 140,473 employees at year end [2]. Tesla's gross margin was 18.2% in 2023 and 25.6% in 2022 [2]. Ford reported total revenue of $176,191 million in 2023 [3]. Ford's net income was $4.35 billion in 2023 [3].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] Tesla 2023 results summary - https://example.org/tesla-2023-results\n[3] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json",
+   "checks": {
+    "chart_points": [
+     15.0,
+     4.35
+    ],
+    "chart_max_points": 2,
+    "chart_consistent_scale": [
+     15.0,
+     4.35
+    ]
+   },
+   "tier": "hard"
+  },
+  {
+   "id": "F6",
+   "skill": "fact_check",
+   "task": "Fact-check the revenue note",
+   "context": "Tesla's revenue was $97.69 billion in 2023 [1]. Ford's revenue was $176.19 billion in 2023 [2].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n\nCitation check: passed.",
+   "source_texts": {
+    "https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json": "Official annual revenue from 10-K filings: fiscal year ended 2023-12-31: $96.77 billion; fiscal year ended 2022-12-31: $81.46 billion",
+    "https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json": "Official annual revenue from 10-K filings: fiscal year ended 2023-12-31: $176.19 billion; fiscal year ended 2022-12-31: $158.06 billion"
+   },
+   "checks": {
+    "verdicts": [
+     "contradicted",
+     "supported"
+    ]
+   },
+   "note": "97.69 vs 96.77: digits swapped",
+   "tier": "hard"
+  },
+  {
+   "id": "F7",
+   "skill": "fact_check",
+   "task": "Fact-check the revenue note",
+   "context": "Ford's revenue was $158.06 billion in 2023 [1]. GM's revenue was $171.84 billion in 2023 [2].\n\n---\nSources\n[1] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json\n[2] SEC EDGAR 10-K data: General Motors Co (GM) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001467858/us-gaap/Revenues.json\n\nCitation check: passed.",
+   "source_texts": {
+    "https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/Revenues.json": "Official annual revenue from 10-K filings: fiscal year ended 2023-12-31: $176.19 billion; fiscal year ended 2022-12-31: $158.06 billion",
+    "https://data.sec.gov/api/xbrl/companyconcept/CIK0001467858/us-gaap/Revenues.json": "Official annual revenue from 10-K filings: fiscal year ended 2023-12-31: $171.84 billion; fiscal year ended 2022-12-31: $156.74 billion"
+   },
+   "checks": {
+    "verdicts": [
+     "contradicted",
+     "supported"
+    ]
+   },
+   "note": "158.06 is Ford's 2022 figure: right number, wrong year",
+   "tier": "hard"
+  },
+  {
+   "id": "F8",
+   "skill": "fact_check",
+   "task": "Fact-check the big tech note",
+   "context": "Apple's fiscal 2023 net sales were $383.29 million [1]. Microsoft's fiscal 2023 revenue was $211.92 billion [2].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Apple Inc. (AAPL) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000320193/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json\n[2] SEC EDGAR 10-K data: MICROSOFT CORP (MSFT) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000789019/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json\n\nCitation check: passed.",
+   "source_texts": {
+    "https://data.sec.gov/api/xbrl/companyconcept/CIK0000320193/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json": "Official annual revenue from 10-K filings: fiscal year ended 2023-09-30: $383.29 billion; fiscal year ended 2022-09-24: $394.33 billion",
+    "https://data.sec.gov/api/xbrl/companyconcept/CIK0000789019/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json": "Official annual revenue from 10-K filings: fiscal year ended 2023-06-30: $211.92 billion; fiscal year ended 2022-06-30: $198.27 billion"
+   },
+   "checks": {
+    "verdicts": [
+     "contradicted",
+     "supported"
+    ]
+   },
+   "note": "million vs billion",
+   "tier": "hard"
+  },
+  {
+   "id": "F9",
+   "skill": "fact_check",
+   "task": "Fact-check the big tech note",
+   "context": "Microsoft's fiscal 2023 revenue was about $212 billion [2]. Apple's net sales were lower in fiscal 2023 than in fiscal 2022 [1].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Apple Inc. (AAPL) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000320193/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json\n[2] SEC EDGAR 10-K data: MICROSOFT CORP (MSFT) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000789019/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json\n\nCitation check: passed.",
+   "source_texts": {
+    "https://data.sec.gov/api/xbrl/companyconcept/CIK0000320193/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json": "Official annual revenue from 10-K filings: fiscal year ended 2023-09-30: $383.29 billion; fiscal year ended 2022-09-24: $394.33 billion",
+    "https://data.sec.gov/api/xbrl/companyconcept/CIK0000789019/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json": "Official annual revenue from 10-K filings: fiscal year ended 2023-06-30: $211.92 billion; fiscal year ended 2022-06-30: $198.27 billion"
+   },
+   "checks": {
+    "verdicts": [
+     "supported",
+     "supported"
+    ]
+   },
+   "note": "rounding is fine; second claim needs comparing two years in the source",
+   "tier": "hard"
+  },
+  {
+   "id": "F10",
+   "skill": "fact_check",
+   "task": "Fact-check the mountains note",
+   "context": "Mount Everest is 8,848.86 metres high [1]. K2 is 8,611 metres high [1].\n\n---\nSources\n[1] Mount Everest (Wikipedia) - https://en.wikipedia.org/wiki/Mount_Everest\n[2] K2 (Wikipedia) - https://en.wikipedia.org/wiki/K2\n\nCitation check: passed.",
+   "source_texts": {
+    "https://en.wikipedia.org/wiki/Mount_Everest": "Mount Everest is Earth's highest mountain above sea level. In 2020 China and Nepal announced a height of 8,848.86 m. The first ascent was made in 1953 by Tenzing Norgay and Edmund Hillary.",
+    "https://en.wikipedia.org/wiki/K2": "K2, at 8,611 metres above sea level, is the second-highest mountain on Earth, after Mount Everest."
+   },
+   "checks": {
+    "verdicts": [
+     "supported",
+     "unsupported"
+    ]
+   },
+   "note": "true fact, wrong citation: [1] is the Everest page",
+   "tier": "hard"
   }
  ]
 }

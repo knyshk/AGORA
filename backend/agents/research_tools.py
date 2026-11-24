@@ -201,17 +201,23 @@ async def _sec_revenue(ticker: str):
             if not found:
                 return None
             cik, title = found
+            # Companies switch revenue concepts over the years (Apple moved from "Revenues" to
+            # "RevenueFromContract..."), so use the concept with the most recent fiscal year.
+            best = None
             for concept in REVENUE_CONCEPTS:
                 url = f"https://data.sec.gov/api/xbrl/companyconcept/CIK{int(cik):010d}/us-gaap/{concept}.json"
                 resp = await client.get(url)
                 if resp.status_code != 200:
                     continue
                 rows = annual_values(resp.json().get("units", {}).get("USD", []))
-                if len(rows) >= 2:
-                    lines = "; ".join(f"fiscal year ended {end}: ${val / 1e9:.2f} billion" for end, val in rows[:5])
-                    return {"title": f"SEC EDGAR 10-K data: {title} ({ticker.upper()}) annual revenue",
-                            "url": url, "type": "sec",
-                            "snippet": f"Official annual revenue from 10-K filings (US GAAP, USD): {lines}."}
+                if len(rows) >= 2 and (best is None or rows[0][0] > best[1][0][0]):
+                    best = (url, rows)
+            if best:
+                url, rows = best
+                lines = "; ".join(f"fiscal year ended {end}: ${val / 1e9:.2f} billion" for end, val in rows[:5])
+                return {"title": f"SEC EDGAR 10-K data: {title} ({ticker.upper()}) annual revenue",
+                        "url": url, "type": "sec",
+                        "snippet": f"Official annual revenue from 10-K filings (US GAAP, USD): {lines}."}
     except Exception as e:
         print(f"[SEC ERROR] {ticker}: {type(e).__name__}: {e}")
     return None

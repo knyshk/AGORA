@@ -32,9 +32,10 @@ PRIOR_PSEUDO = 2      # shrink small samples toward 0.5: prior = (sum + 1) / (n 
 PRIOR_RANGE = (0.05, 0.95)
 
 
-def load_tasks(skill=None, ids=None):
+def load_tasks(skill=None, ids=None, tier=None):
     tasks = json.loads(TASKS_FILE.read_text())["tasks"]
-    return [t for t in tasks if (not skill or t["skill"] == skill) and (not ids or t["id"] in ids)]
+    return [t for t in tasks if (not skill or t["skill"] == skill) and (not ids or t["id"] in ids)
+            and (not tier or t.get("tier", "core") == tier)]
 
 
 def build_prompt(task):
@@ -117,6 +118,16 @@ def derive_priors(records):
     return priors
 
 
+def load_records(files):
+    """Records from several results files; later files win for the same (agent, task)."""
+    merged = {}
+    for f in files:
+        path = Path(f) if Path(f).exists() else RESULTS_DIR / f
+        for r in json.loads(path.read_text())["records"]:
+            merged[(r["agent"], r["task"])] = r
+    return list(merged.values())
+
+
 def apply_priors(records, source_file):
     new = derive_priors(records)
     existing = json.loads(PRIORS_FILE.read_text()) if PRIORS_FILE.exists() else {}
@@ -163,12 +174,22 @@ async def main():
     ap.add_argument("--sleep", type=float, default=6.0, help="seconds between calls (free-tier rate limits)")
     ap.add_argument("--apply-priors", action="store_true")
     ap.add_argument("--regrade", help="re-grade the saved outputs of a results file (no agent calls)")
+    ap.add_argument("--tier", choices=["core", "hard"])
+    ap.add_argument("--priors-from", help="comma-separated results files: set priors from all of them, run nothing")
     args = ap.parse_args()
     if args.regrade:
         return regrade(args.regrade, args.apply_priors)
+    if args.priors_from:
+        files = args.priors_from.split(",")
+        records = load_records(files)
+        print(summary_markdown(summarise(records), {"finished_at": "combined: " + ", ".join(files),
+                                                    "n_tasks": len({r["task"] for r in records}), "judge": True}))
+        for agent, p in apply_priors(records, ",".join(files)).items():
+            print(f"prior {agent}: {p['prior']} (bench mean {p['bench_mean']}, n={p['n']})")
+        return
 
     ids = set(args.tasks.split(",")) if args.tasks else None
-    tasks = load_tasks(args.skill, ids)
+    tasks = load_tasks(args.skill, ids, args.tier)
     agents = [m for m in REGISTRY.values()
               if (not args.agent or m.name == args.agent) and any(t["skill"] == m.skill for t in tasks)]
     jobs = [(t, m) for m in agents for t in tasks if t["skill"] == m.skill]
@@ -186,7 +207,7 @@ async def main():
 
     finished = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     meta = {"finished_at": finished, "n_tasks": len(tasks), "judge": not args.no_judge,
-            "filters": {"skill": args.skill, "agent": args.agent, "tasks": args.tasks}}
+            "filters": {"skill": args.skill, "agent": args.agent, "tasks": args.tasks, "tier": args.tier}}
     out = save(records, meta)
 
     if args.apply_priors:

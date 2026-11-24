@@ -1,0 +1,370 @@
+{
+ "meta": {
+  "finished_at": "20261124T094147Z",
+  "n_tasks": 40,
+  "judge": true,
+  "filters": {
+   "skill": null,
+   "agent": "research-v1",
+   "tasks": null,
+   "tier": null
+  }
+ },
+ "summary": {
+  "research-v1": {
+   "skill": "research",
+   "model": "openai/gpt-oss-120b",
+   "strategy": "grounded",
+   "n_scored": 10,
+   "n_infra_errors": 0,
+   "mean": 1.0,
+   "ci95": [
+    1.0,
+    1
+   ],
+   "mean_latency_s": 8.67
+  }
+ },
+ "records": [
+  {
+   "task": "R1",
+   "skill": "research",
+   "agent": "research-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "grounded",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "1/1 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "2 distinct citation(s), need 1"
+    },
+    "has_sources": {
+     "score": 1.0,
+     "detail": "source list present"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The agent successfully states Tesla's total revenue for fiscal year 2023 and provides multiple valid source citations."
+   },
+   "latency_s": 11.3,
+   "error": null,
+   "infra_error": false,
+   "output": "Tesla’s total revenue for fiscal year 2023 was **$96.77 billion** (US GAAP, USD) [1][5]\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] Tesla Total Revenue 2023 | StatMuse Money - https://www.statmuse.com/money/ask/tesla-total-revenue-2023\n[3] Tesla Releases Fourth Quarter and Full Year 2023 Financial ... - https://ir.tesla.com/press-release/tesla-releases-fourth-quarter-and-full-year-2023-financial-results\n[4] Tesla, Inc. - https://ir.tesla.com/_flysystem/s3/sec/000156459023005959/tsla-8k_20230419-gen.pdf\n[5] Tesla (TSLA) Revenue 2006-2026 - Stock Analysis - https://stockanalysis.com/stocks/tsla/revenue/\n[6] Tesla, Inc. - https://ir.tesla.com/_flysystem/s3/sec/000162828024002390/tsla-20231231-gen.pdf\n[7] tsla-20231231 - https://www.sec.gov/Archives/edgar/data/1318605/000162828024002390/tsla-20231231.htm\n[8] Annual Report 2023 - SEC.gov - https://www.sec.gov/Archives/edgar/data/1318605/000110465924053372/tm2412112d4_ars.pdf\n[9] Tesla Full Year 2023 Earnings: EPS Beats Expectations - https://finance.yahoo.com/news/tesla-full-2023-earnings-eps-114607342.html?fr=sycsrp_catchall\n[10] Tesla Releases Fourth Quarter and Full Year 2023 Financial ... - https://www.businesswire.com/news/home/20240124529420/en/Tesla-Releases-Fourth-Quarter-and-Full-Year-2023-Financial-Results\n[11] Tesla, Inc. (Wikipedia) - https://en.wikipedia.org/wiki/Tesla,_Inc."
+  },
+  {
+   "task": "R2",
+   "skill": "research",
+   "agent": "research-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "grounded",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "1/1 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "2 distinct citation(s), need 1"
+    },
+    "has_sources": {
+     "score": 1.0,
+     "detail": "source list present"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The agent correctly states Apple's total net sales for fiscal year 2023 and provides multiple appropriate sources."
+   },
+   "latency_s": 7.93,
+   "error": null,
+   "infra_error": false,
+   "output": "**Apple – Fiscal Year 2023 Total Net Sales**\n\n- Apple reported **total net sales of $383.29 billion** for the fiscal year ended September 30 2023[1].  \n- This figure is also presented as **$383.3 billion** in a summary of the FY 2023 10‑K, reflecting a **3 % decrease** versus FY 2022[3].  \n\n*The FY 2023 net‑sales number therefore stands at roughly $383 billion, confirming a modest decline from the prior year.*\n\n---\nSources\n[1] SEC EDGAR 10-K data: Apple Inc. (AAPL) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000320193/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json\n[2] 23-11-02 Apple reports fourth quarter results - https://www.apple.com/newsroom/pdfs/fy2023-q4/FY23_Q4_Consolidated_Financial_Statements.pdf\n[3] AAPL 10-K FY2023 Annual Report — Revenue, Net Income, EPS - https://www.analystlens.com/stocks/aapl/10k/fy2023\n[4] SEC Filings - SEC Filings Details - Apple - https://investor.apple.com/sec-filings/sec-filings-details/default.aspx?FilingId=17028298\n[5] Apple Annual Report 2023 - https://app.stocklight.com/stocks/us/nasdaq-aapl/apple/annual-reports/nasdaq-aapl-2023-10K-231373899.pdf\n[6] Investor Relations - Apple - https://investor.apple.com/investor-relations/financial-information/default.aspx\n[7] Apple reports second quarter results - https://www.apple.com/newsroom/2023/05/apple-reports-second-quarter-results/\n[8] ATL (company) (Wikipedia) - https://en.wikipedia.org/wiki/ATL_(company)\n[9] Make in India (Wikipedia) - https://en.wikipedia.org/wiki/Make_in_India\n[10] Apple Inc. (Wikipedia) - https://en.wikipedia.org/wiki/Apple_Inc.\n[11] List of largest technology companies by revenue (Wikipedia) - https://en.wikipedia.org/wiki/List_of_largest_technology_companies_by_revenue"
+  },
+  {
+   "task": "R3",
+   "skill": "research",
+   "agent": "research-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "grounded",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "1/1 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "3 distinct citation(s), need 1"
+    },
+    "has_sources": {
+     "score": 1.0,
+     "detail": "source list present"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The answer correctly states Microsoft's fiscal year 2023 revenue and provides proper citations to SEC data and the annual report."
+   },
+   "latency_s": 7.81,
+   "error": null,
+   "infra_error": false,
+   "output": "Microsoft reported **total revenue of $211.91 billion** for fiscal year 2023 (the year ended June 30, 2023) [1].  \n\nThis figure is corroborated by other public disclosures: the Stock Analysis summary lists FY 2023 revenue as $211.92 billion [4], and the company’s 2023 Annual Report describes FY 2023 results as a “record $211 billion in revenue” [5].  \n\nThus, the total revenue for Microsoft in fiscal year 2023 is approximately **$211 billion**.\n\n---\nSources\n[1] SEC EDGAR 10-K data: MICROSOFT CORP (MSFT) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000789019/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json\n[2] Microsoft 2023 Annual Report - https://www.microsoft.com/investor/reports/ar23/index.html\n[3] FY23 Q4 - Press Releases - Investor Relations - Microsoft - https://www.microsoft.com/en-us/investor/earnings/fy-2023-q4/press-release-webcast\n[4] Microsoft (MSFT) Revenue 2005-2026 - Stock Analysis - https://stockanalysis.com/stocks/msft/revenue/\n[5] cdn-dynmedia-1.microsoft.com - https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/2023_Annual_Report\n[6] Download Center - Microsoft 2023 Annual Report - https://www.microsoft.com/investor/reports/ar23/download-center/index.html\n[7] Microsoft Revenue 2017-2026 | MSFT - Macrotrends - https://www.macrotrends.net/stocks/charts/MSFT/microsoft/revenue\n[8] Microsoft records $56.2 billion in revenue and $20.1 ... - Neowin - https://www.neowin.net/news/microsoft-records-562-billion-in-revenue-and-201-billion-in-net-income-for-fy23-q4/\n[9] Microsoft (Wikipedia) - https://en.wikipedia.org/wiki/Microsoft\n[10] List of largest video game companies by revenue (Wikipedia) - https://en.wikipedia.org/wiki/List_of_largest_video_game_companies_by_revenue\n[11] Advertising revenue (Wikipedia) - https://en.wikipedia.org/wiki/Advertising_revenue"
+  },
+  {
+   "task": "R4",
+   "skill": "research",
+   "agent": "research-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "grounded",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "2/2 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "4 distinct citation(s), need 2"
+    },
+    "has_sources": {
+     "score": 1.0,
+     "detail": "source list present"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The output successfully provides the 2023 total revenue for both Ford and General Motors, along with corresponding sources for each."
+   },
+   "latency_s": 10.01,
+   "error": null,
+   "infra_error": false,
+   "output": "**2023 Total Revenue (US GAAP, USD)**  \n\n| Company | 2023 Revenue |\n|---------|--------------|\n| Ford Motor Company | $176.19 billion [1] |\n| General Motors | $171.84 billion [2] |\n\n* Both figures come directly from each firm’s Form 10‑K filing for the fiscal year ended December 31, 2023, which reports revenue under US GAAP.  \n* Ford’s revenue is also reflected in independent data aggregators that list the same 2023 amount (≈$176.2 billion) [4][5].  \n* GM’s 2023 revenue is the officially reported amount in its 10‑K and matches the SEC‑based dataset [2].  \n\nThese numbers represent the total amount earned from contracts with customers (excluding assessed taxes) for the full 2023 fiscal year for each automaker.\n\n---\nSources\n[1] SEC EDGAR 10-K data: FORD MOTOR CO (F) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000037996/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json\n[2] SEC EDGAR 10-K data: General Motors Co (GM) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001467858/us-gaap/Revenues.json\n[3] Ford Motor Company (F) Revenue 2005-2026 - Stock Analysis - https://stockanalysis.com/stocks/f/revenue/\n[4] Ford Motor Revenue 2016-2026 | F - Macrotrends - https://www.macrotrends.net/stocks/charts/F/ford-motor/revenue\n[5] (F) Ford Motor Co Revenue: 1993-2026 Annual Revenue ... - https://www.wallstreetzen.com/stocks/us/nyse/f/revenue\n[6] 2023 Annual Report - SEC.gov - https://www.sec.gov/Archives/edgar/data/37996/000110465924040873/tm2318496d5_ars.pdf\n[7] Ford Motor Company (Wikipedia) - https://en.wikipedia.org/wiki/Ford_Motor_Company\n[8] Ford F-150 Lightning (Wikipedia) - https://en.wikipedia.org/wiki/Ford_F-150_Lightning\n[9] General Motors (Wikipedia) - https://en.wikipedia.org/wiki/General_Motors\n[10] Lucid Motors (Wikipedia) - https://en.wikipedia.org/wiki/Lucid_Motors"
+  },
+  {
+   "task": "R5",
+   "skill": "research",
+   "agent": "research-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "grounded",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "2/2 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "1 distinct citation(s), need 1"
+    },
+    "has_sources": {
+     "score": 1.0,
+     "detail": "source list present"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The agent accurately provides Tesla's revenue for both 2022 and 2023 along with proper sources."
+   },
+   "latency_s": 7.76,
+   "error": null,
+   "infra_error": false,
+   "output": "**Tesla Inc. – Annual Revenue**\n\n- **Fiscal year 2022 (ended December 31, 2022)** – Total revenue was **$81.46 billion**[1].  \n- **Fiscal year 2023 (ended December 31, 2023)** – Total revenue was **$96.77 billion**[1].  \n\nThese figures come from Tesla’s official 10‑K filings reported through the SEC’s EDGAR XBRL data, which present US GAAP‑based revenue for each fiscal year. No other revenue numbers for 2022 or 2023 appear in the provided sources.\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] Tesla, Inc. - https://ir.tesla.com/_flysystem/s3/sec/000095017023001409/tsla-20221231-gen.pdf\n[3] Tesla Annual Report 2022 - StockLight - https://stocklight.com/stocks/us/nasdaq-tsla/tesla/annual-reports/nasdaq-tsla-2022-10K-22595227.pdf\n[4] Tesla Releases Fourth Quarter and Full Year 2022 Financial ... - https://ir.tesla.com/press-release/tesla-releases-fourth-quarter-and-full-year-2022-financial-results\n[5] Tesla made an annual profit of $12.6 billion in 2022 - Ars ... - https://arstechnica.com/cars/2023/01/tesla-made-an-annual-profit-of-12-6-billion-in-2022/\n[6] Tesla Annual Report 2022 - https://annualreport.stocklight.com/nasdaq/tsla/22878151.pdf\n[7] Tesla, Inc. (Wikipedia) - https://en.wikipedia.org/wiki/Tesla,_Inc.\n[8] Tesla Autopilot (Wikipedia) - https://en.wikipedia.org/wiki/Tesla_Autopilot\n[9] Tesla Energy (Wikipedia) - https://en.wikipedia.org/wiki/Tesla_Energy"
+  },
+  {
+   "task": "R6",
+   "skill": "research",
+   "agent": "research-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "grounded",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "1/1 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "2 distinct citation(s), need 1"
+    },
+    "has_sources": {
+     "score": 1.0,
+     "detail": "source list present"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The agent correctly provided Nvidia's revenue for fiscal year 2024 ($60.9 billion, ended January 28, 2024) and included valid sources."
+   },
+   "latency_s": 7.97,
+   "error": null,
+   "infra_error": false,
+   "output": "NVIDIA reported **total revenue of approximately $60.9 billion for fiscal year 2024**, the year that ended on January 28, 2024[1][6]. This figure reflects a 126 % increase over the prior fiscal year[6].\n\n---\nSources\n[1] SEC EDGAR 10-K data: NVIDIA CORP (NVDA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001045810/us-gaap/Revenues.json\n[2] NVIDIA Corporation - Financial Reports - https://investor.nvidia.com/financial-info/financial-reports/default.aspx\n[3] NVIDIA Corporation - Financial Info - Annual Reports and Proxies - https://investor.nvidia.com/financial-info/annual-reports-and-proxies/default.aspx\n[4] nvda-20240128 - SEC.govand Fiscal 2024 NVIDIA Announces Financial Results for Fourth ...NVIDIA Corporation Annual Report 2024nvda-20240428 - SEC.govNVIDIA Announces Financial Results for Fourth Quarter and ... - https://www.sec.gov/Archives/edgar/data/1045810/000104581024000029/nvda-20240128.htm\n[5] and Fiscal 2024 NVIDIA Announces Financial Results for Fourth ... - https://nvidianews.nvidia.com/_gallery/download_pdf/65d669a33d63329bbf62672a/\n[6] NVIDIA Corporation - NVIDIA Announces Financial Results for ... - https://investor.nvidia.com/news/press-release-details/2024/NVIDIA-Announces-Financial-Results-for-Fourth-Quarter-and-Fiscal-2024/\n[7] NVIDIA Announces Financial Results for Fourth Quarter and ... - https://nvidianews.nvidia.com/news/nvidia-announces-financial-results-for-fourth-quarter-and-fiscal-2024\n[8] NVIDIA Corporation - NVIDIA Announces Financial Results for ... - https://investor.nvidia.com/news/press-release-details/2024/NVIDIA-Announces-Financial-Results-for-Fourth-Quarter-and-Fiscal-2024/default.aspx\n[9] Deloitte (Wikipedia) - https://en.wikipedia.org/wiki/Deloitte\n[10] CrowdStrike (Wikipedia) - https://en.wikipedia.org/wiki/CrowdStrike\n[11] Jensen Huang scandal (Wikipedia) - https://en.wikipedia.org/wiki/Jensen_Huang_scandal"
+  },
+  {
+   "task": "R7",
+   "skill": "research",
+   "agent": "research-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "grounded",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "2/2 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "3 distinct citation(s), need 1"
+    },
+    "has_sources": {
+     "score": 1.0,
+     "detail": "source list present"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The output successfully provides Tesla's 2023 total revenue and 2023 net income along with corresponding sources for both values."
+   },
+   "latency_s": 8.26,
+   "error": null,
+   "infra_error": false,
+   "output": "For the fiscal year ended December 31, 2023, Tesla's financial metrics were as follows:\n\n* **Total Revenue:** $96.77 billion [1, 5].\n* **Net Income:** $15.00 billion [7].\n\n---\nSources\n[1] SEC EDGAR 10-K data: Tesla, Inc. (TSLA) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001318605/us-gaap/Revenues.json\n[2] Tesla Total Revenue 2023 | StatMuse Money - https://www.statmuse.com/money/ask/tesla-total-revenue-2023\n[3] Tesla Releases Fourth Quarter and Full Year 2023 Financial ... - https://ir.tesla.com/press-release/tesla-releases-fourth-quarter-and-full-year-2023-financial-results\n[4] Tesla, Inc. - https://ir.tesla.com/_flysystem/s3/sec/000156459023005959/tsla-8k_20230419-gen.pdf\n[5] Tesla (TSLA) Revenue 2006-2026 - Stock Analysis - https://stockanalysis.com/stocks/tsla/revenue/\n[6] Tesla Income Potential - TSII — Now Trading - https://www.bing.com/aclick?ld=e8jKGB4bozhx9jRUgLIwBzoTVUCUw3MK7Bl2bTaw9K-OokuyyJvt_iQqjoFy2N_11yLhnnUZJlMhYbKlUblZfHc7Stla1zhkV7-xnREZ_OQA5wmivcf2tjyU1Q9TPr6RORgJagDmEQbnnbJ8ghSCRZE9nu6fW-__5W9fjYxY2e-OxlxHiG0wjTcMOy16VvLdoYehC8gA&u=aHR0cHMlM2ElMmYlMmZwdWxzZS5jbGlja2d1YXJkLmNvbSUyZmdhZHMlMmZhdCUyZmFjYzZKZXA1N2VueUklMmZhc3RjSlVJNERpN2tRJTJmYWRhN0toRzk4aVFqNyUzZnRtJTNkdHQlMjZjaWQlM2Q1MjQxNzAyNzklMjZhZ2lkJTNkMTMyOTMxMjQxMjc3NDM2NyUyNmFpZCUzZCUyNmtpZCUzZGt3ZC04MzA4MzY2MjkyNjYyOSUyNmt3JTNkc2luZ2xlJTI1MjBzdG9jayUyNTIwVGVzbGElMjUyMEVURiUyNm53JTNkbyUyNmR2JTNkYyUyNm10JTNkYiUyNnBsJTNkJTI2dXJsJTNkaHR0cHMlMjUzQSUyNTJGJTI1MkZ3d3cucmV4c2hhcmVzLmNvbSUyNTJGdHNpaSUyNTNGdG0lMjUzRHR0JTI1MjZhcCUyNTNEZ2FkcyUyNTI2YWFpZCUyNTNEYWRhN0toRzk4aVFqNyUyNm1zY2xraWQlM2QxZjVkNGNjYzk3YTgxZDVhYTU3NzI3YzljYzBhODg2YQ&rlid=1f5d4ccc97a81d5aa57727c9cc0a886a\n[7] Tesla Net Income 2016-2026 | TSLA - Macrotrends - https://www.macrotrends.net/stocks/charts/TSLA/tesla/net-income\n[8] Tesla, Inc. - https://ir.tesla.com/_flysystem/s3/sec/000095017023013890/tsla-20230331-gen.pdf\n[9] Tesla, Inc. - https://ir.tesla.com/_flysystem/s3/sec/000162828024002390/tsla-20231231-gen.pdf\n[10] tsla-20231231 - https://www.sec.gov/Archives/edgar/data/1318605/000162828024002390/tsla-20231231.htm\n[11] Annual Report 2023 - SEC.gov - https://www.sec.gov/Archives/edgar/data/1318605/000110465924053372/tm2412112d4_ars.pdf"
+  },
+  {
+   "task": "R8",
+   "skill": "research",
+   "agent": "research-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "grounded",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "1/1 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "1 distinct citation(s), need 1"
+    },
+    "has_sources": {
+     "score": 1.0,
+     "detail": "source list present"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The output accurately provides Toyota's net revenue of 45.095 trillion yen for the fiscal year ended March 2024 and includes valid sources."
+   },
+   "latency_s": 9.22,
+   "error": null,
+   "infra_error": false,
+   "output": "Toyota Motor Corporation reported **consolidated net revenues of 45.095 trillion yen** (approximately **US $311.0 billion**) for the fiscal year that ended **31 March 2024**. This represented a **21.4 % increase** over the prior fiscal year’s revenue level[6].\n\n---\nSources\n[1] FINANCIAL SUMMARY FY2024 - トヨタ自動車株式会社 ... - https://global.toyota/pages/global_toyota/ir/financial-results/2024_4q_summary_en.pdf\n[2] FY2024 Financial Results - https://global.toyota/pages/global_toyota/ir/financial-results/2024_4q_presentation_en.pdf\n[3] FY2024 FINANCIAL SUMMARY - SEC.gov - https://www.sec.gov/Archives/edgar/data/1094517/000119312524133537/d735266dex991.htm\n[4] Toyota's Financial Results--Solid Revenue Structure Drives ... - https://toyotatimes.jp/en/toyota_news/financial_results_2024/002.html\n[5] TMC's FY2024 Financial Results Press Briefing | Corporate ... - https://global.toyota/en/newsroom/corporate/40759288.html\n[6] TMC Announces April Through March 2024 Financial Results - https://pressroom.toyota.com/tmc-announces-april-through-march-2024-financial-results/\n[7] FINANCIAL SUMMARY FY2023 - トヨタ自動車株式会社 ... - https://global.toyota/pages/global_toyota/ir/financial-results/2023_4q_summary_en.pdf\n[8] Toyota Motor Corporation – Integrated Report 2023 - https://pressroom.toyota.com/toyota-motor-corporation-integrated-report-2023/\n[9] FY2023 FINANCIAL SUMMARY - SEC.gov - https://www.sec.gov/Archives/edgar/data/1094517/000119312523139964/d467324dex991.htm\n[10] Annual Financial Report 2023 - Toyota Industries - https://www.toyota-industries.com/company/item/2023_annual_financial_report_E.pdf"
+  },
+  {
+   "task": "R9",
+   "skill": "research",
+   "agent": "research-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "grounded",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "3/3 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "3 distinct citation(s), need 2"
+    },
+    "has_sources": {
+     "score": 1.0,
+     "detail": "source list present"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The output successfully provides the fiscal year 2023 total revenue for Apple, Microsoft, and Alphabet, with corresponding sources provided for each."
+   },
+   "latency_s": 9.09,
+   "error": null,
+   "infra_error": false,
+   "output": "**Fiscal‑Year 2023 Revenue (US $ billions)**  \n\n- **Apple Inc.** – $383.29 B [1]  \n- **Microsoft Corp.** – $211.91 B [2]  \n- **Alphabet Inc.** – $307.39 B [3]  \n\nThese figures come directly from each company’s SEC Form 10‑K filings for the fiscal year that ended in 2023 (Apple 9/30/2023, Microsoft 6/30/2023, Alphabet 12/31/2023). No other metrics were requested, so the answer is limited to the total revenue values for the specified year.\n\n---\nSources\n[1] SEC EDGAR 10-K data: Apple Inc. (AAPL) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000320193/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json\n[2] SEC EDGAR 10-K data: MICROSOFT CORP (MSFT) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0000789019/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json\n[3] SEC EDGAR 10-K data: Alphabet Inc. (GOOGL) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001652044/us-gaap/Revenues.json\n[4] Microsoft 2023 Annual Report - https://www.microsoft.com/investor/reports/ar23/index.html\n[5] Microsoft (MSFT) Revenue 2005-2026 - Stock Analysis - https://stockanalysis.com/stocks/msft/revenue/\n[6] Microsoft Revenue 2023 | StatMuse Money - https://www.statmuse.com/money/ask/microsoft-revenue-2023\n[7] Microsoft Revenue 2017-2026 | MSFT - Macrotrends - https://www.macrotrends.net/stocks/charts/MSFT/microsoft/revenue\n[8] Alphabet Revenue 2012-2026 | GOOG - Macrotrends - https://www.macrotrends.net/stocks/charts/GOOG/alphabet/revenue\n[9] Alphabet (GOOGL) Revenue 2005-2026 - Stock Analysis - https://stockanalysis.com/stocks/googl/revenue/\n[10] Alphabet Revenue 2012-2026 | GOOGL - Macrotrends - https://www.macrotrends.net/stocks/charts/GOOGL/alphabet/revenue\n[11] Alphabet: global annual revenue 2025 | Statista - https://www.statista.com/statistics/507742/alphabet-annual-global-revenue/\n[12] List of largest technology companies by revenue - WikipediaMicrosoft 2023 Annual ReportHow Apple, Microsoft, Alphabet, Amazon and Meta Compare onA List of All \"Magnificent Seven\" Stocks - Stock AnalysisAlphabet (GOOGL) Revenue 2005-2026 - Stock AnalysisMSFT vs AAPL, GOOGL - Annual Revenue - https://en.wikipedia.org/wiki/List_of_largest_technology_companies_by_revenue"
+  },
+  {
+   "task": "R10",
+   "skill": "research",
+   "agent": "research-v1",
+   "model": "openai/gpt-oss-120b",
+   "provider": "groq",
+   "strategy": "grounded",
+   "score": 1.0,
+   "deterministic": 1.0,
+   "checks": {
+    "contains_numbers": {
+     "score": 1.0,
+     "detail": "1/1 expected figures present"
+    },
+    "min_citations": {
+     "score": 1.0,
+     "detail": "4 distinct citation(s), need 1"
+    },
+    "has_sources": {
+     "score": 1.0,
+     "detail": "source list present"
+    }
+   },
+   "judge": {
+    "provider": "gemini",
+    "score_1_5": 5,
+    "score": 1.0,
+    "reason": "The agent correctly provides Amazon's total net sales for 2023 with appropriate citations and segment breakdowns."
+   },
+   "latency_s": 7.36,
+   "error": null,
+   "infra_error": false,
+   "output": "For the fiscal year ended December 31, 2023, Amazon's total revenue was $574.78 billion [1] (or approximately $574.785 billion according to MacroTrends [2], and listed as $574.79 billion with a change of $60.80 billion and an 11.83% growth rate by Stock Analysis [3]). \n\nAccording to Amazon's annual report, total revenue grew 12% year-over-year from $514 billion in 2022 to $575 billion in 2023 [5]. Breakdown by segment for 2023 includes:\n- **North America:** Increased 12% year-over-year from $316 billion to $353 billion [5].\n- **International:** Grew 11% year-over-year from $118 billion to $131 billion [5].\n- **AWS:** Increased 13% year-over-year from $80 billion to $91 billion [5].\n\n---\nSources\n[1] SEC EDGAR 10-K data: AMAZON COM INC (AMZN) annual revenue - https://data.sec.gov/api/xbrl/companyconcept/CIK0001018724/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json\n[2] Amazon Revenue 2012-2026 | AMZN | MacroTrends - https://www.macrotrends.net/stocks/charts/AMZN/amazon/revenue\n[3] Amazon.com (AMZN) Revenue 2005-2026 - Stock Analysis - https://stockanalysis.com/stocks/amzn/revenue/\n[4] Amazon.com, Inc. - Annual reports, proxies and shareholder ... - https://ir.aboutamazon.com/annual-reports-proxies-and-shareholder-letters/default.aspx\n[5] Amazon.com, Inc. - https://s2.q4cdn.com/299287126/files/doc_financials/2024/ar/Amazon-com-Inc-2023-Annual-Report.pdf\n[6] Amazon.com, Inc. - Quarterly results - https://ir.aboutamazon.com/quarterly-results/default.aspx\n[7] Amazon.com Q4 2023 Earnings Results & Report - MarketBeatamzn-20231231AMZN-2023.09.30-EX99 - s2.q4cdn.comAMZN-2023.12.31-EX99 - s2.q4cdn.comAmazon reports $30B in profits in 2023, reversing loss in ... - https://www.marketbeat.com/earnings/reports/2024-2-1-amazoncom-inc-stock/\n[8] amzn-20231231 - https://www.sec.gov/Archives/edgar/data/1018724/000101872424000008/amzn-20231231.htm\n[9] amzn-20230331 - SEC.gov - https://www.sec.gov/Archives/edgar/data/1018724/000101872423000008/amzn-20230331.htm\n[10] Amazon (company) (Wikipedia) - https://en.wikipedia.org/wiki/Amazon_(company)\n[11] Amazon MGM Studios (Wikipedia) - https://en.wikipedia.org/wiki/Amazon_MGM_Studios"
+  }
+ ]
+}

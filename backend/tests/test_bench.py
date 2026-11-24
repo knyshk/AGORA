@@ -14,8 +14,9 @@ TASKS = run_bench.load_tasks()
 
 # ---------- the benchmark data itself ----------
 
-def test_bench_has_five_tasks_per_skill_and_known_checks():
-    assert Counter(t["skill"] for t in TASKS) == {"research": 5, "drafting": 5, "chart": 5, "fact_check": 5}
+def test_bench_has_five_tasks_per_skill_per_tier_and_known_checks():
+    assert Counter((t["tier"], t["skill"]) for t in TASKS) == {
+        (tier, skill): 5 for tier in ("core", "hard") for skill in ("research", "drafting", "chart", "fact_check")}
     assert len({t["id"] for t in TASKS}) == len(TASKS)
     for t in TASKS:
         assert set(t["checks"]) <= set(grader.CHECKS), t["id"]
@@ -36,7 +37,52 @@ def test_fact_check_tasks_have_one_verdict_per_claim_and_frozen_sources(task):
     assert cited_urls <= set(task["source_texts"])
 
 
+@pytest.mark.parametrize("task", [t for t in TASKS if "forbidden_numbers" in t["checks"]], ids=lambda t: t["id"])
+def test_forbidden_figures_are_not_in_the_context(task):
+    assert grader.check_forbidden_numbers(task["context"], task["checks"]["forbidden_numbers"])[0] == 1.0
+
+
+def test_tier_filter():
+    assert len(run_bench.load_tasks(tier="hard")) == 20
+    assert {t["id"] for t in run_bench.load_tasks(skill="chart", tier="core")} == {"C1", "C2", "C3", "C4", "C5"}
+
+
 # ---------- grader ----------
+
+def _chart(points, kind="bar"):
+    data = {"title": "t", "chart_type": kind, "x_label": "x", "y_label": "y",
+            "data": [{"category": c, "series": s, "value": v} for c, s, v in points]}
+    return chart_tools.render_output(data, chart_tools.build_spec(data), [])
+
+
+def test_chart_mark_check():
+    assert grader.check_chart_mark(_chart([("2022", "", 1.5)], "line"), "line")[0] == 1.0
+    grouped = _chart([("Tesla", "2022", 81.46), ("Tesla", "2023", 96.77)], "grouped_bar")
+    assert grader.check_chart_mark(grouped, "grouped_bar")[0] == 1.0
+    assert grader.check_chart_mark(grouped, "line")[0] == 0.0
+
+
+def test_consistent_scale_catches_mixed_units():
+    same = _chart([("Tesla", "", 96.77), ("Ford", "", 176.19)])
+    millions = _chart([("Tesla", "", 96770), ("Ford", "", 176191)])
+    mixed = _chart([("Tesla", "", 96.77), ("Ford", "", 176191)])
+    assert grader.check_chart_consistent_scale(same, [96.77, 176.19])[0] == 1.0
+    assert grader.check_chart_consistent_scale(millions, [96.77, 176.19])[0] == 1.0
+    assert grader.check_chart_consistent_scale(mixed, [96.77, 176.19])[0] == 0.0
+
+
+def test_mentions_any_and_forbidden_numbers():
+    assert grader.check_mentions_any("2024 figures are Not Available.", ["not available"])[0] == 1.0
+    assert grader.check_forbidden_numbers("It grew by $15.31 billion [1].", [15.31])[0] == 0.0
+    assert grader.check_forbidden_numbers("81.46 then 96.77 [1].\n---\nSources\n[1] 15.31 - u", [15.31])[0] == 1.0
+
+
+def test_records_merge_later_file_wins(tmp_path):
+    a, b = tmp_path / "a.json", tmp_path / "b.json"
+    a.write_text(json.dumps({"records": [{"agent": "x", "task": "C1", "score": 0.0}, {"agent": "x", "task": "C2", "score": 1.0}]}))
+    b.write_text(json.dumps({"records": [{"agent": "x", "task": "C1", "score": 1.0}]}))
+    merged = {r["task"]: r["score"] for r in run_bench.load_records([str(a), str(b)])}
+    assert merged == {"C1": 1.0, "C2": 1.0}
 
 def test_gold_chart_scores_full_and_invented_point_is_penalised():
     data = {"title": "t", "chart_type": "bar", "x_label": "x", "y_label": "y",

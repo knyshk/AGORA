@@ -18,7 +18,7 @@ import re
 from jsonschema import Draft202012Validator
 
 from agents.base_agent import run_agent
-from agents.grounding import context_numbers, is_grounded  # noqa: F401 (re-exported for tests)
+from agents.grounding import UNIT_NAMES, context_numbers, is_grounded, shared_unit  # noqa: F401
 
 MAX_ATTEMPTS = 2
 MAX_POINTS = 40
@@ -109,6 +109,18 @@ def ground(data: dict, context: str):
     return kept, dropped
 
 
+def check_one_unit(points: list, context: str) -> None:
+    """Every value in one chart must be in the same unit (all billions, or all millions, ...)."""
+    unit, per_value = shared_unit([p["value"] for p in points], context)
+    if unit is None:
+        described = ", ".join(
+            f'{p["category"]} {p.get("series") or ""} = {p["value"]} '
+            f'(matches the text only as {"/".join(UNIT_NAMES[m] for m in sorted(per_value[p["value"]]))})'
+            .replace("  ", " ") for p in points if per_value[p["value"]])
+        raise ChartError("values mix units: " + described +
+                         ". Convert them so every value uses the same unit, e.g. 176,191 million = 176.19 billion")
+
+
 def build_spec(data: dict) -> dict:
     points = data["data"]
     unit = data.get("unit") or ""
@@ -176,6 +188,7 @@ async def build_chart(prompt: str, provider: str = None, model: str = None) -> s
             if not kept:
                 raise ChartError("none of the values appear in the context; copy numbers exactly as written")
             data["data"] = kept
+            check_one_unit(kept, context)
             return render_output(data, build_spec(data), dropped)
         except ChartError as e:
             last_error = str(e)
