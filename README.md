@@ -33,7 +33,7 @@ append-only log, so any run can be replayed, forked from a checkpoint and audite
 Full write-up with every number, sample size and result file: [docs/EVALUATION.md](docs/EVALUATION.md).
 Headline: forking saves 92 % of time (n = 5); self-correction raises supported claims 0.72 → 0.87
 (n = 20); reputation routing keeps quality ≈ 0.97 when the default agent degrades while fixed routing
-drops to 0.56 (simulation, 600 × 30); parallel execution 1.71× (indicative, n = 9 / 3).
+drops to 0.56 (simulation, 600 × 30); parallel execution 1.37× (n = 20 per mode).
 
 
 Every number comes from a script in this repository and a saved results file in `backend/bench/results/`.
@@ -43,7 +43,7 @@ Sample sizes are given next to each number. The full evaluation (RQ1–RQ5 with 
 |---|---|---|---|
 | Tool use vs plain LLM (research) | grounded agent 1.00 vs plain model 0.50 mean score | 10 tasks each | AGORA-Bench, `bench/run_bench.py` |
 | Agent quality (all skills) | 0.98–1.00 for every tool-using agent | 10 tasks per agent | AGORA-Bench |
-| Conflict detection (RQ2) | structured F1 0.955 (precision 0.91, recall 1.00) vs pairwise-LLM baseline F1 0.941 (precision 0.89) | 64 labelled pairs | `bench/eval_conflicts.py` — a rounding bug behind all 3 false positives has been fixed since; a confirming run is pending (free-tier quota) |
+| Conflict detection (RQ2) | structured F1 0.984 (precision 1.00, recall 0.97) vs pairwise-LLM baseline F1 0.970 (precision 0.94) | 64 labelled pairs | `bench/eval_conflicts.py` (confirming run after the rounding fix) |
 | Fork vs full re-run (RQ5) | 21 s vs 51 s | 1 run | early measurement, to be repeated |
 | Local 9B model vs cloud 120B (same tools) | research 1.00 vs 1.00 · chart 0.97 vs 1.00 · drafting 0.88 vs 0.98 · fact-check 0.85 vs 1.00; local is slower (research 41 s vs 9 s) | 10 tasks per agent | AGORA-Bench (deterministic checks) |
 | Routing when the default agent degrades (RQ1, simulation) | reputation strategies keep quality ≈ 0.97 and switch within ≈ 21–38 tasks; fixed routing drops to 0.56 and never recovers | 600 tasks × 30 seeds | `bench/simulate_routing.py` (production router, agents drawn from measured bench scores) |

@@ -14,7 +14,7 @@ The synopsis (Aug 2026) lists RQ1–RQ5; the final-phase plan renumbered some of
 |---|---|
 | RQ1 benchmark-seeded reputation converges to accurate trust faster than usage-only | **Convergence** below (simulation): error 0.05 from the first task vs 0.30, usage-only needs ≈ 95 tasks |
 | RQ2 a lightweight classifier detects semantic conflicts with acceptable false positives | RQ2 below (64 labelled pairs, cloud and local) |
-| RQ3 parallel execution + adaptive routing reduce latency vs sequential | RQ3 below (indicative) and the budget governor (economy mode) |
+| RQ3 parallel execution + adaptive routing reduce latency vs sequential | RQ3 below (1.37×, n = 20 per mode) and the budget governor (economy mode) |
 | RQ4 live mid-task human intervention improves quality vs pre/post review | User study (protocol ready); live pause / redirect / reassign implemented |
 | RQ5 the catch-up digest reduces time to regain context vs the raw transcript | User study, digest part (protocol ready) |
 | (plan) fork vs full re-run | RQ5 in the summary below |
@@ -24,8 +24,8 @@ The synopsis (Aug 2026) lists RQ1–RQ5; the final-phase plan renumbered some of
 | Research question | Result | Sample |
 |---|---|---|
 | **RQ1** Does reputation routing beat fixed / random routing? | When the default agent degrades, reputation routing keeps quality ≈ 0.97 and switches within ≈ 21–38 tasks; fixed routing drops to 0.56 and never recovers; random 0.68 | 600 tasks × 30 seeds per strategy (simulation with the production router, agent quality drawn from measured bench scores) |
-| **RQ2** Does structured arbitration detect conflicts better than a pairwise LLM? | Cloud model: structured F1 0.955 (P 0.91, R 1.00) vs pairwise 0.941 (P 0.89, R 1.00). Local 9B model: pairwise 0.968 vs structured 0.847 (P 0.93) | 64 labelled pairs (32 conflicts, 32 hard negatives) |
-| **RQ3** Is parallel execution faster than sequential? | 1.71× (ratio of means; median of paired ratios 1.85×), theoretical maximum 2× for this plan | **9 parallel / 3 sequential runs only** (28 excluded by the cloud rate limit); to be repeated |
+| **RQ2** Does structured arbitration detect conflicts better than a pairwise LLM? | Cloud model: structured F1 0.984 (P 1.00, R 0.97) vs pairwise 0.970 (P 0.94, R 1.00). Local 9B model: pairwise 0.968 vs structured 0.847 (P 0.93) | 64 labelled pairs (32 conflicts, 32 hard negatives) |
+| **RQ3** Is parallel execution faster than sequential? | 1.37× (4.78 s vs 6.56 s; median of paired ratios 1.29×), theoretical maximum 2× for this plan | 20 parallel / 20 sequential runs, none excluded |
 | **RQ5** Is forking from a checkpoint cheaper than re-running? | 7.4 ± 0.8 s vs 95.2 ± 13.6 s: **92 % less time, 85 % fewer LLM tokens** | 5 pairs, local model |
 | **Self-correction** Does feeding fact-check results back improve drafts? | Supported claims 0.72 ± 0.09 → **0.87 ± 0.06**; drafts with every claim supported 4/20 → **9/20** | 10 bench tasks × 2, local model |
 | **Tools vs plain LLM** | Grounded research 1.00 vs plain model 0.50 | 10 tasks each (AGORA-Bench) |
@@ -109,13 +109,14 @@ different period/entity/metric, verifier quotes). `bench/eval_conflicts.py`.
 
 | LLM used by both methods | Method | Precision | Recall | F1 | File |
 |---|---|---|---|---|---|
-| cloud free tiers | structured (new) | 0.914 | 1.000 | **0.955** | `conflicts_20261124T112739Z` |
-| cloud free tiers | pairwise LLM (old) | 0.889 | 1.000 | 0.941 | same |
+| cloud free tiers | structured (new) | 1.000 | 0.969 | **0.984** | `conflicts_20261125T151524Z` (after the rounding fix) |
+| cloud free tiers | pairwise LLM (old) | 0.941 | 1.000 | 0.970 | same |
+| cloud free tiers (earlier run, before the rounding fix) | structured / pairwise | 0.914 / 0.889 | 1.000 / 1.000 | 0.955 / 0.941 | `conflicts_20261124T112739Z` |
 | local qwen3.5 9B | structured (new) | 0.926 | 0.781 | 0.847 | `…154534Z-local` |
 | local qwen3.5 9B | pairwise LLM (old) | 1.000 | 0.938 | **0.968** | `…152632Z-local` |
 
-The cloud run was taken before a rounding fix that removed the cause of its 3 false positives; the
-confirming cloud re-run is pending (rate limits). Interpretation: structured comparison is exact on
+The confirming cloud run after the rounding fix has zero false positives for structured arbitration (it missed one
+unit error) against two for the pairwise baseline. Interpretation: structured comparison is exact on
 numbers (units, rounding) and explains every conflict field by field, but it depends on the model
 extracting claims correctly; a small local model extracts less reliably, so the simpler pairwise check
 wins there and is 5× faster. A hybrid (pairwise check as a second opinion when extraction finds nothing)
@@ -123,18 +124,18 @@ is a natural next step.
 
 ## RQ3 — parallel vs sequential
 
-`bench/eval_runtime.py rq3`: plan research (frozen input) → drafting ∥ chart, agents and provider (Groq)
-pinned, modes alternated run by run, arbitration off.
+`bench/eval_runtime.py rq3` (`rq3_20261125T155913Z`): plan research (frozen input) → drafting ∥ chart, agents and provider
+(Groq) pinned, modes alternated run by run, arbitration off, 60 s pause between runs.
 
-| Mode | n | Mean (s) | Median (s) |
+| Mode | n | Mean (s, 95% CI) | Median (s) |
 |---|---|---|---|
-| parallel | 9 | 4.11 ± 0.76 | 3.73 |
-| sequential | 3 | 7.01 ± 0.73 | 6.90 |
+| parallel | 20 | 4.78 ± 0.43 | 4.79 |
+| sequential | 20 | 6.56 ± 0.76 | 6.27 |
 
-Speedup 1.71× (ratio of means), 1.85× (median of paired ratios); maximum possible for two branches is 2×.
-**28 of 40 attempts were excluded by Groq's free-tier limit, so this is indicative only.** A second
-attempt with 60 s pauses was stopped after Groq's daily quota ran out. Re-run after the quota resets:
-`docker compose exec backend python -m bench.eval_runtime rq3 --runs 20 --pause 60`.
+Speedup 1.37× (ratio of means), 1.29× (median of paired ratios); no runs excluded. The maximum possible for two
+branches is 2×; the gain is limited by the slower branch (drafting, which may retry once). An earlier attempt with
+only 9 / 3 valid runs (`rq3_20261124T162900Z`, 28 excluded by rate limits) had suggested 1.71×; the larger sample
+replaces it.
 Note: the local model serves one request at a time (measured: 2 parallel calls take 2× as long), so
 parallel speedup needs a backend that serves concurrent requests (any cloud API).
 
@@ -165,7 +166,5 @@ local model; drafting → fact-check (frozen source texts) → self-correction.
 drafting call and one extra fact-check call per revised draft.
 
 ## Still to do
-1. RQ3 with ≥ 20 runs per mode (after the cloud quota resets).
-2. RQ2 confirming cloud run after the rounding fix.
-3. RQ4 user study (5–8 classmates, [USER_STUDY.md](USER_STUDY.md)).
-4. Judge–human agreement: hand-label ~20 judged outputs, then `python -m bench.kappa score …`.
+1. RQ4 user study (5–8 classmates, [USER_STUDY.md](USER_STUDY.md)).
+2. Judge–human agreement: hand-label ~20 judged outputs, then `python -m bench.kappa score …`.
