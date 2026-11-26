@@ -1,61 +1,6 @@
 import { motion } from "framer-motion";
 import CountUp from "../CountUp";
 
-const CAPABILITIES = [
-  {
-    id: "orchestration",
-    title: "Dependency-Driven Orchestration",
-    tag: "DAG Topology",
-    body: "Tasks compile into a Directed Acyclic Graph (DAG). Independent agent nodes execute concurrently in parallel, while dependent nodes suspend until their prerequisite artifacts are delivered.",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-        <circle cx="6" cy="6" r="3" />
-        <circle cx="18" cy="6" r="3" />
-        <circle cx="12" cy="18" r="3" />
-        <path d="M8.5 7.5L10.5 15.5M15.5 7.5L13.5 15.5M9 6h6" strokeLinecap="round" strokeDasharray="1.5 2.5" />
-      </svg>
-    ),
-  },
-  {
-    id: "routing",
-    title: "Reputation-Weighted Routing",
-    tag: "Bayesian Scoring",
-    body: "Every specialized agent carries a persistent Redis-backed trust score, updated via Bayesian Thompson sampling from real task outcomes to dynamically route steps to the highest-performing variant.",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-        <path d="M12 2l2.8 6.2 6.7.7-5 4.6 1.4 6.7L12 16.8 6.1 20.2l1.4-6.7-5-4.6 6.7-.7L12 2z" strokeLinejoin="round" />
-        <circle cx="12" cy="12" r="2" fill="currentColor" opacity="0.3" />
-      </svg>
-    ),
-  },
-  {
-    id: "arbitration",
-    title: "Conflict Arbitration Engine",
-    tag: "Arbitration",
-    body: "When parallel agents generate contradictory claims, our arbitration engine intercepts the divergence, produces a plain-language explanation of the disagreement, and prescribes a resolution.",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-        <path d="M12 3v18M5 7l7-4 7 4M5 7v4a7 7 0 0014 0V7" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M3 17h4M17 17h4" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    id: "playground",
-    title: "Dual-Mode Playground",
-    tag: "Interactive Suite",
-    body: "Execute dynamic real-world prompts through the full multi-agent pipeline, or instantly trigger the isolated Conflict Demo to observe guaranteed factual collision and dispute arbitration in action.",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-        <rect x="3" y="4" width="8" height="7" rx="1.5" />
-        <rect x="13" y="4" width="8" height="7" rx="1.5" />
-        <rect x="8" y="14" width="8" height="7" rx="1.5" />
-        <path d="M7 11v1.5a1.5 1.5 0 001.5 1.5H10M17 11v1.5a1.5 1.5 0 01-1.5 1.5H14" />
-      </svg>
-    ),
-  },
-];
-
 export default function Hero({ backendOnline, checkingBackend }) {
   return (
     <section className="hero-section">
@@ -152,26 +97,6 @@ export default function Hero({ backendOnline, checkingBackend }) {
         </div>
       </div>
 
-      {/* 4 Real Capabilities */}
-      <div className="capabilities-grid">
-        {CAPABILITIES.map((cap, i) => (
-          <motion.div
-            key={cap.id}
-            className="capability-card"
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.1 + i * 0.08 }}
-            whileHover={{ y: -3, transition: { duration: 0.15 } }}
-          >
-            <div className="cap-header">
-              <div className="cap-icon-box">{cap.icon}</div>
-              <div className="cap-greek-badge">{cap.tag}</div>
-            </div>
-            <h3 className="cap-title">{cap.title}</h3>
-            <p className="cap-body">{cap.body}</p>
-          </motion.div>
-        ))}
-      </div>
     </section>
   );
 }

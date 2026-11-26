@@ -7,16 +7,12 @@ import TaskControl from "./components/TaskControl";
 import AgentGraph from "./components/AgentGraph";
 import InspectorAndConflicts from "./components/InspectorAndConflicts";
 import ReputationRegistry from "./components/ReputationRegistry";
-import LatencyBenchmark from "./components/LatencyBenchmark";
 import "./App.css";
 import RunHistory from "./components/RunHistory";
 import LiveSessions from "./components/LiveSessions";
 import Dashboard from "./components/Dashboard";
 
 const BACKEND_URL = "http://127.0.0.1:8000";
-
-// Fallback verified benchmark samples for resilient demoing
-
 
 export default function App() {
   const [query, setQuery] = useState(
@@ -32,7 +28,7 @@ export default function App() {
   const [checkingBackend, setCheckingBackend] = useState(true);
   const [activeTab, setActiveTab] = useState(
     () => (new URLSearchParams(window.location.search).get("join") ? "live" : "orchestrator")
-  ); // 'orchestrator' | 'latency' | 'reputation' | 'history' | 'live'
+  ); // 'orchestrator' | 'reputation' | 'history' | 'live' | 'dashboard'
 
   const resultsRef = useRef(null);
 
@@ -188,20 +184,11 @@ export default function App() {
             <span className="tab-text">Task Orchestration & DAG Floor</span>
           </button>
           <button
-            className={`module-tab ${activeTab === "latency" ? "module-tab-active" : ""}`}
-            onClick={() => setActiveTab("latency")}
-          >
-            <span className="tab-icon">⚡</span>
-            <span className="tab-text">DAG Concurrency Benchmark</span>
-            <span className="tab-pill">1.37× Speedup</span>
-          </button>
-          <button
             className={`module-tab ${activeTab === "reputation" ? "module-tab-active" : ""}`}
             onClick={() => setActiveTab("reputation")}
           >
             <span className="tab-icon">🛡️</span>
             <span className="tab-text">Redis Reputation Registry</span>
-            <span className="tab-pill">Bayesian Routing</span>
           </button>
           <button
             className={`module-tab ${activeTab === "history" ? "module-tab-active" : ""}`}
@@ -209,7 +196,6 @@ export default function App() {
           >
             <span className="tab-icon">🕘</span>
             <span className="tab-text">Run History & Replay</span>
-            <span className="tab-pill">Fork</span>
           </button>
           <button
             className={`module-tab ${activeTab === "live" ? "module-tab-active" : ""}`}
@@ -217,7 +203,6 @@ export default function App() {
           >
             <span className="tab-icon">👥</span>
             <span className="tab-text">Live Sessions</span>
-            <span className="tab-pill">Collaborate</span>
           </button>
           <button
             className={`module-tab ${activeTab === "dashboard" ? "module-tab-active" : ""}`}
@@ -225,7 +210,6 @@ export default function App() {
           >
             <span className="tab-icon">📊</span>
             <span className="tab-text">Observability</span>
-            <span className="tab-pill">Metrics</span>
           </button>
         </div>
 
@@ -296,10 +280,7 @@ export default function App() {
           </>
         )}
 
-        {/* Tab 2: DAG Concurrency & Latency Benchmark */}
-        {activeTab === "latency" && <LatencyBenchmark />}
-
-        {/* Tab 3: Redis Reputation Registry */}
+        {/* Tab 2: Redis Reputation Registry */}
         {activeTab === "reputation" && <ReputationRegistry />}
         {activeTab === "history" && <RunHistory backendUrl={BACKEND_URL} />}
         {activeTab === "live" && <LiveSessions backendUrl={BACKEND_URL} />}

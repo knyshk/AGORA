@@ -20,33 +20,6 @@ const PRESET_QUERIES = [
   },
 ];
 
-const STAGES = [
-  {
-    id: 1,
-    title: "Topological Decomposition",
-    desc: "Planner agent parses the query into a directed acyclic graph (DAG) of specialized subtasks.",
-    threshold: 0,
-  },
-  {
-    id: 2,
-    title: "Bayesian Reputation Routing",
-    desc: "Querying Redis trust scores to pick optimal model variants for research, drafting, chart, and fact-check.",
-    threshold: 4,
-  },
-  {
-    id: 3,
-    title: "Parallel Async Execution",
-    desc: "Independent nodes run concurrently via asyncio.gather; dependent nodes await prerequisite outputs.",
-    threshold: 9,
-  },
-  {
-    id: 4,
-    title: "Conflict Arbitration Chamber",
-    desc: "Numeric claims from every node are extracted and compared field by field, with unit and rounding tolerance.",
-    threshold: 20,
-  },
-];
-
 export default function TaskControl({
   query,
   setQuery,
@@ -73,10 +46,6 @@ export default function TaskControl({
       setElapsed(0);
     };
   }, [loading]);
-
-  const currentStageIndex = STAGES.reduce((acc, stage, idx) => {
-    return elapsed >= stage.threshold ? idx : acc;
-  }, 0);
 
   return (
     <section className="control-section">
@@ -202,8 +171,9 @@ export default function TaskControl({
                       : "Convening Autonomous Multi-Agent Assembly…"}
                   </h3>
                   <p className="loading-sub">
-                    Multi-agent DAG execution in progress. Calls typically require 10–30s for topological planning,
-                    parallel execution, fact-checking and conflict checks. The steps below are an indication; Live Sessions streams real progress.
+                    The backend is planning the graph, running the agents, fact-checking and checking for conflicts.
+                    The full result appears here when the run finishes (usually within a minute or two; longer on the laptop model).
+                    To watch each node and every word live, use Live Sessions.
                   </p>
                 </div>
               </div>
@@ -215,43 +185,6 @@ export default function TaskControl({
               </div>
             </div>
 
-            {/* Stages Tracker */}
-            <div className="stages-tracker">
-              {STAGES.map((stage, idx) => {
-                const isActive = idx === currentStageIndex;
-                const isPassed = idx < currentStageIndex;
-                return (
-                  <div
-                    key={stage.id}
-                    className={`stage-item ${isActive ? "stage-active" : isPassed ? "stage-passed" : "stage-pending"}`}
-                  >
-                    <div className="stage-indicator">
-                      {isPassed ? (
-                        <span className="stage-check">✓</span>
-                      ) : isActive ? (
-                        <span className="stage-pulse-dot" />
-                      ) : (
-                        <span className="stage-number">{stage.id}</span>
-                      )}
-                    </div>
-                    <div className="stage-content">
-                      <div className="stage-heading">{stage.title}</div>
-                      <div className="stage-desc">{stage.desc}</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Progress Bar */}
-            <div className="pipeline-bar-wrapper">
-              <div
-                className="pipeline-bar-fill"
-                style={{
-                  width: `${Math.min(95, (elapsed / 26) * 100)}%`,
-                }}
-              />
-            </div>
           </motion.div>
         )}
       </AnimatePresence>

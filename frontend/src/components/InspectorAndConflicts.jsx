@@ -40,38 +40,6 @@ export default function InspectorAndConflicts({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Export Council Report as Markdown
-  const handleExportReport = () => {
-    let md = `# AGORA Council Synthesis Report\nGenerated: ${new Date().toLocaleString()}\n\n`;
-    md += `## 1. DAG Topology Execution Plan\n`;
-    plan.forEach((n) => {
-      const deps = (n.depends_on || []).length > 0 ? n.depends_on.map((d) => `[${d}]`).join(", ") : "None (Root)";
-      md += `- **Node [${n.id}]** (${n.agent}) — Dependencies: ${deps}\n`;
-    });
-    md += `\n## 2. Verified Agent Outputs\n\n`;
-    plan.forEach((n) => {
-      md += `### Node [${n.id}] — Agent: ${n.agent}\n`;
-      md += `${result[n.id] || "No output recorded"}\n\n`;
-    });
-    if (conflicts.length > 0) {
-      md += `## 3. Factual Conflict Arbitration Chamber\n\n`;
-      conflicts.forEach((c, i) => {
-        md += `### Case #${i + 1}: Disagreement between [${c.between?.join("] and [")}]\n`;
-        md += `- **Factual Divergence:** ${c.explanation}\n`;
-        md += `- **Suggested Resolution:** ${c.suggested_resolution}\n\n`;
-      });
-    } else {
-      md += `## 3. Factual Consistency Status\nUnanimous consensus confirmed across all agent nodes with 0 factual divergences.\n`;
-    }
-    const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `agora-council-report-${Date.now()}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   // Human approval gate: send the reviewer's decision to the backend
   const resolveConflict = async (conflict, choice) => {
     if (!runId) return;
@@ -153,12 +121,6 @@ export default function InspectorAndConflicts({
                 )}
               </button>
 
-              <button className="btn-export" onClick={handleExportReport} title="Export full plan & outputs as markdown">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
-                </svg>
-                Export Briefing (.md)
-              </button>
               {runId && (
                 <>
                   <a className="btn-export" href={`${BACKEND_URL}/runs/${runId}/report.docx`}
