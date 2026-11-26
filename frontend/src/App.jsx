@@ -159,7 +159,7 @@ export default function App() {
           <div className="nav-meta">
             <div className="nav-stat-chip">
               <span className="chip-key">Concurrency:</span>
-              <span className="chip-val">2.68× Speedup</span>
+              <span className="chip-val">1.37× Speedup (n = 20)</span>
             </div>
             <div className="nav-stat-chip">
               <span className="chip-key">Trust Scoring:</span>
@@ -193,7 +193,7 @@ export default function App() {
           >
             <span className="tab-icon">⚡</span>
             <span className="tab-text">DAG Concurrency Benchmark</span>
-            <span className="tab-pill">2.68× Speedup</span>
+            <span className="tab-pill">1.37× Speedup</span>
           </button>
           <button
             className={`module-tab ${activeTab === "reputation" ? "module-tab-active" : ""}`}

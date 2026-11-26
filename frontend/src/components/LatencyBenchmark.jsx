@@ -5,10 +5,12 @@ export default function LatencyBenchmark() {
   const [activeView, setActiveView] = useState("comparison"); // 'comparison' | 'interactive'
   const [simulatedNodes, setSimulatedNodes] = useState(4);
 
-  // Verified benchmark numbers from evaluate.py
-  const PARALLEL_TIME = 2.53;
-  const SEQUENTIAL_TIME = 6.79;
-  const SPEEDUP = 2.68;
+  // Measured RQ3 result: backend/bench/results/rq3_20261125T155913Z.md (20 runs per mode, none excluded)
+  const PARALLEL_TIME = 4.78;
+  const SEQUENTIAL_TIME = 6.56;
+  const PARALLEL_CI = 0.43;
+  const SEQUENTIAL_CI = 0.76;
+  const SPEEDUP = SEQUENTIAL_TIME / PARALLEL_TIME;
   const SAVINGS = ((SEQUENTIAL_TIME - PARALLEL_TIME) / SEQUENTIAL_TIME) * 100;
 
   // Simulated interactive numbers based on slider
@@ -30,13 +32,13 @@ export default function LatencyBenchmark() {
             className={`tab-btn ${activeView === "comparison" ? "tab-active" : ""}`}
             onClick={() => setActiveView("comparison")}
           >
-            Verified Benchmark (3 Trials)
+            Measured Benchmark (20 runs per mode)
           </button>
           <button
             className={`tab-btn ${activeView === "interactive" ? "tab-active" : ""}`}
             onClick={() => setActiveView("interactive")}
           >
-            Concurrency Scaling Calculator
+            What-if Calculator (illustration)
           </button>
         </div>
       </div>
@@ -47,17 +49,17 @@ export default function LatencyBenchmark() {
             <div className="b-stat">
               <span className="b-stat-k">Parallel Latency</span>
               <span className="b-stat-v highlight-amber">{PARALLEL_TIME.toFixed(2)}s</span>
-              <span className="b-stat-sub">Independent nodes run concurrently</span>
+              <span className="b-stat-sub">± {PARALLEL_CI} s (95% CI) · drafting and chart run together</span>
             </div>
             <div className="b-stat">
               <span className="b-stat-k">Sequential Baseline</span>
               <span className="b-stat-v">{SEQUENTIAL_TIME.toFixed(2)}s</span>
-              <span className="b-stat-sub">Linear synchronous execution</span>
+              <span className="b-stat-sub">± {SEQUENTIAL_CI} s (95% CI) · same plan, one node at a time</span>
             </div>
             <div className="b-stat">
               <span className="b-stat-k">Observed Speedup</span>
               <span className="b-stat-v highlight-gold">{SPEEDUP.toFixed(2)}×</span>
-              <span className="b-stat-sub">{SAVINGS.toFixed(1)}% total wall-clock reduction</span>
+              <span className="b-stat-sub">{SAVINGS.toFixed(1)}% less wall-clock time · maximum possible here is 2×</span>
             </div>
           </div>
 
@@ -67,7 +69,7 @@ export default function LatencyBenchmark() {
             <div className="timeline-track">
               <div className="track-label-area">
                 <span className="track-title">AGORA Parallel DAG</span>
-                <span className="track-duration">{PARALLEL_TIME}s total</span>
+                <span className="track-duration">mean {PARALLEL_TIME} s</span>
               </div>
               <div className="track-bar-container">
                 <motion.div
@@ -76,11 +78,11 @@ export default function LatencyBenchmark() {
                   animate={{ width: `${(PARALLEL_TIME / SEQUENTIAL_TIME) * 100}%` }}
                   transition={{ duration: 0.8, ease: "easeOut" }}
                 >
-                  <div className="gantt-subnode">x1 (Research) 2.1s</div>
-                  <div className="gantt-subnode">x2 (Drafting) 2.4s</div>
-                  <div className="gantt-subnode">x3 (Chart) 2.5s</div>
+                  <div className="gantt-subnode">Drafting</div>
+                  <div className="gantt-subnode">Chart</div>
+                  <span>run at the same time</span>
                 </motion.div>
-                <div className="concurrency-callout">Concurrent Async Workers via asyncio.gather</div>
+                <div className="concurrency-callout">asyncio.gather</div>
               </div>
             </div>
 
@@ -88,17 +90,21 @@ export default function LatencyBenchmark() {
             <div className="timeline-track">
               <div className="track-label-area">
                 <span className="track-title">Standard Sequential Baseline</span>
-                <span className="track-duration">{SEQUENTIAL_TIME}s total</span>
+                <span className="track-duration">mean {SEQUENTIAL_TIME} s</span>
               </div>
               <div className="track-bar-container">
-                <div className="gantt-bar gantt-sequential">
-                  <div className="gantt-segment seg-1">x1: 2.1s</div>
-                  <div className="gantt-segment seg-2">x2: 2.4s</div>
-                  <div className="gantt-segment seg-3">x3: 2.3s</div>
+                <div className="gantt-bar gantt-sequential" style={{ gridTemplateColumns: "1fr 1fr" }}>
+                  <div className="gantt-segment seg-1">Drafting</div>
+                  <div className="gantt-segment seg-2">then Chart</div>
                 </div>
               </div>
             </div>
           </div>
+          <p style={{ fontSize: 13, opacity: 0.8, marginTop: 14, lineHeight: 1.6 }}>
+            Plan: research (same frozen input every run) → drafting and chart. Agents pinned (drafting-v1, chart-v1, Groq),
+            modes alternated run by run, conflict checks off. Mean of 20 runs per mode; no runs excluded. The gain is limited by
+            the slower of the two branches, so 2× is the ceiling for this plan. (The mid-term showed 2.68× from only 3 trials.)
+          </p>
         </div>
       ) : (
         <div className="interactive-calc-card">
@@ -135,6 +141,12 @@ export default function LatencyBenchmark() {
             </div>
           </div>
         </div>
+      )}
+      {activeView === "interactive" && (
+        <p style={{ fontSize: 13, opacity: 0.8, marginTop: 12, lineHeight: 1.6 }}>
+          Illustration only, not a measurement: it assumes every node takes 2.15 s and that parallel nodes do not slow each
+          other down. Real runs gain less (rate limits, uneven branches); see the measured benchmark.
+        </p>
       )}
     </section>
   );

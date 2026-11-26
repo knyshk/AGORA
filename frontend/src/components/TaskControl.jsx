@@ -42,7 +42,7 @@ const STAGES = [
   {
     id: 4,
     title: "Conflict Arbitration Chamber",
-    desc: "Arbitration engine conducts pairwise cross-examination across all agent outputs to detect factual divergence.",
+    desc: "Numeric claims from every node are extracted and compared field by field, with unit and rounding tolerance.",
     threshold: 20,
   },
 ];
@@ -203,7 +203,7 @@ export default function TaskControl({
                   </h3>
                   <p className="loading-sub">
                     Multi-agent DAG execution in progress. Calls typically require 10–30s for topological planning,
-                    parallel execution, and pairwise dispute verification.
+                    parallel execution, fact-checking and conflict checks. The steps below are an indication; Live Sessions streams real progress.
                   </p>
                 </div>
               </div>

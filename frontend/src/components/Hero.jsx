@@ -100,44 +100,43 @@ export default function Hero({ backendOnline, checkingBackend }) {
       {/* Verified Evaluation Metrics Strip */}
       <div className="eval-strip-container">
         <div className="eval-strip-header">
-          <span className="eval-strip-title">Verified Empirical Benchmarks</span>
-          <span className="eval-strip-note">Measured on live trials across multi-agent pipelines</span>
+          <span className="eval-strip-title">Measured Results (final evaluation)</span>
+          <span className="eval-strip-note">From docs/EVALUATION.md · sample size given with every number</span>
         </div>
         <div className="stats-strip">
+          <div className="stat-card">
+            <div className="stat-top">
+              <span className="stat-accent-tag">Conflict Detection</span>
+            </div>
+            <div className="stat-value">
+              <CountUp to={0.984} decimals={3} />
+            </div>
+            <div className="stat-label">F1 on 64 Labelled Pairs</div>
+            <div className="stat-caption">Structured claims vs 0.970 for the pairwise-LLM baseline (cloud model)</div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-top">
+              <span className="stat-accent-tag">Precision</span>
+            </div>
+            <div className="stat-value">
+              <CountUp to={0} />
+              <span className="stat-fraction">/32</span>
+            </div>
+            <div className="stat-label">False Positives</div>
+            <div className="stat-caption">No clean pair among the 32 hard negatives wrongly flagged as a conflict</div>
+          </div>
+
           <div className="stat-card">
             <div className="stat-top">
               <span className="stat-accent-tag">Bayesian Routing</span>
             </div>
             <div className="stat-value">
-              <CountUp to={3} />
-              <span className="stat-fraction">/3</span>
+              <CountUp to={40} />
+              <span className="stat-fraction"> tasks</span>
             </div>
-            <div className="stat-label">Routing Decisions Correct</div>
-            <div className="stat-caption">100% accuracy steering work to best-performing agent variants</div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-top">
-              <span className="stat-accent-tag">Arbitration Recall</span>
-            </div>
-            <div className="stat-value">
-              <CountUp to={3} />
-              <span className="stat-fraction">/3</span>
-            </div>
-            <div className="stat-label">Real Conflicts Caught</div>
-            <div className="stat-caption">100% recall intercepting injected factual discrepancies</div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-top">
-              <span className="stat-accent-tag">Precision Balance</span>
-            </div>
-            <div className="stat-value">
-              <CountUp to={0} />
-              <span className="stat-fraction">/3</span>
-            </div>
-            <div className="stat-label">False Positives</div>
-            <div className="stat-caption">Zero clean statements wrongly flagged as conflicting</div>
+            <div className="stat-label">AGORA-Bench Trust Priors</div>
+            <div className="stat-caption">Priors are accurate from task 1; usage-only scoring needs ≈ 95 tasks (simulation, 600 tasks × 30 seeds)</div>
           </div>
 
           <div className="stat-card highlight-card">
@@ -145,10 +144,10 @@ export default function Hero({ backendOnline, checkingBackend }) {
               <span className="stat-accent-tag highlight-tag">DAG Concurrency</span>
             </div>
             <div className="stat-value highlight-val">
-              <CountUp to={2.68} decimals={2} suffix="×" />
+              <CountUp to={1.37} decimals={2} suffix="×" />
             </div>
             <div className="stat-label">Parallel Execution Speedup</div>
-            <div className="stat-caption">2.53s parallel vs 6.79s sequential (62.7% latency reduction)</div>
+            <div className="stat-caption">4.78 s parallel vs 6.56 s sequential, 20 runs per mode (27% latency reduction)</div>
           </div>
         </div>
       </div>
